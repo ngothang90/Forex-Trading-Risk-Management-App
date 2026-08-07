@@ -160,7 +160,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const db = getDatabase(app, "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app");
 
         let currentEquity = 0;
         const contractSizes = { 'XAUUSD': 100, 'BTCUSD': 1, 'USOIL': 1000 };
@@ -169,6 +169,7 @@
                 const accountRef = ref(db, 'account');
                 onValue(accountRef, (snapshot) => {
                     const data = snapshot.val();
+                    console.log("👉 Dữ liệu từ Firebase gửi về Web:", data);
                     if (data) {
                         // Chuyển đổi an toàn sang kiểu số
                         const balanceVal = Number(data.balance || data.Balance || 0);
