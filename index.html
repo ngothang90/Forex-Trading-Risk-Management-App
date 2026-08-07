@@ -56,7 +56,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs text-slate-400 mb-1">Cặp tiền giao dịch</label>
-          <select id="symbol" class="input-field font-bold">
+          <select id="symbol" class="input-field font-bold" onchange="updateLeverageStatus()">
             <option value="XAUUSD">XAUUSD (Vàng)</option>
             <option value="EURUSD">EURUSD</option>
             <option value="GBPUSD">GBPUSD</option>
@@ -72,14 +72,14 @@
         </div>
         <div>
           <label class="block text-xs text-slate-400 mb-1">Khối lượng (Lot)</label>
-          <input type="number" id="volume" value="0.01" step="0.01" min="0.01" required class="input-field">
+          <input type="number" id="volume" value="0.01" step="0.01" min="0.01" required class="input-field" oninput="updateLeverageStatus()">
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs text-slate-400 mb-1">Giá đặt lệnh (Price)</label>
-          <input type="number" id="price" step="any" placeholder="Nhập giá Limit" required class="input-field" oninput="calculateLeverage()">
+          <input type="number" id="price" step="any" placeholder="Nhập giá Limit" required class="input-field" oninput="updateLeverageStatus()">
         </div>
         <div>
           <label class="block text-xs text-rose-400 mb-1">Stop Loss (Bắt buộc *)</label>
@@ -92,11 +92,11 @@
       </div>
 
       <div class="flex justify-between items-center text-xs bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div>Đòn bẩy dự kiến: <span id="leverageVal" class="font-bold text-white">1:0.0</span></div>
+        <div>Đòn bẩy tổng dự kiến: <span id="leverageVal" class="font-bold text-white">1:0.0</span></div>
         <div id="safetyBadge" class="text-emerald-400 font-semibold">✓ An toàn (&lt;= 1:10)</div>
       </div>
 
-      <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
+      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
         GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)
       </button>
     </form>
@@ -170,7 +170,7 @@
       </div>
     </div>
 
-    <!-- ĐÃ TĂNG CHIỀU CAO BIỂU ĐỒ TỪ h-72 LÊN h-[450px] -->
+    <!-- CHIỀU CAO BIỂU ĐỒ 450PX -->
     <div class="h-[450px] w-full pt-4">
       <canvas id="pnlChart"></canvas>
     </div>
@@ -179,8 +179,95 @@
   <script>
     const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
     let chartInstance = null;
+    let currentPositionsData = {}; // Lưu trữ vị thế đang chạy Realtime
 
-    // A. Khởi tạo Biểu đồ Chart.js
+    // A. Quy đổi Contract Size
+    function getContractSize(symbol) {
+      if (symbol === 'XAUUSD') return 100;      // 1 Lot Vàng = 100 oz
+      if (symbol === 'BTCUSD') return 1;        // 1 Lot BTC = 1 Coin
+      return 100000;                            // 1 Lot Forex (EURUSD, GBPUSD...) = 100,000 units
+    }
+
+    // B. Tính TỔNG ĐÒN BẨY (Lệnh đang chạy + Lệnh mới)
+    function calculateTotalLeverage() {
+      const balText = document.getElementById('balanceVal').innerText.replace('$', '');
+      const balance = parseFloat(balText) || 0;
+      if (balance <= 0) return 0;
+
+      // 1. Notional Value của VỊ THẾ ĐANG CHẠY
+      let totalNotional = 0;
+      for (let key in currentPositionsData) {
+        let pos = currentPositionsData[key];
+        let cSize = getContractSize(pos.symbol);
+        totalNotional += (pos.volume * cSize * pos.price);
+      }
+
+      // 2. Notional Value của LỆNH MỚI
+      const vol = parseFloat(document.getElementById('volume').value) || 0;
+      const price = parseFloat(document.getElementById('price').value) || 0;
+      const symbol = document.getElementById('symbol').value;
+      const newOrderNotional = vol * getContractSize(symbol) * price;
+
+      totalNotional += newOrderNotional;
+
+      return totalNotional / balance;
+    }
+
+    // C. Cập nhật giao diện Đòn bẩy & KHÓA NÚT BẮN LỆNH
+    function updateLeverageStatus() {
+      const totalLev = calculateTotalLeverage();
+      document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
+
+      const badge = document.getElementById('safetyBadge');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (totalLev > 10) {
+        badge.className = "text-rose-500 font-bold flex items-center gap-1 animate-pulse";
+        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10 (CẤM ĐẶT LỆNH)";
+        
+        submitBtn.disabled = true;
+        submitBtn.className = "w-full bg-rose-950 text-rose-500 font-bold py-3 rounded-lg border border-rose-800 cursor-not-allowed opacity-80";
+        submitBtn.innerText = "⛔ BỊ KHÓA: TỔNG ĐÒN BẨY VƯỢT QUÁ 1:10";
+      } else {
+        badge.className = "text-emerald-400 font-semibold";
+        badge.innerText = "✓ An toàn (<= 1:10)";
+        
+        submitBtn.disabled = false;
+        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
+        submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)";
+      }
+    }
+
+    // D. Gửi ĐẶT LỆNH MỚI
+    function handlePlaceOrder(e) {
+      e.preventDefault();
+
+      const totalLev = calculateTotalLeverage();
+      if (totalLev > 10) {
+        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).\n\nVui lòng giảm Volume hoặc đóng bớt các vị thế đang chạy!`);
+        return;
+      }
+
+      const payload = {
+        symbol: document.getElementById('symbol').value,
+        type: document.getElementById('type').value,
+        volume: parseFloat(document.getElementById('volume').value),
+        price: parseFloat(document.getElementById('price').value),
+        sl: parseFloat(document.getElementById('sl').value),
+        tp: parseFloat(document.getElementById('tp').value),
+        timestamp: Date.now()
+      };
+
+      fetch(`${FIREBASE_URL}/pending_order.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => alert("✅ Đã bắn lệnh kỷ luật lên Firebase thành công!"))
+      .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
+    }
+
+    // E. Khởi tạo Biểu đồ
     function initChart() {
       const ctx = document.getElementById('pnlChart').getContext('2d');
       const days = Array.from({length: 31}, (_, i) => `Ngày ${i + 1}`);
@@ -226,43 +313,7 @@
       });
     }
 
-    // B. Tính đòn bẩy dự kiến
-    function calculateLeverage() {
-      const vol = parseFloat(document.getElementById('volume').value) || 0;
-      const price = parseFloat(document.getElementById('price').value) || 0;
-      const balText = document.getElementById('balanceVal').innerText.replace('$', '');
-      const balance = parseFloat(balText) || 500;
-
-      if (price > 0 && balance > 0) {
-        const notional = vol * 100 * price; // Với XAUUSD 1 lot = 100 oz
-        const lev = (notional / balance).toFixed(1);
-        document.getElementById('leverageVal').innerText = `1:${lev}`;
-      }
-    }
-
-    // C. Gửi ĐẶT LỆNH MỚI lên Firebase
-    function handlePlaceOrder(e) {
-      e.preventDefault();
-      const payload = {
-        symbol: document.getElementById('symbol').value,
-        type: document.getElementById('type').value,
-        volume: parseFloat(document.getElementById('volume').value),
-        price: parseFloat(document.getElementById('price').value),
-        sl: parseFloat(document.getElementById('sl').value),
-        tp: parseFloat(document.getElementById('tp').value),
-        timestamp: Date.now()
-      };
-
-      fetch(`${FIREBASE_URL}/pending_order.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(() => alert("✅ Đã bắn lệnh kỷ luật lên Firebase thành công!"))
-      .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
-    }
-
-    // D. Lắng nghe Dữ liệu Realtime
+    // F. Lắng nghe Dữ liệu Realtime
     function listenRealtimeData() {
       // Balance / Equity / Margin
       fetch(`${FIREBASE_URL}/account.json`)
@@ -272,7 +323,7 @@
             document.getElementById('balanceVal').innerText = `$${data.balance.toFixed(2)}`;
             document.getElementById('equityVal').innerText = `$${data.equity.toFixed(2)}`;
             document.getElementById('marginVal').innerText = `$${data.margin.toFixed(2)}`;
-            calculateLeverage();
+            updateLeverageStatus();
           }
         });
 
@@ -280,6 +331,9 @@
       fetch(`${FIREBASE_URL}/live_positions.json`)
         .then(res => res.json())
         .then(data => {
+          currentPositionsData = data || {};
+          updateLeverageStatus();
+
           const tbody = document.getElementById('positionsTableBody');
           if (!data || Object.keys(data).length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>';
@@ -300,7 +354,7 @@
                 <td class="p-3 text-xs text-slate-400">SL: ${pos.sl}<br>TP: ${pos.tp}</td>
                 <td class="p-3 ${pnlColor}">$${pos.profit.toFixed(2)}</td>
                 <td class="p-3 text-center">
-                  <button onclick="requestAction('CLOSE_POSITION', ${pos.ticket})" class="btn-close">Đóng Lệnh</button>
+                  <button onclick="requestAction('CLOSE_POSITION', '${pos.ticket}')" class="btn-close">Đóng Lệnh</button>
                 </td>
               </tr>
             `;
@@ -329,7 +383,7 @@
                 <td class="p-3 font-mono">${ord.price}</td>
                 <td class="p-3 text-xs text-slate-400">SL: ${ord.sl}<br>TP: ${ord.tp}</td>
                 <td class="p-3 text-center">
-                  <button onclick="requestAction('CANCEL_ORDER', ${ord.ticket})" class="btn-close">Hủy Lệnh</button>
+                  <button onclick="requestAction('CANCEL_ORDER', '${ord.ticket}')" class="btn-close">Hủy Lệnh</button>
                 </td>
               </tr>
             `;
@@ -338,13 +392,13 @@
         });
     }
 
-    // E. Yêu cầu Đóng/Hủy Lệnh
+    // G. Yêu cầu Đóng/Hủy Lệnh (Truyền Ticket dạng String chuẩn)
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
 
       const payload = {
         action: actionType,
-        ticket: ticketId,
+        ticket: String(ticketId),
         timestamp: Date.now()
       };
 
