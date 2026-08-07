@@ -166,22 +166,28 @@
         const contractSizes = { 'XAUUSD': 100, 'BTCUSD': 1, 'USOIL': 1000 };
 
         // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5 gửi lên
-        const accountRef = ref(db, 'account');
-        onValue(accountRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                currentEquity = data.equity || 0;
-                document.getElementById('accBalance').innerText = `$${(data.balance || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                document.getElementById('accEquity').innerText = `$${(data.equity || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                document.getElementById('accMargin').innerText = `$${(data.margin || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                const accountRef = ref(db, 'account');
+                onValue(accountRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Chuyển đổi an toàn sang kiểu số
+                        const balanceVal = Number(data.balance || data.Balance || 0);
+                        const equityVal  = Number(data.equity  || data.Equity  || 0);
+                        const marginVal  = Number(data.margin  || data.Margin  || 0);
+
+                        currentEquity = equityVal;
+
+                        document.getElementById('accBalance').innerText = `$${balanceVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        document.getElementById('accEquity').innerText  = `$${equityVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        document.getElementById('accMargin').innerText  = `$${marginVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 
-                const syncStatus = document.getElementById('syncStatus');
-                syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> EA MT5 Đã Kết Nối`;
-                syncStatus.className = "text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700";
+                        const syncStatus = document.getElementById('syncStatus');
+                        syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> EA MT5 Đã Kết Nối`;
+                        syncStatus.className = "text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700";
                 
-                window.validateRisk();
-            }
-        });
+                        window.validateRisk();
+                    }
+                });
 
         // 2. Lắng nghe Lịch sử PnL từ MT5 để cập nhật Biểu đồ 365 ngày
         const historyRef = ref(db, 'history');
