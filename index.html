@@ -147,7 +147,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CẤU HÌNH FIREBASE REALTIME DATABASE (ĐÔNG NAM Á)
         const firebaseConfig = {
             apiKey: "AIzaSyC1gbjcgX4xup4kIOhmOY_RtJbWDcuWRMw",
             authDomain: "forex-discipline-app.firebaseapp.com",
@@ -165,42 +164,39 @@
         let currentEquity = 0;
         const contractSizes = { 'XAUUSD': 100, 'BTCUSD': 1, 'USOIL': 1000 };
 
-       // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5 gửi lên
-             const accountRef = ref(db, 'account');
-             onValue(accountRef, (snapshot) => {
-                 const data = snapshot.val();
-                 console.log("👉 Dữ liệu từ Firebase gửi về Web:", data);
+        // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5
+        const accountRef = ref(db, 'account');
+        onValue(accountRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const b = Number(data.balance || 0);
+                const e = Number(data.equity || 0);
+                const m = Number(data.margin || 0);
 
-                 if (data) {
-                     const balanceVal = Number(data.balance || 0);
-                     const equityVal  = Number(data.equity  || 0);
-                     const marginVal  = Number(data.margin  || 0);
+                currentEquity = e;
 
-                     currentEquity = equityVal;
+                // Gán trực tiếp bằng JavaScript chuẩn
+                const bEl = document.getElementById('accBalance');
+                const eEl = document.getElementById('accEquity');
+                const mEl = document.getElementById('accMargin');
+                const sEl = document.getElementById('syncStatus');
 
-                     // Format chuỗi tiền tệ
-                     const strBalance = `$${balanceVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                     const strEquity  = `$${equityVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                     const strMargin  = `$${marginVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-
-                     // Cập nhật TẤT CẢ các thẻ có trùng ID trên giao diện
-                     document.querySelectorAll('#accBalance').forEach(el => el.innerText = strBalance);
-                     document.querySelectorAll('#accEquity').forEach(el => el.innerText = strEquity);
-                     document.querySelectorAll('#accMargin').forEach(el => el.innerText = strMargin);
+                if (bEl) bEl.innerHTML = `$${b.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                if (eEl) eEl.innerHTML = `$${e.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                if (mEl) mEl.innerHTML = `$${m.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
                 
-                     // Cập nhật trạng thái kết nối
-                     document.querySelectorAll('#syncStatus').forEach(el => {
-                         el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> EA MT5 Đã Kết Nối`;
-                         el.className = "text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700";
-                     });
-                
-                     if (typeof window.validateRisk === 'function') {
-                         window.validateRisk();
-                     }
-                 }
-             });
+                if (sEl) {
+                    sEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> EA MT5 Đã Kết Nối`;
+                    sEl.className = "text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700";
+                }
 
-        // 2. Lắng nghe Lịch sử PnL từ MT5 để cập nhật Biểu đồ 365 ngày
+                if (typeof window.validateRisk === 'function') {
+                    window.validateRisk();
+                }
+            }
+        });
+
+        // 2. Lắng nghe Lịch sử PnL từ MT5
         const historyRef = ref(db, 'history');
         onValue(historyRef, (snapshot) => {
             const historyData = snapshot.val();
@@ -209,7 +205,7 @@
             }
         });
 
-        // 3. Hàm Gửi Lệnh Limit lên Firebase Realtime Database
+        // 3. Hàm Gửi Lệnh Limit lên Firebase
         window.handlePlaceOrder = async function(e) {
             e.preventDefault();
             
@@ -246,28 +242,34 @@
             const positionValue = volume * contractSize * (price > 0 ? price : 1);
             const leverageRatio = currentEquity > 0 ? (positionValue / currentEquity) : 0;
 
-            document.getElementById('calcLeverage').innerText = `1:${leverageRatio.toFixed(1)}`;
+            const leverageEl = document.getElementById('calcLeverage');
+            if (leverageEl) leverageEl.innerText = `1:${leverageRatio.toFixed(1)}`;
 
             const isLeverageValid = leverageRatio <= 10.0;
             const isSlTpValid = sl > 0 && tp > 0;
             const isPriceValid = price > 0 && volume > 0;
 
-            if (isLeverageValid) {
-                document.getElementById('leverageStatus').innerText = "✓ An toàn (<= 1:10)";
-                document.getElementById('leverageStatus').className = "text-emerald-400 font-semibold";
-            } else {
-                document.getElementById('leverageStatus').innerText = "✕ Vi phạm Đòn bẩy (> 1:10)";
-                document.getElementById('leverageStatus').className = "text-red-400 font-semibold";
+            const statusEl = document.getElementById('leverageStatus');
+            if (statusEl) {
+                if (isLeverageValid) {
+                    statusEl.innerText = "✓ An toàn (<= 1:10)";
+                    statusEl.className = "text-emerald-400 font-semibold";
+                } else {
+                    statusEl.innerText = "✕ Vi phạm Đòn bẩy (> 1:10)";
+                    statusEl.className = "text-red-400 font-semibold";
+                }
             }
 
-            if (isLeverageValid && isSlTpValid && isPriceValid) {
-                submitBtn.disabled = false;
-                submitBtn.className = "w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition-all cursor-pointer shadow-lg";
-                submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (HỢP LỆ)";
-            } else {
-                submitBtn.disabled = true;
-                submitBtn.className = "w-full py-3 bg-slate-700 text-slate-500 font-bold rounded-lg transition-all cursor-not-allowed";
-                submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)";
+            if (submitBtn) {
+                if (isLeverageValid && isSlTpValid && isPriceValid) {
+                    submitBtn.disabled = false;
+                    submitBtn.className = "w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition-all cursor-pointer shadow-lg";
+                    submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (HỢP LỆ)";
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.className = "w-full py-3 bg-slate-700 text-slate-500 font-bold rounded-lg transition-all cursor-not-allowed";
+                    submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)";
+                }
             }
         };
     </script>
@@ -397,7 +399,6 @@
             alert(`Đã cập nhật Mục tiêu cho ${currentMode === 'month' ? 'Tháng' : 'Năm'} là $${targetVal.toLocaleString('en-US')}`);
         }
 
-        // Cập nhật PnL thực tế từ Firebase vào Chart
         window.updateChartHistory = function(historyData) {
             if (!chart) return;
             const labels = chart.data.labels;
