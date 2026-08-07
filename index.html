@@ -13,6 +13,8 @@
     .input-field:focus { outline: none; border-color: #3b82f6; }
     .btn-close { background-color: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
     .btn-close:hover { background-color: #dc2626; }
+    .btn-mode-active { background-color: #f59e0b; color: #0f172a; font-weight: 700; }
+    .btn-mode-inactive { background-color: #0f172a; color: #94a3b8; border: 1px solid #1e2d4a; }
   </style>
 </head>
 <body class="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
@@ -23,7 +25,7 @@
       <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
         🛡️ FOREX DISCIPLINE GATEKEEPER
       </h1>
-      <p class="text-xs text-slate-400 mt-1">Kết nối Firebase Realtime Database & EA MT5</p>
+      <p class="text-xs text-slate-400 mt-1">Kết nối Firebase Realtime Database & EA MT5 (XAUUSD & BTCUSD)</p>
     </div>
     <div>
       <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
@@ -158,13 +160,13 @@
         <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">
           📈 Tiến Độ Mục Tiêu Giao Dịch
         </h2>
-        <p class="text-xs text-slate-400 mt-0.5">Theo dõi PnL Thực tế vs Target chi tiết theo Ngày</p>
+        <p class="text-xs text-slate-400 mt-0.5">Theo dõi PnL Thực tế vs Target chi tiết</p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Theo Tháng</button>
-        <button class="bg-slate-900 text-slate-400 text-xs px-3 py-1.5 rounded border border-slate-800">Theo 1 Năm (Theo Ngày)</button>
+        <button id="btnMonth" onclick="switchChartMode('month')" class="btn-mode-active text-xs px-3 py-1.5 rounded">Theo Tháng</button>
+        <button id="btnYear" onclick="switchChartMode('year')" class="btn-mode-inactive text-xs px-3 py-1.5 rounded">Theo Năm (12 Tháng)</button>
         <input type="number" id="targetPnlInput" placeholder="Target PnL ($)" class="bg-slate-900 text-xs border border-slate-800 px-2 py-1.5 rounded w-28 text-white">
-        <button onclick="saveTarget()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Lưu Target</button>
+        <button onclick="saveTarget()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded hover:bg-amber-400">Lưu Target</button>
       </div>
     </div>
 
@@ -177,7 +179,9 @@
   <script>
     const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
     let chartInstance = null;
-    let currentPositionsData = {}; // Lưu trữ vị thế đang chạy Realtime
+    let currentPositionsData = {}; 
+    let currentChartMode = 'month'; // 'month' hoặc 'year'
+    let currentTargetPnL = parseFloat(localStorage.getItem('gatekeeper_target_pnl')) || 1000;
 
     // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
@@ -186,13 +190,12 @@
       return 1;
     }
 
-    // B. Tính TỔNG ĐÒN BẨY (Lệnh đang chạy + Lệnh mới)
+    // B. Tính TỔNG ĐÒN BẨY
     function calculateTotalLeverage() {
       const balText = document.getElementById('balanceVal').innerText.replace('$', '');
       const balance = parseFloat(balText) || 0;
       if (balance <= 0) return 0;
 
-      // 1. Notional Value của VỊ THẾ ĐANG CHẠY
       let totalNotional = 0;
       for (let key in currentPositionsData) {
         let pos = currentPositionsData[key];
@@ -200,14 +203,12 @@
         totalNotional += (pos.volume * cSize * pos.price);
       }
 
-      // 2. Notional Value của LỆNH MỚI
       const vol = parseFloat(document.getElementById('volume').value) || 0;
       const price = parseFloat(document.getElementById('price').value) || 0;
       const symbol = document.getElementById('symbol').value;
       const newOrderNotional = vol * getContractSize(symbol) * price;
 
       totalNotional += newOrderNotional;
-
       return totalNotional / balance;
     }
 
@@ -265,30 +266,28 @@
       .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
     }
 
-    // E. Khởi tạo Biểu đồ
+    // E. XỬ LÝ BIỂU ĐỒ (CHART.JS)
     function initChart() {
       const ctx = document.getElementById('pnlChart').getContext('2d');
-      const days = Array.from({length: 31}, (_, i) => `Ngày ${i + 1}`);
-      const targetData = Array.from({length: 31}, (_, i) => (1000 / 31) * (i + 1));
-      const actualData = new Array(31).fill(0);
+      document.getElementById('targetPnlInput').value = currentTargetPnL;
 
       chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: days,
+          labels: [],
           datasets: [
             {
-              label: 'PnL Thực tế Theo Ngày ($)',
-              data: actualData,
+              label: 'PnL Thực tế ($)',
+              data: [],
               borderColor: '#10b981',
               backgroundColor: '#10b981',
               borderWidth: 2,
-              tension: 0.1,
+              tension: 0.2,
               pointRadius: 3
             },
             {
               label: 'Mục tiêu Tích lũy ($)',
-              data: targetData,
+              data: [],
               borderColor: '#f59e0b',
               borderDash: [4, 4],
               borderWidth: 2,
@@ -309,9 +308,76 @@
           }
         }
       });
+
+      renderChartData();
     }
 
-    // F. Lắng nghe Dữ liệu Realtime
+    function renderChartData() {
+      if (!chartInstance) return;
+
+      let labels = [];
+      let targetData = [];
+      let actualData = [];
+
+      // Tính tổng PnL hiện tại từ các vị thế đang mở
+      let currentTotalProfit = 0;
+      for (let key in currentPositionsData) {
+        currentTotalProfit += (currentPositionsData[key].profit || 0);
+      }
+
+      if (currentChartMode === 'month') {
+        labels = Array.from({length: 31}, (_, i) => `Ngày ${i + 1}`);
+        targetData = Array.from({length: 31}, (_, i) => (currentTargetPnL / 31) * (i + 1));
+        
+        actualData = new Array(31).fill(null);
+        let dayIndex = new Date().getDate() - 1;
+        actualData[dayIndex] = currentTotalProfit;
+      } 
+      else {
+        // Chế độ Năm (12 tháng gần nhất)
+        labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+        targetData = Array.from({length: 12}, (_, i) => (currentTargetPnL / 12) * (i + 1));
+        
+        actualData = new Array(12).fill(null);
+        let monthIndex = new Date().getMonth(); // Tháng hiện tại (0-11)
+        actualData[monthIndex] = currentTotalProfit;
+      }
+
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = actualData;
+      chartInstance.data.datasets[1].data = targetData;
+      chartInstance.update();
+    }
+
+    function switchChartMode(mode) {
+      currentChartMode = mode;
+      const btnMonth = document.getElementById('btnMonth');
+      const btnYear = document.getElementById('btnYear');
+
+      if (mode === 'month') {
+        btnMonth.className = 'btn-mode-active text-xs px-3 py-1.5 rounded';
+        btnYear.className = 'btn-mode-inactive text-xs px-3 py-1.5 rounded';
+      } else {
+        btnYear.className = 'btn-mode-active text-xs px-3 py-1.5 rounded';
+        btnMonth.className = 'btn-mode-inactive text-xs px-3 py-1.5 rounded';
+      }
+
+      renderChartData();
+    }
+
+    function saveTarget() {
+      const val = parseFloat(document.getElementById('targetPnlInput').value);
+      if (isNaN(val) || val <= 0) {
+        alert("⚠️ Vui lòng nhập số tiền Target hợp lệ!");
+        return;
+      }
+      currentTargetPnL = val;
+      localStorage.setItem('gatekeeper_target_pnl', val);
+      renderChartData();
+      alert(`✅ Đã lưu Target mới: $${val.toFixed(2)}`);
+    }
+
+    // F. Lắng nghe Dữ liệu Realtime từ Firebase
     function listenRealtimeData() {
       // Balance / Equity / Margin
       fetch(`${FIREBASE_URL}/account.json`)
@@ -331,6 +397,7 @@
         .then(data => {
           currentPositionsData = data || {};
           updateLeverageStatus();
+          renderChartData(); // Cập nhật PnL vào biểu đồ
 
           const tbody = document.getElementById('positionsTableBody');
           if (!data || Object.keys(data).length === 0) {
@@ -409,11 +476,7 @@
       .catch(err => alert("❌ Lỗi: " + err));
     }
 
-    function saveTarget() {
-      alert("✅ Đã lưu Target thành công!");
-    }
-
-    // Khởi chạy
+    // Khởi chạy ứng dụng
     window.onload = () => {
       initChart();
       setInterval(listenRealtimeData, 2000);
