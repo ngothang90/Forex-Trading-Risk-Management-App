@@ -147,7 +147,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CẤU HÌNH FIREBASE CHÍNH THỨC CỦA BẠN
+        // CẤU HÌNH FIREBASE REALTIME DATABASE (ĐÔNG NAM Á)
         const firebaseConfig = {
             apiKey: "AIzaSyC1gbjcgX4xup4kIOhmOY_RtJbWDcuWRMw",
             authDomain: "forex-discipline-app.firebaseapp.com",
@@ -159,14 +159,13 @@
             measurementId: "G-C3YCXLXFJN"
         };
 
-        // Khởi tạo Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         let currentEquity = 0;
         const contractSizes = { 'XAUUSD': 100, 'BTCUSD': 1, 'USOIL': 1000 };
 
-        // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5 gửi lên Firebase
+        // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5 gửi lên
         const accountRef = ref(db, 'account');
         onValue(accountRef, (snapshot) => {
             const data = snapshot.val();
@@ -184,7 +183,16 @@
             }
         });
 
-        // 2. Hàm Gửi Lệnh Limit lên Firebase Realtime Database
+        // 2. Lắng nghe Lịch sử PnL từ MT5 để cập nhật Biểu đồ 365 ngày
+        const historyRef = ref(db, 'history');
+        onValue(historyRef, (snapshot) => {
+            const historyData = snapshot.val();
+            if (historyData && window.updateChartHistory) {
+                window.updateChartHistory(historyData);
+            }
+        });
+
+        // 3. Hàm Gửi Lệnh Limit lên Firebase Realtime Database
         window.handlePlaceOrder = async function(e) {
             e.preventDefault();
             
@@ -200,7 +208,7 @@
 
             try {
                 await set(ref(db, 'pending_order'), orderPayload);
-                alert("✅ Đã đẩy lệnh Limit thành công lên Firebase! Robot EA trên MT5 sẽ nhận và khớp lệnh ngay.");
+                alert("✅ Đã đẩy lệnh Limit thành công lên Firebase! EA trên MT5 sẽ nhận và đặt lệnh ngay.");
                 document.getElementById('orderForm').reset();
                 window.validateRisk();
             } catch (err) {
@@ -208,7 +216,7 @@
             }
         };
 
-        // 3. Hàm Kiểm tra Đòn bẩy 1:10 & SL/TP
+        // 4. Hàm Kiểm tra Đòn bẩy 1:10 & SL/TP
         window.validateRisk = function() {
             const symbol = document.getElementById('symbol').value;
             const volume = parseFloat(document.getElementById('volume').value) || 0;
@@ -247,27 +255,23 @@
         };
     </script>
 
-    <!-- CHART LOGIC (CHI TIẾT THEO NGÀY CHO CẢ THÁNG & 1 NĂM) -->
+    <!-- CHART LOGIC -->
     <script>
         let chart;
         let currentMode = 'month';
 
-        // Hàm khởi tạo danh sách Ngày cho biểu đồ
         function generateDateLabels(mode) {
             const labels = [];
             const now = new Date();
             
             if (mode === 'month') {
-                // Tất cả các ngày trong tháng (Ngày 1 -> Ngày 30/31)
                 const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
                 for (let i = 1; i <= daysInMonth; i++) {
                     labels.push(`Ngày ${i}`);
                 }
             } else if (mode === 'year') {
-                // Phân bổ 365/366 ngày trong năm (DD/MM)
                 const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
                 const totalDays = isLeapYear(now.getFullYear()) ? 366 : 365;
-                
                 let startDate = new Date(now.getFullYear(), 0, 1);
                 for (let i = 0; i < totalDays; i++) {
                     const d = new Date(startDate);
@@ -280,7 +284,6 @@
             return labels;
         }
 
-        // Tạo mốc đường Target tịnh tiến theo từng ngày
         function generateTargetArray(labelsCount, totalTarget) {
             if (totalTarget <= 0 || labelsCount <= 1) return new Array(labelsCount).fill(0);
             const step = totalTarget / (labelsCount - 1);
@@ -323,10 +326,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index',
-                    },
+                    interaction: { intersect: false, mode: 'index' },
                     plugins: { 
                         legend: { labels: { color: '#94a3b8' } },
                         tooltip: {
@@ -338,17 +338,8 @@
                         }
                     },
                     scales: {
-                        x: { 
-                            ticks: { 
-                                color: '#94a3b8',
-                                maxTicksLimit: 12
-                            }, 
-                            grid: { color: '#334155' } 
-                        },
-                        y: { 
-                            ticks: { color: '#94a3b8' }, 
-                            grid: { color: '#334155' } 
-                        }
+                        x: { ticks: { color: '#94a3b8', maxTicksLimit: 12 }, grid: { color: '#334155' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
                     }
                 }
             });
@@ -388,6 +379,22 @@
 
             alert(`Đã cập nhật Mục tiêu cho ${currentMode === 'month' ? 'Tháng' : 'Năm'} là $${targetVal.toLocaleString('en-US')}`);
         }
+
+        // Cập nhật PnL thực tế từ Firebase vào Chart
+        window.updateChartHistory = function(historyData) {
+            if (!chart) return;
+            const labels = chart.data.labels;
+            const pnlArray = new Array(labels.length).fill(0);
+
+            labels.forEach((label, index) => {
+                if (historyData[label]) {
+                    pnlArray[index] = historyData[label].cumulativePnl || 0;
+                }
+            });
+
+            chart.data.datasets[0].data = pnlArray;
+            chart.update();
+        };
     </script>
 </body>
 </html>
