@@ -55,12 +55,10 @@
     <form id="orderForm" onsubmit="handlePlaceOrder(event)" class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Cặp tiền giao dịch</label>
-          <select id="symbol" class="input-field font-bold" onchange="updateLeverageStatus()">
+          <label class="block text-xs text-slate-400 mb-1">Sản phẩm giao dịch</label>
+          <select id="symbol" class="input-field font-bold text-amber-400" onchange="updateLeverageStatus()">
             <option value="XAUUSD">XAUUSD (Vàng)</option>
-            <option value="EURUSD">EURUSD</option>
-            <option value="GBPUSD">GBPUSD</option>
-            <option value="BTCUSD">BTCUSD</option>
+            <option value="BTCUSD">BTCUSD (Bitcoin)</option>
           </select>
         </div>
         <div>
@@ -112,7 +110,7 @@
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
             <th class="p-3">Ticket</th>
-            <th class="p-3">Cặp Tiền</th>
+            <th class="p-3">Sản Phẩm</th>
             <th class="p-3">Loại</th>
             <th class="p-3">Volume</th>
             <th class="p-3">Giá Vào</th>
@@ -138,7 +136,7 @@
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
             <th class="p-3">Ticket</th>
-            <th class="p-3">Cặp Tiền</th>
+            <th class="p-3">Sản Phẩm</th>
             <th class="p-3">Loại Lệnh</th>
             <th class="p-3">Volume</th>
             <th class="p-3">Giá Đặt</th>
@@ -181,11 +179,11 @@
     let chartInstance = null;
     let currentPositionsData = {}; // Lưu trữ vị thế đang chạy Realtime
 
-    // A. Quy đổi Contract Size
+    // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
       if (symbol === 'XAUUSD') return 100;      // 1 Lot Vàng = 100 oz
       if (symbol === 'BTCUSD') return 1;        // 1 Lot BTC = 1 Coin
-      return 100000;                            // 1 Lot Forex (EURUSD, GBPUSD...) = 100,000 units
+      return 1;
     }
 
     // B. Tính TỔNG ĐÒN BẨY (Lệnh đang chạy + Lệnh mới)
@@ -392,7 +390,7 @@
         });
     }
 
-    // G. Yêu cầu Đóng/Hủy Lệnh (Truyền Ticket dạng String chuẩn)
+    // G. Yêu cầu Đóng/Hủy Lệnh
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
 
