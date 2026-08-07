@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý & Kỷ Luật Giao Dịch Forex</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-6 pb-20">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-800 p-4 rounded-xl border border-slate-700 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-amber-400">🛡️ FOREX DISCIPLINE GATEKEEPER</h1>
+                <p class="text-xs text-slate-400">Kết nối Firebase Realtime Database & EA MT5</p>
+            </div>
+            <div id="syncStatus" class="text-xs font-semibold text-amber-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Đang chờ kết nối MT5...
+            </div>
+        </header>
+
+        <!-- DASHBOARD QUẢN LÝ VỐN -->
+        <section class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400 block">Số Dư (Balance)</span>
+                <span id="accBalance" class="text-lg md:text-xl font-bold text-emerald-400">$0.00</span>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400 block">Tài Sản (Equity)</span>
+                <span id="accEquity" class="text-lg md:text-xl font-bold text-blue-400">$0.00</span>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 col-span-2 md:col-span-1">
+                <span class="text-xs text-slate-400 block">Ký Quỹ (Margin)</span>
+                <span id="accMargin" class="text-lg md:text-xl font-bold text-purple-400">$0.00</span>
+            </div>
+        </section>
+
+        <!-- FORM ĐẶT LỆNH KỶ LUẬT -->
+        <section class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
+            <h2 class="text-base font-semibold text-slate-200 border-b border-slate-700 pb-2">🎯 Đặt Lệnh Kỷ Luật (Risk Filter)</h2>
+            
+            <form id="orderForm" onsubmit="handlePlaceOrder(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Sản phẩm -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Cặp tiền giao dịch</label>
+                        <select id="symbol" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-amber-400" onchange="validateRisk()">
+                            <option value="XAUUSD">XAUUSD (Vàng)</option>
+                            <option value="BTCUSD">BTCUSD (Bitcoin)</option>
+                            <option value="USOIL">USOIL (Dầu)</option>
+                        </select>
+                    </div>
+
+                    <!-- Loại lệnh (Khóa Market) -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Loại lệnh (Chỉ Limit)</label>
+                        <select id="orderType" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-amber-400 font-semibold focus:outline-none">
+                            <option value="BUY_LIMIT">BUY LIMIT</option>
+                            <option value="SELL_LIMIT">SELL LIMIT</option>
+                        </select>
+                    </div>
+
+                    <!-- Khối lượng Lot -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Khối lượng (Lot)</label>
+                        <input type="number" id="volume" step="0.01" min="0.01" value="0.01" 
+                               class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-amber-400" 
+                               oninput="validateRisk()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Giá Limit -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Giá đặt lệnh (Price)</label>
+                        <input type="number" id="price" step="0.01" required placeholder="Nhập giá Limit" 
+                               class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-amber-400" 
+                               oninput="validateRisk()">
+                    </div>
+
+                    <!-- Stop Loss -->
+                    <div>
+                        <label class="block text-xs font-semibold text-red-400 mb-1">Stop Loss (Bắt buộc *)</label>
+                        <input type="number" id="sl" step="0.01" required placeholder="Giá Cắt Lỗ" 
+                               class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-sm text-white focus:border-red-500 focus:outline-none" 
+                               oninput="validateRisk()">
+                    </div>
+
+                    <!-- Take Profit -->
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 mb-1">Take Profit (Bắt buộc *)</label>
+                        <input type="number" id="tp" step="0.01" required placeholder="Giá Chốt Lời" 
+                               class="w-full bg-slate-900 border border-emerald-900/50 rounded p-2 text-sm text-white focus:border-emerald-500 focus:outline-none" 
+                               oninput="validateRisk()">
+                    </div>
+                </div>
+
+                <!-- Cảnh báo Đòn bẩy -->
+                <div id="riskWarning" class="p-3 bg-slate-900 rounded border border-slate-700 text-xs text-slate-300 flex justify-between items-center">
+                    <span>Đòn bẩy dự kiến: <strong id="calcLeverage" class="text-amber-400">1:0.0</strong></span>
+                    <span id="leverageStatus" class="text-emerald-400 font-semibold">✓ An toàn (<= 1:10)</span>
+                </div>
+
+                <button type="submit" id="submitBtn" disabled
+                        class="w-full py-3 bg-slate-700 text-slate-500 font-bold rounded-lg transition-all cursor-not-allowed">
+                    GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)
+                </button>
+            </form>
+        </section>
+
+        <!-- QUẢN LÝ MỤC TIÊU (THÁNG & 1 NĂM THEO NGÀY) -->
+        <section class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-3 gap-3">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-200">📈 Tiến Độ Mục Tiêu Giao Dịch</h2>
+                    <p class="text-xs text-slate-400">Theo dõi PnL Thực tế vs Target chi tiết theo Ngày</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <!-- Switch View -->
+                    <div class="bg-slate-900 p-1 rounded-lg border border-slate-700 flex text-xs">
+                        <button id="btnViewMonth" onclick="switchView('month')" class="px-3 py-1 rounded-md bg-amber-500 text-slate-950 font-bold transition-all">Theo Tháng</button>
+                        <button id="btnViewYear" onclick="switchView('year')" class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all">Theo 1 Năm (Theo Ngày)</button>
+                    </div>
+
+                    <!-- Input Target -->
+                    <input type="number" id="targetInput" placeholder="Target PnL ($)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white w-28 focus:outline-none focus:border-amber-400">
+                    <button onclick="updateTarget()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-1 rounded">Lưu Target</button>
+                </div>
+            </div>
+
+            <!-- Khung Biểu Đồ -->
+            <div class="h-72">
+                <canvas id="targetChart"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- FIREBASE SDK V10 & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // CẤU HÌNH FIREBASE CHÍNH THỨC CỦA BẠN
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1gbjcgX4xup4kIOhmOY_RtJbWDcuWRMw",
+            authDomain: "forex-discipline-app.firebaseapp.com",
+            databaseURL: "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "forex-discipline-app",
+            storageBucket: "forex-discipline-app.firebasestorage.app",
+            messagingSenderId: "254328640095",
+            appId: "1:254328640095:web:74b232e4d8f56b8c4e41ea",
+            measurementId: "G-C3YCXLXFJN"
+        };
+
+        // Khởi tạo Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let currentEquity = 0;
+        const contractSizes = { 'XAUUSD': 100, 'BTCUSD': 1, 'USOIL': 1000 };
+
+        // 1. Lắng nghe dữ liệu Số dư / Tài sản từ MT5 gửi lên Firebase
+        const accountRef = ref(db, 'account');
+        onValue(accountRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                currentEquity = data.equity || 0;
+                document.getElementById('accBalance').innerText = `$${(data.balance || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                document.getElementById('accEquity').innerText = `$${(data.equity || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                document.getElementById('accMargin').innerText = `$${(data.margin || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                
+                const syncStatus = document.getElementById('syncStatus');
+                syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> EA MT5 Đã Kết Nối`;
+                syncStatus.className = "text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700";
+                
+                window.validateRisk();
+            }
+        });
+
+        // 2. Hàm Gửi Lệnh Limit lên Firebase Realtime Database
+        window.handlePlaceOrder = async function(e) {
+            e.preventDefault();
+            
+            const orderPayload = {
+                symbol: document.getElementById('symbol').value,
+                type: document.getElementById('orderType').value,
+                volume: parseFloat(document.getElementById('volume').value),
+                price: parseFloat(document.getElementById('price').value),
+                sl: parseFloat(document.getElementById('sl').value),
+                tp: parseFloat(document.getElementById('tp').value),
+                timestamp: Date.now()
+            };
+
+            try {
+                await set(ref(db, 'pending_order'), orderPayload);
+                alert("✅ Đã đẩy lệnh Limit thành công lên Firebase! Robot EA trên MT5 sẽ nhận và khớp lệnh ngay.");
+                document.getElementById('orderForm').reset();
+                window.validateRisk();
+            } catch (err) {
+                alert("❌ Lỗi khi gửi lệnh tới Firebase: " + err.message);
+            }
+        };
+
+        // 3. Hàm Kiểm tra Đòn bẩy 1:10 & SL/TP
+        window.validateRisk = function() {
+            const symbol = document.getElementById('symbol').value;
+            const volume = parseFloat(document.getElementById('volume').value) || 0;
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const sl = parseFloat(document.getElementById('sl').value) || 0;
+            const tp = parseFloat(document.getElementById('tp').value) || 0;
+            const submitBtn = document.getElementById('submitBtn');
+
+            const contractSize = contractSizes[symbol] || 100;
+            const positionValue = volume * contractSize * (price > 0 ? price : 1);
+            const leverageRatio = currentEquity > 0 ? (positionValue / currentEquity) : 0;
+
+            document.getElementById('calcLeverage').innerText = `1:${leverageRatio.toFixed(1)}`;
+
+            const isLeverageValid = leverageRatio <= 10.0;
+            const isSlTpValid = sl > 0 && tp > 0;
+            const isPriceValid = price > 0 && volume > 0;
+
+            if (isLeverageValid) {
+                document.getElementById('leverageStatus').innerText = "✓ An toàn (<= 1:10)";
+                document.getElementById('leverageStatus').className = "text-emerald-400 font-semibold";
+            } else {
+                document.getElementById('leverageStatus').innerText = "✕ Vi phạm Đòn bẩy (> 1:10)";
+                document.getElementById('leverageStatus').className = "text-red-400 font-semibold";
+            }
+
+            if (isLeverageValid && isSlTpValid && isPriceValid) {
+                submitBtn.disabled = false;
+                submitBtn.className = "w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition-all cursor-pointer shadow-lg";
+                submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (HỢP LỆ)";
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full py-3 bg-slate-700 text-slate-500 font-bold rounded-lg transition-all cursor-not-allowed";
+                submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)";
+            }
+        };
+    </script>
+
+    <!-- CHART LOGIC (CHI TIẾT THEO NGÀY CHO CẢ THÁNG & 1 NĂM) -->
+    <script>
+        let chart;
+        let currentMode = 'month';
+
+        // Hàm khởi tạo danh sách Ngày cho biểu đồ
+        function generateDateLabels(mode) {
+            const labels = [];
+            const now = new Date();
+            
+            if (mode === 'month') {
+                // Tất cả các ngày trong tháng (Ngày 1 -> Ngày 30/31)
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                for (let i = 1; i <= daysInMonth; i++) {
+                    labels.push(`Ngày ${i}`);
+                }
+            } else if (mode === 'year') {
+                // Phân bổ 365/366 ngày trong năm (DD/MM)
+                const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                const totalDays = isLeapYear(now.getFullYear()) ? 366 : 365;
+                
+                let startDate = new Date(now.getFullYear(), 0, 1);
+                for (let i = 0; i < totalDays; i++) {
+                    const d = new Date(startDate);
+                    d.setDate(startDate.getDate() + i);
+                    const dayStr = String(d.getDate()).padStart(2, '0');
+                    const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+                    labels.push(`${dayStr}/${monthStr}`);
+                }
+            }
+            return labels;
+        }
+
+        // Tạo mốc đường Target tịnh tiến theo từng ngày
+        function generateTargetArray(labelsCount, totalTarget) {
+            if (totalTarget <= 0 || labelsCount <= 1) return new Array(labelsCount).fill(0);
+            const step = totalTarget / (labelsCount - 1);
+            return Array.from({ length: labelsCount }, (_, index) => Math.round(step * index));
+        }
+
+        window.onload = function() {
+            initChart();
+        };
+
+        function initChart() {
+            const ctx = document.getElementById('targetChart').getContext('2d');
+            const initialLabels = generateDateLabels('month');
+            const initialTarget = generateTargetArray(initialLabels.length, 1000);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: initialLabels,
+                    datasets: [
+                        { 
+                            label: 'PnL Thực tế Theo Ngày ($)', 
+                            data: new Array(initialLabels.length).fill(0), 
+                            borderColor: '#10b981', 
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 3
+                        },
+                        { 
+                            label: 'Mục tiêu Tích lũy ($)', 
+                            data: initialTarget, 
+                            borderColor: '#f59e0b', 
+                            borderDash: [4, 4],
+                            tension: 0.1,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    plugins: { 
+                        legend: { labels: { color: '#94a3b8' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: $${context.raw.toLocaleString('en-US')}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            ticks: { 
+                                color: '#94a3b8',
+                                maxTicksLimit: 12
+                            }, 
+                            grid: { color: '#334155' } 
+                        },
+                        y: { 
+                            ticks: { color: '#94a3b8' }, 
+                            grid: { color: '#334155' } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchView(mode) {
+            currentMode = mode;
+            const btnMonth = document.getElementById('btnViewMonth');
+            const btnYear = document.getElementById('btnViewYear');
+
+            if (mode === 'month') {
+                btnMonth.className = "px-3 py-1 rounded-md bg-amber-500 text-slate-950 font-bold transition-all";
+                btnYear.className = "px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all";
+            } else {
+                btnYear.className = "px-3 py-1 rounded-md bg-amber-500 text-slate-950 font-bold transition-all";
+                btnMonth.className = "px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all";
+            }
+
+            const newLabels = generateDateLabels(mode);
+            const targetVal = parseFloat(document.getElementById('targetInput').value) || (mode === 'month' ? 1000 : 12000);
+
+            chart.data.labels = newLabels;
+            chart.data.datasets[0].data = new Array(newLabels.length).fill(0);
+            chart.data.datasets[0].pointRadius = mode === 'year' ? 1 : 3;
+            chart.data.datasets[1].data = generateTargetArray(newLabels.length, targetVal);
+            chart.options.scales.x.ticks.maxTicksLimit = mode === 'year' ? 12 : 15;
+            
+            chart.update();
+        }
+
+        function updateTarget() {
+            const targetVal = parseFloat(document.getElementById('targetInput').value) || 0;
+            const labelsCount = chart.data.labels.length;
+
+            chart.data.datasets[1].data = generateTargetArray(labelsCount, targetVal);
+            chart.update();
+
+            alert(`Đã cập nhật Mục tiêu cho ${currentMode === 'month' ? 'Tháng' : 'Năm'} là $${targetVal.toLocaleString('en-US')}`);
+        }
+    </script>
+</body>
+</html>
