@@ -13,8 +13,6 @@
     .input-field:focus { outline: none; border-color: #3b82f6; }
     .btn-close { background-color: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
     .btn-close:hover { background-color: #dc2626; }
-    .btn-mode-active { background-color: #f59e0b; color: #0f172a; font-weight: 700; }
-    .btn-mode-inactive { background-color: #0f172a; color: #94a3b8; border: 1px solid #1e2d4a; }
   </style>
 </head>
 <body class="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
@@ -46,6 +44,39 @@
     <div class="card p-5">
       <div class="text-xs text-slate-400">Ký Quỹ (Margin)</div>
       <div id="marginVal" class="text-2xl font-bold text-purple-400 mt-1">$0.00</div>
+    </div>
+  </div>
+
+  <!-- 1.1. BẢNG THỐNG KÊ HIỆU SUẤT GIAO DỊCH -->
+  <div class="card p-5">
+    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">
+      📊 Thống Kê Hiệu Suất Giao Dịch
+    </h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Tổng Lệnh Vào</div>
+        <div id="statTotal" class="text-lg font-bold text-white mt-1">0</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Lệnh Thắng</div>
+        <div id="statWin" class="text-lg font-bold text-emerald-400 mt-1">0</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Lệnh Thua</div>
+        <div id="statLoss" class="text-lg font-bold text-rose-400 mt-1">0</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Tỉ Lệ Thắng (Winrate)</div>
+        <div id="statWinrate" class="text-lg font-bold text-amber-400 mt-1">0.0%</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Tổng Lợi Nhuận</div>
+        <div id="statNetProfit" class="text-lg font-bold text-emerald-400 mt-1">$0.00</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-400">Hệ Số Lợi Nhuận (PF)</div>
+        <div id="statProfitFactor" class="text-lg font-bold text-blue-400 mt-1">0.00</div>
+      </div>
     </div>
   </div>
 
@@ -97,12 +128,12 @@
       </div>
 
       <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
-        GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)
+        ĐẶT LỆNH
       </button>
     </form>
   </div>
 
-  <!-- 3. BẢNG VỊ THẾ ĐANG CHẠY -->
+  <!-- 3. BẢNG VỊ THẾ Đang CHẠY -->
   <div class="card p-6">
     <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">
       ⚡ Vị Thế Đang Chạy (Open Positions)
@@ -153,26 +184,36 @@
     </div>
   </div>
 
-  <!-- 5. TIẾN ĐỘ MỤC TIÊU GIAO DỊCH (BIỂU ĐỒ) -->
+  <!-- 5. BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY THEO THÁNG -->
   <div class="card p-6 space-y-4">
     <div class="flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">
-          📈 Tiến Độ Mục Tiêu Giao Dịch
+          📈 Biểu Đồ Lợi Nhuận Hàng Ngày (Theo Tháng)
         </h2>
-        <p class="text-xs text-slate-400 mt-0.5">Theo dõi PnL Thực tế vs Target chi tiết</p>
+        <p class="text-xs text-slate-400 mt-0.5">Theo dõi lãi/lỗ từng ngày trong tháng (Xanh: Lãi, Đỏ: Lỗ)</p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btnMonth" onclick="switchChartMode('month')" class="btn-mode-active text-xs px-3 py-1.5 rounded">Theo Tháng</button>
-        <button id="btnYear" onclick="switchChartMode('year')" class="btn-mode-inactive text-xs px-3 py-1.5 rounded">Theo Năm (12 Tháng)</button>
-        <input type="number" id="targetPnlInput" placeholder="Target PnL ($)" class="bg-slate-900 text-xs border border-slate-800 px-2 py-1.5 rounded w-28 text-white">
-        <button onclick="saveTarget()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded hover:bg-amber-400">Lưu Target</button>
+        <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
+          <option value="0">Tháng 1</option>
+          <option value="1">Tháng 2</option>
+          <option value="2">Tháng 3</option>
+          <option value="3">Tháng 4</option>
+          <option value="4">Tháng 5</option>
+          <option value="5">Tháng 6</option>
+          <option value="6">Tháng 7</option>
+          <option value="7">Tháng 8</option>
+          <option value="8">Tháng 9</option>
+          <option value="9">Tháng 10</option>
+          <option value="10">Tháng 11</option>
+          <option value="11">Tháng 12</option>
+        </select>
       </div>
     </div>
 
     <!-- CHIỀU CAO BIỂU ĐỒ 450PX -->
     <div class="h-[450px] w-full pt-4">
-      <canvas id="pnlChart"></canvas>
+      <canvas id="dailyProfitChart"></canvas>
     </div>
   </div>
 
@@ -180,8 +221,8 @@
     const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
     let chartInstance = null;
     let currentPositionsData = {}; 
-    let currentChartMode = 'month'; // 'month' hoặc 'year'
-    let currentTargetPnL = parseFloat(localStorage.getItem('gatekeeper_target_pnl')) || 1000;
+    let selectedMonth = new Date().getMonth(); // Mặc định tháng hiện tại
+    document.getElementById('selectMonth').value = selectedMonth;
 
     // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
@@ -233,7 +274,7 @@
         
         submitBtn.disabled = false;
         submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
-        submitBtn.innerText = "GỬI LỆNH LÊN FIREBASE (CHỜ KHÓA TIÊU CHUẨN)";
+        submitBtn.innerText = "ĐẶT LỆNH";
       }
     }
 
@@ -262,124 +303,95 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      .then(() => alert("✅ Đã bắn lệnh kỷ luật lên Firebase thành công!"))
+      .then(() => alert("✅ Đã đặt lệnh thành công!"))
       .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
     }
 
-    // E. XỬ LÝ BIỂU ĐỒ (CHART.JS)
+    // E. XỬ LÝ BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY (BAR CHART)
     function initChart() {
-      const ctx = document.getElementById('pnlChart').getContext('2d');
-      document.getElementById('targetPnlInput').value = currentTargetPnL;
+      const ctx = document.getElementById('dailyProfitChart').getContext('2d');
 
       chartInstance = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
           labels: [],
-          datasets: [
-            {
-              label: 'PnL Thực tế ($)',
-              data: [],
-              borderColor: '#10b981',
-              backgroundColor: '#10b981',
-              borderWidth: 2,
-              tension: 0.2,
-              pointRadius: 3
-            },
-            {
-              label: 'Mục tiêu Tích lũy ($)',
-              data: [],
-              borderColor: '#f59e0b',
-              borderDash: [4, 4],
-              borderWidth: 2,
-              pointRadius: 0,
-              fill: false
-            }
-          ]
+          datasets: [{
+            label: 'Lợi Nhuận Ngày ($)',
+            data: [],
+            backgroundColor: [],
+            borderRadius: 4
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { grid: { color: '#1e2d4a' }, ticks: { color: '#64748b' } },
-            x: { grid: { color: '#1e2d4a' }, ticks: { color: '#64748b' } }
+            y: { 
+              grid: { color: '#1e2d4a' }, 
+              ticks: { color: '#64748b' } 
+            },
+            x: { 
+              grid: { display: false }, 
+              ticks: { color: '#64748b', maxTicksLimit: 15 } 
+            }
           },
           plugins: {
-            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+            legend: { display: false }
           }
         }
       });
 
-      renderChartData();
+      updateChartData();
     }
 
-    function renderChartData() {
+    function changeMonth() {
+      selectedMonth = parseInt(document.getElementById('selectMonth').value);
+      updateChartData();
+    }
+
+    function updateChartData() {
       if (!chartInstance) return;
 
-      let labels = [];
-      let targetData = [];
-      let actualData = [];
+      const year = new Date().getFullYear();
+      const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
+      
+      let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
+      let dailyProfits = new Array(daysInMonth).fill(0);
+      let bgColors = new Array(daysInMonth).fill('#10b981');
 
-      // Tính tổng PnL hiện tại từ các vị thế đang mở
-      let currentTotalProfit = 0;
-      for (let key in currentPositionsData) {
-        currentTotalProfit += (currentPositionsData[key].profit || 0);
-      }
+      fetch(`${FIREBASE_URL}/closed_history.json`)
+        .then(res => res.json())
+        .then(historyData => {
+          if (historyData) {
+            for (let key in historyData) {
+              let item = historyData[key];
+              let closeDate = new Date(item.close_time || item.timestamp);
+              if (closeDate.getMonth() === selectedMonth && closeDate.getFullYear() === year) {
+                let dayIdx = closeDate.getDate() - 1;
+                if (dayIdx >= 0 && dayIdx < daysInMonth) {
+                  dailyProfits[dayIdx] += (item.profit || 0);
+                }
+              }
+            }
+          }
 
-      if (currentChartMode === 'month') {
-        labels = Array.from({length: 31}, (_, i) => `Ngày ${i + 1}`);
-        targetData = Array.from({length: 31}, (_, i) => (currentTargetPnL / 31) * (i + 1));
-        
-        actualData = new Array(31).fill(null);
-        let dayIndex = new Date().getDate() - 1;
-        actualData[dayIndex] = currentTotalProfit;
-      } 
-      else {
-        // Chế độ Năm (12 tháng gần nhất)
-        labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-        targetData = Array.from({length: 12}, (_, i) => (currentTargetPnL / 12) * (i + 1));
-        
-        actualData = new Array(12).fill(null);
-        let monthIndex = new Date().getMonth(); // Tháng hiện tại (0-11)
-        actualData[monthIndex] = currentTotalProfit;
-      }
+          bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
 
-      chartInstance.data.labels = labels;
-      chartInstance.data.datasets[0].data = actualData;
-      chartInstance.data.datasets[1].data = targetData;
-      chartInstance.update();
+          chartInstance.data.labels = labels;
+          chartInstance.data.datasets[0].data = dailyProfits;
+          chartInstance.data.datasets[0].backgroundColor = bgColors;
+          chartInstance.update();
+        })
+        .catch(() => {
+          chartInstance.data.labels = labels;
+          chartInstance.data.datasets[0].data = dailyProfits;
+          chartInstance.data.datasets[0].backgroundColor = bgColors;
+          chartInstance.update();
+        });
     }
 
-    function switchChartMode(mode) {
-      currentChartMode = mode;
-      const btnMonth = document.getElementById('btnMonth');
-      const btnYear = document.getElementById('btnYear');
-
-      if (mode === 'month') {
-        btnMonth.className = 'btn-mode-active text-xs px-3 py-1.5 rounded';
-        btnYear.className = 'btn-mode-inactive text-xs px-3 py-1.5 rounded';
-      } else {
-        btnYear.className = 'btn-mode-active text-xs px-3 py-1.5 rounded';
-        btnMonth.className = 'btn-mode-inactive text-xs px-3 py-1.5 rounded';
-      }
-
-      renderChartData();
-    }
-
-    function saveTarget() {
-      const val = parseFloat(document.getElementById('targetPnlInput').value);
-      if (isNaN(val) || val <= 0) {
-        alert("⚠️ Vui lòng nhập số tiền Target hợp lệ!");
-        return;
-      }
-      currentTargetPnL = val;
-      localStorage.setItem('gatekeeper_target_pnl', val);
-      renderChartData();
-      alert(`✅ Đã lưu Target mới: $${val.toFixed(2)}`);
-    }
-
-    // F. Lắng nghe Dữ liệu Realtime từ Firebase
+    // F. THỐNG KÊ HIỆU SUẤT GIAO DỊCH & DỮ LIỆU REALTIME
     function listenRealtimeData() {
-      // Balance / Equity / Margin
       fetch(`${FIREBASE_URL}/account.json`)
         .then(res => res.json())
         .then(data => {
@@ -391,13 +403,11 @@
           }
         });
 
-      // Open Positions
       fetch(`${FIREBASE_URL}/live_positions.json`)
         .then(res => res.json())
         .then(data => {
           currentPositionsData = data || {};
           updateLeverageStatus();
-          renderChartData(); // Cập nhật PnL vào biểu đồ
 
           const tbody = document.getElementById('positionsTableBody');
           if (!data || Object.keys(data).length === 0) {
@@ -427,7 +437,6 @@
           tbody.innerHTML = html;
         });
 
-      // Pending Orders
       fetch(`${FIREBASE_URL}/live_pending_orders.json`)
         .then(res => res.json())
         .then(data => {
@@ -455,6 +464,48 @@
           }
           tbody.innerHTML = html;
         });
+
+      fetch(`${FIREBASE_URL}/closed_history.json`)
+        .then(res => res.json())
+        .then(historyData => {
+          let totalTrades = 0;
+          let winTrades = 0;
+          let lossTrades = 0;
+          let netProfit = 0;
+          let grossProfit = 0;
+          let grossLoss = 0;
+
+          if (historyData) {
+            for (let key in historyData) {
+              let item = historyData[key];
+              totalTrades++;
+              let profit = item.profit || 0;
+              netProfit += profit;
+              if (profit > 0) {
+                winTrades++;
+                grossProfit += profit;
+              } else if (profit < 0) {
+                lossTrades++;
+                grossLoss += Math.abs(profit);
+              }
+            }
+          }
+
+          let winrate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+          let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
+
+          document.getElementById('statTotal').innerText = totalTrades;
+          document.getElementById('statWin').innerText = winTrades;
+          document.getElementById('statLoss').innerText = lossTrades;
+          document.getElementById('statWinrate').innerText = winrate.toFixed(1) + '%';
+          
+          let netProfitEl = document.getElementById('statNetProfit');
+          netProfitEl.innerText = (netProfit >= 0 ? '+$' : '-$') + Math.abs(netProfit).toFixed(2);
+          netProfitEl.className = netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
+
+          document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
+        })
+        .catch(() => {});
     }
 
     // G. Yêu cầu Đóng/Hủy Lệnh
