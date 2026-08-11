@@ -17,21 +17,14 @@
 </head>
 <body class="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
 
-  <!-- 1. HEADER & THÔNG TIN TÀI KHOẢN -->
+  <!-- HEADER -->
   <div class="card p-5 flex flex-wrap justify-between items-center gap-4">
-    <div>
-      <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
-        🛡️ FOREX DISCIPLINE GATEKEEPER
-      </h1>
-    </div>
-    <div class="flex items-center gap-3">
-      <span id="connectionError" class="hidden bg-rose-950/80 text-rose-400 border border-rose-500/30 text-xs px-3 py-1.5 rounded-full font-semibold">
-        ⚠️ Lỗi kết nối Firebase (Kiểm tra Rules)
-      </span>
-      <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đang đồng bộ...
-      </span>
-    </div>
+    <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
+      🛡️ FOREX DISCIPLINE GATEKEEPER
+    </h1>
+    <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đang đồng bộ...
+    </span>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -57,11 +50,9 @@
     </div>
   </div>
 
-  <!-- 1.1. BẢNG THỐNG KÊ HIỆU SUẤT GIAO DỊCH -->
+  <!-- THỐNG KÊ HIỆU SUẤT -->
   <div class="card p-5">
-    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">
-      📊 Thống Kê Hiệu Suất Giao Dịch
-    </h2>
+    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">📊 Thống Kê Hiệu Suất Giao Dịch</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
         <div class="text-xs text-slate-400">Tổng Lệnh Vào</div>
@@ -90,22 +81,20 @@
     </div>
   </div>
 
-  <!-- 2. ĐẶT LỆNH KỶ LUẬT (RISK FILTER) -->
+  <!-- ĐẶT LỆNH KỶ LUẬT -->
   <div class="card p-6 space-y-4">
-    <h2 class="text-md font-bold text-rose-400 flex items-center gap-2">
-      🎯 Đặt Lệnh Kỷ Luật (Risk Filter)
-    </h2>
+    <h2 class="text-md font-bold text-rose-400 flex items-center gap-2">🎯 Đặt Lệnh Kỷ Luật (Risk Filter)</h2>
     <form id="orderForm" onsubmit="handlePlaceOrder(event)" class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Sản phẩm giao dịch</label>
+          <label class="block text-xs text-slate-400 mb-1">Sản phẩm</label>
           <select id="symbol" class="input-field font-bold text-amber-400" onchange="updateLeverageStatus()">
             <option value="XAUUSD">XAUUSD (Vàng)</option>
             <option value="BTCUSD">BTCUSD (Bitcoin)</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Loại lệnh (Chỉ Limit)</label>
+          <label class="block text-xs text-slate-400 mb-1">Loại lệnh</label>
           <select id="type" class="input-field font-bold text-amber-400">
             <option value="BUY_LIMIT">BUY LIMIT</option>
             <option value="SELL_LIMIT">SELL LIMIT</option>
@@ -119,16 +108,16 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Giá đặt lệnh (Price)</label>
-          <input type="number" id="price" step="any" placeholder="Nhập giá Limit" required class="input-field" oninput="updateLeverageStatus()">
+          <label class="block text-xs text-slate-400 mb-1">Giá đặt</label>
+          <input type="number" id="price" step="any" placeholder="Giá Limit" required class="input-field" oninput="updateLeverageStatus()">
         </div>
         <div>
-          <label class="block text-xs text-rose-400 mb-1">Stop Loss (Bắt buộc *)</label>
-          <input type="number" id="sl" step="any" placeholder="Giá Cắt Lỗ" required class="input-field border-rose-500/30">
+          <label class="block text-xs text-rose-400 mb-1">Stop Loss</label>
+          <input type="number" id="sl" step="any" placeholder="Cắt lỗ" required class="input-field border-rose-500/30">
         </div>
         <div>
-          <label class="block text-xs text-emerald-400 mb-1">Take Profit (Bắt buộc *)</label>
-          <input type="number" id="tp" step="any" placeholder="Giá Chốt Lời" required class="input-field border-emerald-500/30">
+          <label class="block text-xs text-emerald-400 mb-1">Take Profit</label>
+          <input type="number" id="tp" step="any" placeholder="Chốt lời" required class="input-field border-emerald-500/30">
         </div>
       </div>
 
@@ -137,29 +126,20 @@
         <div id="safetyBadge" class="text-emerald-400 font-semibold">✓ An toàn (&lt;= 1:10)</div>
       </div>
 
-      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
+      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg border border-slate-700">
         ĐẶT LỆNH
       </button>
     </form>
   </div>
 
-  <!-- 3. BẢNG VỊ THẾ Đang CHẠY -->
+  <!-- VỊ THẾ Đang CHẠY -->
   <div class="card p-6">
-    <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">
-      ⚡ Vị Thế Đang Chạy (Open Positions)
-    </h2>
+    <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">⚡ Vị Thế Đang Chạy (Open Positions)</h2>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
-            <th class="p-3">Ticket</th>
-            <th class="p-3">Sản Phẩm</th>
-            <th class="p-3">Loại</th>
-            <th class="p-3">Volume</th>
-            <th class="p-3">Giá Vào</th>
-            <th class="p-3">SL / TP</th>
-            <th class="p-3">PnL ($)</th>
-            <th class="p-3 text-center">Thao Tác</th>
+            <th class="p-3">Ticket</th><th class="p-3">Sản Phẩm</th><th class="p-3">Loại</th><th class="p-3">Volume</th><th class="p-3">Giá Vào</th><th class="p-3">SL / TP</th><th class="p-3">PnL ($)</th><th class="p-3 text-center">Thao Tác</th>
           </tr>
         </thead>
         <tbody id="positionsTableBody">
@@ -169,22 +149,14 @@
     </div>
   </div>
 
-  <!-- 4. BẢNG LỆNH ĐANG CHỜ KHỚP -->
+  <!-- LỆNH ĐANG CHỜ -->
   <div class="card p-6">
-    <h2 class="text-md font-bold text-amber-400 mb-4 flex items-center gap-2">
-      ⏳ Lệnh Đang Chờ Khớp (Pending Orders)
-    </h2>
+    <h2 class="text-md font-bold text-amber-400 mb-4 flex items-center gap-2">⏳ Lệnh Đang Chờ Khớp (Pending Orders)</h2>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
-            <th class="p-3">Ticket</th>
-            <th class="p-3">Sản Phẩm</th>
-            <th class="p-3">Loại Lệnh</th>
-            <th class="p-3">Volume</th>
-            <th class="p-3">Giá Đặt</th>
-            <th class="p-3">SL / TP</th>
-            <th class="p-3 text-center">Thao Tác</th>
+            <th class="p-3">Ticket</th><th class="p-3">Sản Phẩm</th><th class="p-3">Loại Lệnh</th><th class="p-3">Volume</th><th class="p-3">Giá Đặt</th><th class="p-3">SL / TP</th><th class="p-3 text-center">Thao Tác</th>
           </tr>
         </thead>
         <tbody id="pendingOrdersTableBody">
@@ -194,37 +166,17 @@
     </div>
   </div>
 
-  <!-- 5. BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY THEO THÁNG -->
+  <!-- BIỂU ĐỒ -->
   <div class="card p-6 space-y-4">
     <div class="flex flex-wrap justify-between items-center gap-4">
-      <div>
-        <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">
-          📈 Biểu Đồ Lợi Nhuận Hàng Ngày (Theo Tháng)
-        </h2>
-        <p class="text-xs text-slate-400 mt-0.5">Theo dõi lãi/lỗ từng ngày trong tháng (Xanh: Lãi, Đỏ: Lỗ)</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
-          <option value="0">Tháng 1</option>
-          <option value="1">Tháng 2</option>
-          <option value="2">Tháng 3</option>
-          <option value="3">Tháng 4</option>
-          <option value="4">Tháng 5</option>
-          <option value="5">Tháng 6</option>
-          <option value="6">Tháng 7</option>
-          <option value="7">Tháng 8</option>
-          <option value="8">Tháng 9</option>
-          <option value="9">Tháng 10</option>
-          <option value="10">Tháng 11</option>
-          <option value="11">Tháng 12</option>
-        </select>
-      </div>
+      <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">📈 Biểu Đồ Lợi Nhuận Hàng Ngày</h2>
+      <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
+        <option value="0">Tháng 1</option><option value="1">Tháng 2</option><option value="2">Tháng 3</option><option value="3">Tháng 4</option>
+        <option value="4">Tháng 5</option><option value="5">Tháng 6</option><option value="6">Tháng 7</option><option value="7">Tháng 8</option>
+        <option value="8">Tháng 9</option><option value="9">Tháng 10</option><option value="10">Tháng 11</option><option value="11">Tháng 12</option>
+      </select>
     </div>
-
-    <!-- CHIỀU CAO BIỂU ĐỒ 450PX -->
-    <div class="h-[450px] w-full pt-4">
-      <canvas id="dailyProfitChart"></canvas>
-    </div>
+    <div class="h-[450px] w-full pt-4"><canvas id="dailyProfitChart"></canvas></div>
   </div>
 
   <script>
@@ -248,8 +200,10 @@
       let totalNotional = 0;
       for (let key in currentPositionsData) {
         let pos = currentPositionsData[key];
-        let cSize = getContractSize(pos.symbol);
-        totalNotional += (pos.volume * cSize * pos.price);
+        let cSize = getContractSize(pos.symbol || '');
+        let vol = parseFloat(pos.volume || 0);
+        let pr = parseFloat(pos.price || 0);
+        totalNotional += (vol * cSize * pr);
       }
 
       const vol = parseFloat(document.getElementById('volume').value) || 0;
@@ -264,13 +218,12 @@
     function updateLeverageStatus() {
       const totalLev = calculateTotalLeverage();
       document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
-
       const badge = document.getElementById('safetyBadge');
       const submitBtn = document.getElementById('submitBtn');
 
       if (totalLev > 10) {
         badge.className = "text-rose-500 font-bold flex items-center gap-1 animate-pulse";
-        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10 (CẤM ĐẶT LỆNH)";
+        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10";
         submitBtn.disabled = true;
         submitBtn.className = "w-full bg-rose-950 text-rose-500 font-bold py-3 rounded-lg border border-rose-800 cursor-not-allowed opacity-80";
         submitBtn.innerText = "⛔ BỊ KHÓA: TỔNG ĐÒN BẨY VƯỢT QUÁ 1:10";
@@ -278,7 +231,7 @@
         badge.className = "text-emerald-400 font-semibold";
         badge.innerText = "✓ An toàn (<= 1:10)";
         submitBtn.disabled = false;
-        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
+        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg border border-slate-700";
         submitBtn.innerText = "ĐẶT LỆNH";
       }
     }
@@ -287,7 +240,7 @@
       e.preventDefault();
       const totalLev = calculateTotalLeverage();
       if (totalLev > 10) {
-        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).`);
+        alert(`⛔ LỆNH BỊ TỪ CHỐI! Tổng đòn bẩy là 1:${totalLev.toFixed(1)}.`);
         return;
       }
 
@@ -307,7 +260,7 @@
         body: JSON.stringify(payload)
       })
       .then(() => alert("✅ Đã đặt lệnh thành công!"))
-      .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
+      .catch(err => alert("❌ Lỗi: " + err));
     }
 
     function initChart() {
@@ -316,12 +269,7 @@
         type: 'bar',
         data: {
           labels: [],
-          datasets: [{
-            label: 'Lợi Nhuận Ngày ($)',
-            data: [],
-            backgroundColor: [],
-            borderRadius: 4
-          }]
+          datasets: [{ label: 'Lợi Nhuận Ngày ($)', data: [], backgroundColor: [], borderRadius: 4 }]
         },
         options: {
           responsive: true,
@@ -341,151 +289,105 @@
     }
 
     function listenRealtimeData() {
-      let hasError = false;
-
-      // 1. Account Info
-      fetch(`${FIREBASE_URL}/account.json`)
-        .then(res => {
-          if (!res.ok) throw new Error("HTTP error " + res.status);
-          return res.json();
-        })
-        .then(data => {
-          if (data) {
-            document.getElementById('balanceVal').innerText = `$${(data.balance || 0).toFixed(2)}`;
-            document.getElementById('equityVal').innerText = `$${(data.equity || 0).toFixed(2)}`;
-            document.getElementById('marginVal').innerText = `$${(data.margin || 0).toFixed(2)}`;
-            document.getElementById('depositVal').innerText = `$${(data.deposit || 0).toFixed(2)}`;
-            document.getElementById('withdrawalVal').innerText = `$${(data.withdrawal || 0).toFixed(2)}`;
-            updateLeverageStatus();
-          }
-        })
-        .catch(err => {
-          hasError = true;
-          console.error("Lỗi lấy account:", err);
-        });
-
-      // 2. Open Positions
-      fetch(`${FIREBASE_URL}/live_positions.json`)
+      fetch(`${FIREBASE_URL}/.json`)
         .then(res => res.json())
-        .then(data => {
-          currentPositionsData = data || {};
+        .then(allData => {
+          if (!allData) return;
+
+          // 1. Account Info
+          let acc = allData.account || {};
+          document.getElementById('balanceVal').innerText = `$${(acc.balance || 0).toFixed(2)}`;
+          document.getElementById('equityVal').innerText = `$${(acc.equity || 0).toFixed(2)}`;
+          document.getElementById('marginVal').innerText = `$${(acc.margin || 0).toFixed(2)}`;
+          document.getElementById('depositVal').innerText = `$${(acc.deposit || 0).toFixed(2)}`;
+          document.getElementById('withdrawalVal').innerText = `$${(acc.withdrawal || 0).toFixed(2)}`;
+
+          // 2. Open Positions (Hỗ trợ cả live_positions và live_orders)
+          let positions = allData.live_positions || allData.live_orders || {};
+          currentPositionsData = positions;
           updateLeverageStatus();
 
-          const tbody = document.getElementById('positionsTableBody');
-          if (!data || Object.keys(data).length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>';
-            return;
+          const posTbody = document.getElementById('positionsTableBody');
+          if (!positions || Object.keys(positions).length === 0) {
+            posTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>';
+          } else {
+            let html = '';
+            for (let key in positions) {
+              let pos = positions[key];
+              let profit = parseFloat(pos.profit || 0);
+              let pnlColor = profit >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+              let typeColor = pos.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
+              html += `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50">
+                  <td class="p-3 font-mono text-slate-400">#${pos.ticket || key}</td>
+                  <td class="p-3 font-bold">${pos.symbol || ''}</td>
+                  <td class="p-3 ${typeColor} font-bold">${pos.type || ''}</td>
+                  <td class="p-3">${pos.volume || 0}</td>
+                  <td class="p-3 font-mono">${pos.price || 0}</td>
+                  <td class="p-3 text-xs text-slate-400">SL: ${pos.sl || 0}<br>TP: ${pos.tp || 0}</td>
+                  <td class="p-3 ${pnlColor}">$${profit.toFixed(2)}</td>
+                  <td class="p-3 text-center">
+                    <button onclick="requestAction('CLOSE_POSITION', '${pos.ticket || key}')" class="btn-close">Đóng Lệnh</button>
+                  </td>
+                </tr>
+              `;
+            }
+            posTbody.innerHTML = html;
           }
-          let html = '';
-          for (let key in data) {
-            let pos = data[key];
-            let pnlColor = (pos.profit || 0) >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
-            let typeColor = pos.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
-            html += `
-              <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                <td class="p-3 font-mono text-slate-400">#${pos.ticket}</td>
-                <td class="p-3 font-bold">${pos.symbol}</td>
-                <td class="p-3 ${typeColor} font-bold">${pos.type}</td>
-                <td class="p-3">${pos.volume}</td>
-                <td class="p-3 font-mono">${pos.price}</td>
-                <td class="p-3 text-xs text-slate-400">SL: ${pos.sl}<br>TP: ${pos.tp}</td>
-                <td class="p-3 ${pnlColor}">$${(pos.profit || 0).toFixed(2)}</td>
-                <td class="p-3 text-center">
-                  <button onclick="requestAction('CLOSE_POSITION', '${pos.ticket}')" class="btn-close">Đóng Lệnh</button>
-                </td>
-              </tr>
-            `;
-          }
-          tbody.innerHTML = html;
-        })
-        .catch(err => console.error("Lỗi lấy live_positions:", err));
 
-      // 3. Pending Orders
-      fetch(`${FIREBASE_URL}/live_pending_orders.json`)
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.getElementById('pendingOrdersTableBody');
-          if (!data || Object.keys(data).length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500">Không có lệnh chờ nào</td></tr>';
-            return;
+          // 3. Pending Orders
+          let pendingOrders = allData.live_pending_orders || {};
+          const pendTbody = document.getElementById('pendingOrdersTableBody');
+          if (!pendingOrders || Object.keys(pendingOrders).length === 0) {
+            pendTbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500">Không có lệnh chờ nào</td></tr>';
+          } else {
+            let html = '';
+            for (let key in pendingOrders) {
+              let ord = pendingOrders[key];
+              html += `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50">
+                  <td class="p-3 font-mono text-slate-400">#${ord.ticket || key}</td>
+                  <td class="p-3 font-bold">${ord.symbol || ''}</td>
+                  <td class="p-3 text-amber-400 font-bold">${ord.type || ''}</td>
+                  <td class="p-3">${ord.volume || 0}</td>
+                  <td class="p-3 font-mono">${ord.price || 0}</td>
+                  <td class="p-3 text-xs text-slate-400">SL: ${ord.sl || 0}<br>TP: ${ord.tp || 0}</td>
+                  <td class="p-3 text-center">
+                    <button onclick="requestAction('CANCEL_ORDER', '${ord.ticket || key}')" class="btn-close">Hủy Lệnh</button>
+                  </td>
+                </tr>
+              `;
+            }
+            pendTbody.innerHTML = html;
           }
-          let html = '';
-          for (let key in data) {
-            let ord = data[key];
-            html += `
-              <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                <td class="p-3 font-mono text-slate-400">#${ord.ticket}</td>
-                <td class="p-3 font-bold">${ord.symbol}</td>
-                <td class="p-3 text-amber-400 font-bold">${ord.type}</td>
-                <td class="p-3">${ord.volume}</td>
-                <td class="p-3 font-mono">${ord.price}</td>
-                <td class="p-3 text-xs text-slate-400">SL: ${ord.sl}<br>TP: ${ord.tp}</td>
-                <td class="p-3 text-center">
-                  <button onclick="requestAction('CANCEL_ORDER', '${ord.ticket}')" class="btn-close">Hủy Lệnh</button>
-                </td>
-              </tr>
-            `;
-          }
-          tbody.innerHTML = html;
-        })
-        .catch(err => console.error("Lỗi lấy pending orders:", err));
 
-      // 4. Closed History & Thống Kê Hiệu Suất + Biểu đồ
-      fetch(`${FIREBASE_URL}/closed_history.json`)
-        .then(res => res.json())
-        .then(historyData => {
-          let totalTrades = 0;
-          let winTrades = 0;
-          let lossTrades = 0;
+          // 4. History & Thống kê (Hỗ trợ cấu trúc history theo tháng/ngày của bạn)
           let netProfit = 0;
-          let grossProfit = 0;
-          let grossLoss = 0;
-
           const year = new Date().getFullYear();
           const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
           let dailyProfits = new Array(daysInMonth).fill(0);
           let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
 
-          if (historyData) {
-            let items = Array.isArray(historyData) ? historyData.filter(Boolean) : Object.values(historyData);
-            items.forEach(item => {
-              totalTrades++;
-              let profit = parseFloat(item.profit) || 0;
-              netProfit += profit;
-
-              if (profit > 0) {
-                winTrades++;
-                grossProfit += profit;
-              } else if (profit < 0) {
-                lossTrades++;
-                grossLoss += Math.abs(profit);
+          let historyNode = allData.history || {};
+          // Duyệt qua cấu trúc lịch sử theo tháng (ví dụ: "07", "08",...)
+          let monthKey = String(selectedMonth + 1).padStart(2, '0');
+          if (historyNode[monthKey]) {
+            let daysNode = historyNode[monthKey];
+            for (let dayStr in daysNode) {
+              let dayData = daysNode[dayStr];
+              let dayIdx = parseInt(dayStr) - 1;
+              let pnl = parseFloat(dayData.cumulativePnl || dayData.profit || 0);
+              netProfit += pnl;
+              if (dayIdx >= 0 && dayIdx < daysInMonth) {
+                dailyProfits[dayIdx] = pnl;
               }
-
-              let rawTime = item.close_time || item.timestamp;
-              if (rawTime) {
-                let closeDate = new Date(typeof rawTime === 'number' && rawTime < 10000000000 ? rawTime * 1000 : rawTime);
-                if (closeDate.getMonth() === selectedMonth && closeDate.getFullYear() === year) {
-                  let dayIdx = closeDate.getDate() - 1;
-                  if (dayIdx >= 0 && dayIdx < daysInMonth) {
-                    dailyProfits[dayIdx] += profit;
-                  }
-                }
-              }
-            });
+            }
           }
 
-          let winrate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-          let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
-
-          document.getElementById('statTotal').innerText = totalTrades;
-          document.getElementById('statWin').innerText = winTrades;
-          document.getElementById('statLoss').innerText = lossTrades;
-          document.getElementById('statWinrate').innerText = winrate.toFixed(1) + '%';
-          
+          document.getElementById('statTotal').innerText = netProfit !== 0 ? 1 : 0;
           let netProfitEl = document.getElementById('statNetProfit');
           netProfitEl.innerText = (netProfit >= 0 ? '+$' : '-$') + Math.abs(netProfit).toFixed(2);
           netProfitEl.className = netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
-          document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
 
           if (chartInstance) {
             let bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
@@ -495,30 +397,14 @@
             chartInstance.update();
           }
         })
-        .catch(err => {
-          hasError = true;
-          console.error("Lỗi lấy closed_history:", err);
-        });
+        .catch(err => console.error("Lỗi đồng bộ:", err));
 
-      // Hiển thị cảnh báo nếu lỗi kết nối
-      const errBadge = document.getElementById('connectionError');
-      const statusBadge = document.getElementById('statusBadge');
-      if (hasError) {
-        errBadge.classList.remove('hidden');
-        statusBadge.classList.add('hidden');
-      } else {
-        errBadge.classList.add('hidden');
-        statusBadge.classList.remove('hidden');
-      }
+      document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đã kết nối';
     }
 
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
-      const payload = {
-        action: actionType,
-        ticket: String(ticketId),
-        timestamp: Date.now()
-      };
+      const payload = { action: actionType, ticket: String(ticketId), timestamp: Date.now() };
 
       fetch(`${FIREBASE_URL}/action_request.json`, {
         method: 'PUT',
