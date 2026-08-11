@@ -350,7 +350,6 @@
       listenRealtimeData();
     }
 
-    // Hàm đệ quy quét tìm tất cả lệnh giao dịch và nạp rút trong mọi cấu trúc Firebase
     function extractTradesAndTransactions(node, targetYear, targetMonth, dailyProfits, statsRef, txRef) {
       if (!node || typeof node !== 'object') return;
 
@@ -358,15 +357,12 @@
         let val = node[key];
         if (!val) continue;
 
-        // Nếu đối tượng chứa thông tin lợi nhuận/giao dịch
         if (typeof val === 'object') {
           let pnl = parseFloat(val.profit !== undefined ? val.profit : (val.cumulativePnl !== undefined ? val.cumulativePnl : NaN));
           let typeStr = String(val.type || val.action || val.comment || '').toUpperCase();
           let amount = parseFloat(val.amount || val.balance_change || 0);
 
-          // Kiểm tra giao dịch Nạp / Rút tiền
           if (typeStr.includes('DEPOSIT') || typeStr.includes('IN') || (amount > 0 && (typeStr.includes('BALANCE') || typeStr === ''))) {
-            // Kiểm tra thời gian nếu có trường time/timestamp
             let timeVal = val.time || val.timestamp || val.date;
             if (timeVal) {
               let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
@@ -389,7 +385,6 @@
             }
           }
 
-          // Nếu đây là một lệnh giao dịch đã đóng có số profit hợp lệ
           if (!isNaN(pnl) && (typeStr === 'BUY' || typeStr === 'SELL' || typeStr.includes('CLOSE') || val.profit !== undefined || val.ticket !== undefined)) {
             let timeVal = val.close_time || val.time || val.timestamp || val.date;
             let tradeDate = null;
@@ -403,13 +398,10 @@
               }
             }
 
-            // Nếu khớp tháng hoặc key của node chính là ngày/tháng
             if (!tradeDate && (key === String(targetMonth + 1) || key === String(targetMonth + 1).padStart(2, '0'))) {
-              // Đi sâu vào trong nếu key là tháng
               extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
               continue;
             } else if (!tradeDate && !isNaN(parseInt(key)) && parseInt(key) >= 1 && parseInt(key) <= 31) {
-              // Key có thể là ngày trong tháng
               tradeDate = parseInt(key);
             }
 
@@ -427,7 +419,6 @@
               dailyProfits[tradeDate - 1] += pnl;
             }
           } else {
-            // Tiếp tục đệ quy vào các nhánh con bên trong
             extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
           }
         }
@@ -440,13 +431,11 @@
         .then(allData => {
           if (!allData) return;
 
-          // 1. Account Info
           let acc = allData.account || {};
           document.getElementById('balanceVal').innerText = `$${parseFloat(acc.balance || 0).toFixed(2)}`;
           document.getElementById('equityVal').innerText = `$${parseFloat(acc.equity || 0).toFixed(2)}`;
           document.getElementById('marginVal').innerText = `$${parseFloat(acc.margin || 0).toFixed(2)}`;
 
-          // 2. Live Positions
           let positions = allData.live_positions || {};
           currentPositionsData = positions;
           updateLeverageStatus();
@@ -487,7 +476,6 @@
             posTbody.innerHTML = html;
           }
 
-          // 3. Live Pending Orders
           let pendingOrders = allData.live_pending_orders || {};
           const pendTbody = document.getElementById('pendingOrdersTableBody');
           if (Object.keys(pendingOrders).length === 0) {
@@ -521,7 +509,6 @@
             pendTbody.innerHTML = html;
           }
 
-          // 4. Thống kê Hiệu suất, Lịch sử & Nạp/Rút
           const year = new Date().getFullYear();
           const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
           let dailyProfits = new Array(daysInMonth).fill(0);
@@ -530,7 +517,6 @@
           let stats = { total: 0, win: 0, loss: 0, netProfit: 0, grossProfit: 0, grossLoss: 0 };
           let txData = { deposit: parseFloat(acc.deposit || 0), withdraw: parseFloat(acc.withdraw || 0) };
 
-          // Quét toàn bộ các nhánh dữ liệu lịch sử trên Firebase
           if (allData.history) {
             extractTradesAndTransactions(allData.history, year, selectedMonth, dailyProfits, stats, txData);
           }
