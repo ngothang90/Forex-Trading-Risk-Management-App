@@ -1,581 +1,420 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FOREX DISCIPLINE GATEKEEPER</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { background-color: #0b1329; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .card { background-color: #131f37; border: 1px solid #1e2d4a; border-radius: 0.75rem; }
-    .input-field { background-color: #0b1329; border: 1px solid #1e2d4a; color: white; border-radius: 0.375rem; padding: 0.6rem; width: 100%; }
-    .input-field:focus { outline: none; border-color: #3b82f6; }
-    .btn-close { background-color: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
-    .btn-close:hover { background-color: #dc2626; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex Discipline Gatekeeper Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-
-  <!-- 1. HEADER & THÔNG TIN TÀI KHOẢN -->
-  <div class="card p-5 flex flex-wrap justify-between items-center gap-4">
-    <div>
-      <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
-        🛡️ FOREX DISCIPLINE GATEKEEPER
-      </h1>
-    </div>
-    <div>
-      <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối
-      </span>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Số Dư (Balance)</div>
-      <div id="balanceVal" class="text-2xl font-bold text-emerald-400 mt-1">$0.00</div>
-    </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Tài Sản (Equity)</div>
-      <div id="equityVal" class="text-2xl font-bold text-blue-400 mt-1">$0.00</div>
-    </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Ký Quỹ (Margin)</div>
-      <div id="marginVal" class="text-2xl font-bold text-purple-400 mt-1">$0.00</div>
-    </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Tổng Nạp (Deposit)</div>
-      <div id="depositVal" class="text-2xl font-bold text-cyan-400 mt-1">$0.00</div>
-    </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Tổng Rút (Withdraw)</div>
-      <div id="withdrawVal" class="text-2xl font-bold text-amber-400 mt-1">$0.00</div>
-    </div>
-  </div>
-
-  <!-- 1.1. BẢNG THỐNG KÊ HIỆU SUẤT GIAO DỊCH -->
-  <div class="card p-5">
-    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">
-      📊 Thống Kê Hiệu Suất Giao Dịch
-    </h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Tổng Lệnh Vào</div>
-        <div id="statTotal" class="text-lg font-bold text-white mt-1">0</div>
-      </div>
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Lệnh Thắng</div>
-        <div id="statWin" class="text-lg font-bold text-emerald-400 mt-1">0</div>
-      </div>
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Lệnh Thua</div>
-        <div id="statLoss" class="text-lg font-bold text-rose-400 mt-1">0</div>
-      </div>
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Tỉ Lệ Thắng (Winrate)</div>
-        <div id="statWinrate" class="text-lg font-bold text-amber-400 mt-1">0.0%</div>
-      </div>
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Tổng Lợi Nhuận</div>
-        <div id="statNetProfit" class="text-lg font-bold text-emerald-400 mt-1">$0.00</div>
-      </div>
-      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div class="text-xs text-slate-400">Hệ Số Lợi Nhuận (PF)</div>
-        <div id="statProfitFactor" class="text-lg font-bold text-blue-400 mt-1">0.00</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. ĐẶT LỆNH KỶ LUẬT (RISK FILTER) -->
-  <div class="card p-6 space-y-4">
-    <h2 class="text-md font-bold text-rose-400 flex items-center gap-2">
-      🎯 Đặt Lệnh Kỷ Luật (Risk Filter)
-    </h2>
-    <form id="orderForm" onsubmit="handlePlaceOrder(event)" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Sản phẩm giao dịch</label>
-          <select id="symbol" class="input-field font-bold text-amber-400" onchange="updateLeverageStatus()">
-            <option value="XAUUSD">XAUUSD (Vàng)</option>
-            <option value="BTCUSD">BTCUSD (Bitcoin)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Loại lệnh (Chỉ Limit)</label>
-          <select id="type" class="input-field font-bold text-amber-400">
-            <option value="BUY_LIMIT">BUY LIMIT</option>
-            <option value="SELL_LIMIT">SELL LIMIT</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Khối lượng (Lot)</label>
-          <input type="number" id="volume" value="0.01" step="0.01" min="0.01" required class="input-field" oninput="updateLeverageStatus()">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Giá đặt lệnh (Price)</label>
-          <input type="number" id="price" step="any" placeholder="Nhập giá Limit" required class="input-field" oninput="updateLeverageStatus()">
-        </div>
-        <div>
-          <label class="block text-xs text-rose-400 mb-1">Stop Loss (Bắt buộc *)</label>
-          <input type="number" id="sl" step="any" placeholder="Giá Cắt Lỗ" required class="input-field border-rose-500/30">
-        </div>
-        <div>
-          <label class="block text-xs text-emerald-400 mb-1">Take Profit (Bắt buộc *)</label>
-          <input type="number" id="tp" step="any" placeholder="Giá Chốt Lời" required class="input-field border-emerald-500/30">
-        </div>
-      </div>
-
-      <div class="flex justify-between items-center text-xs bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div>Đòn bẩy tổng dự kiến: <span id="leverageVal" class="font-bold text-white">1:0.0</span></div>
-        <div id="safetyBadge" class="text-emerald-400 font-semibold">✓ An toàn (&lt;= 1:10)</div>
-      </div>
-
-      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
-        ĐẶT LỆNH
-      </button>
-    </form>
-  </div>
-
-  <!-- 3. BẢNG VỊ THẾ ĐANG CHẠY -->
-  <div class="card p-6">
-    <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">
-      ⚡ Vị Thế Đang Chạy (Open Positions)
-    </h2>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-slate-300">
-        <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
-          <tr>
-            <th class="p-3">Ticket</th>
-            <th class="p-3">Sản Phẩm</th>
-            <th class="p-3">Loại</th>
-            <th class="p-3">Volume</th>
-            <th class="p-3">Giá Vào</th>
-            <th class="p-3">SL / TP</th>
-            <th class="p-3">PnL ($)</th>
-            <th class="p-3 text-center">Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody id="positionsTableBody">
-          <tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 4. BẢNG LỆNH ĐANG CHỜ KHỚP -->
-  <div class="card p-6">
-    <h2 class="text-md font-bold text-amber-400 mb-4 flex items-center gap-2">
-      ⏳ Lệnh Đang Chờ Khớp (Pending Orders)
-    </h2>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-slate-300">
-        <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
-          <tr>
-            <th class="p-3">Ticket</th>
-            <th class="p-3">Sản Phẩm</th>
-            <th class="p-3">Loại Lệnh</th>
-            <th class="p-3">Volume</th>
-            <th class="p-3">Giá Đặt</th>
-            <th class="p-3">SL / TP</th>
-            <th class="p-3 text-center">Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody id="pendingOrdersTableBody">
-          <tr><td colspan="7" class="p-4 text-center text-slate-500">Không có lệnh chờ nào</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 5. BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY THEO THÁNG -->
-  <div class="card p-6 space-y-4">
-    <div class="flex flex-wrap justify-between items-center gap-4">
-      <div>
-        <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">
-          📈 Biểu Đồ Lợi Nhuận Hàng Ngày (Theo Tháng)
-        </h2>
-        <p class="text-xs text-slate-400 mt-0.5">Theo dõi lãi/lỗ từng ngày trong tháng (Xanh: Lãi, Đỏ: Lỗ)</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
-          <option value="0">Tháng 1</option>
-          <option value="1">Tháng 2</option>
-          <option value="2">Tháng 3</option>
-          <option value="3">Tháng 4</option>
-          <option value="4">Tháng 5</option>
-          <option value="5">Tháng 6</option>
-          <option value="6">Tháng 7</option>
-          <option value="7">Tháng 8</option>
-          <option value="8">Tháng 9</option>
-          <option value="9">Tháng 10</option>
-          <option value="10">Tháng 11</option>
-          <option value="11">Tháng 12</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="h-[450px] w-full pt-4">
-      <canvas id="dailyProfitChart"></canvas>
-    </div>
-  </div>
-
-  <script>
-    const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
-    let chartInstance = null;
-    let currentPositionsData = {}; 
-    let selectedMonth = new Date().getMonth(); 
-    document.getElementById('selectMonth').value = selectedMonth;
-
-    function getContractSize(symbol) {
-      if (symbol === 'XAUUSD') return 100;      
-      if (symbol === 'BTCUSD') return 1;        
-      return 1;
-    }
-
-    function calculateTotalLeverage() {
-      const balText = document.getElementById('balanceVal').innerText.replace('$', '').replace(',', '');
-      const balance = parseFloat(balText) || 0;
-      if (balance <= 0) return 0;
-
-      let totalNotional = 0;
-      for (let key in currentPositionsData) {
-        let pos = currentPositionsData[key];
-        let cSize = getContractSize(pos.symbol || '');
-        let vol = parseFloat(pos.volume || 0);
-        let pr = parseFloat(pos.price || 0);
-        totalNotional += (vol * cSize * pr);
-      }
-
-      const vol = parseFloat(document.getElementById('volume').value) || 0;
-      const price = parseFloat(document.getElementById('price').value) || 0;
-      const symbol = document.getElementById('symbol').value;
-      const newOrderNotional = vol * getContractSize(symbol) * price;
-
-      totalNotional += newOrderNotional;
-      return totalNotional / balance;
-    }
-
-    function updateLeverageStatus() {
-      const totalLev = calculateTotalLeverage();
-      document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
-
-      const badge = document.getElementById('safetyBadge');
-      const submitBtn = document.getElementById('submitBtn');
-
-      if (totalLev > 10) {
-        badge.className = "text-rose-500 font-bold flex items-center gap-1 animate-pulse";
-        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10 (CẤM ĐẶT LỆNH)";
+<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
         
-        submitBtn.disabled = true;
-        submitBtn.className = "w-full bg-rose-950 text-rose-500 font-bold py-3 rounded-lg border border-rose-800 cursor-not-allowed opacity-80";
-        submitBtn.innerText = "⛔ BỊ KHÓA: TỔNG ĐÒN BẨY VƯỢT QUÁ 1:10";
-      } else {
-        badge.className = "text-emerald-400 font-semibold";
-        badge.innerText = "✓ An toàn (<= 1:10)";
-        
-        submitBtn.disabled = false;
-        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
-        submitBtn.innerText = "ĐẶT LỆNH";
-      }
-    }
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-600/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wider text-white uppercase">Forex Discipline Gatekeeper</h1>
+                    <p class="text-xs text-gray-400 mt-0.5">Hệ thống Quản trị Kỷ luật & Giao dịch Thông minh</p>
+                </div>
+            </div>
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                <div id="connection-status" class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs font-semibold text-emerald-400">EA MT5 Đã Kết Nối</span>
+                </div>
+            </div>
+        </div>
 
-    function handlePlaceOrder(e) {
-      e.preventDefault();
+        <!-- Hàng 1: Thẻ Tài khoản & Nạp rút (Lọc từ 2026/8/7) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md">
+                <span class="text-xs font-medium text-gray-400">Số Dư (Balance)</span>
+                <p id="acc-balance" class="text-xl font-bold mt-1 text-emerald-400">$0.00</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md">
+                <span class="text-xs font-medium text-gray-400">Tài Sản (Equity)</span>
+                <p id="acc-equity" class="text-xl font-bold mt-1 text-sky-400">$0.00</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md">
+                <span class="text-xs font-medium text-gray-400">Ký Quỹ (Margin)</span>
+                <p id="acc-margin" class="text-xl font-bold mt-1 text-purple-400">$0.00</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md">
+                <span class="text-xs font-medium text-gray-400">Tổng Nạp (Deposit)</span>
+                <p id="acc-deposit" class="text-xl font-bold mt-1 text-blue-400">$0.00</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md col-span-2 sm:col-span-1">
+                <span class="text-xs font-medium text-gray-400">Tổng Rút (Withdraw)</span>
+                <p id="acc-withdraw" class="text-xl font-bold mt-1 text-amber-400">$0.00</p>
+            </div>
+        </div>
 
-      const totalLev = calculateTotalLeverage();
-      if (totalLev > 10) {
-        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).\n\nVui lòng giảm Volume hoặc đóng bớt các vị thế đang chạy!`);
-        return;
-      }
+        <!-- Hàng 2: Thống Kê Hiệu Suất Giao Dịch (Lọc từ 2026/8/7) -->
+        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl mb-6">
+            <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Thống Kê Hiệu Suất Giao Dịch (Từ 07/08/2026)
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Tổng Lệnh Vào</span>
+                    <p id="stat-total-trades" class="text-lg font-bold mt-1 text-white">0</p>
+                </div>
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Lệnh Thắng</span>
+                    <p id="stat-wins" class="text-lg font-bold mt-1 text-emerald-400">0</p>
+                </div>
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Lệnh Thua</span>
+                    <p id="stat-losses" class="text-lg font-bold mt-1 text-rose-400">0</p>
+                </div>
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Tỷ Lệ Thắng (Winrate)</span>
+                    <p id="stat-winrate" class="text-lg font-bold mt-1 text-amber-400">0.0%</p>
+                </div>
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Tổng Lợi Nhận (Net Profit)</span>
+                    <p id="stat-net-profit" class="text-lg font-bold mt-1 text-white">+$0.00</p>
+                </div>
+                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
+                    <span class="text-xs text-gray-400 block">Hệ Số Lợi Nhận (PF)</span>
+                    <p id="stat-profit-factor" class="text-lg font-bold mt-1 text-sky-400">0.00</p>
+                </div>
+            </div>
+        </div>
 
-      const payload = {
-        symbol: document.getElementById('symbol').value,
-        type: document.getElementById('type').value,
-        volume: parseFloat(document.getElementById('volume').value),
-        price: parseFloat(document.getElementById('price').value),
-        s1: parseFloat(document.getElementById('sl').value),
-        tp: parseFloat(document.getElementById('tp').value),
-        timestamp: Date.now()
-      };
+        <!-- Hàng 3: Bảng Quản Lý Vị Thế & Lệnh Chờ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Vị thế đang chạy -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
+                <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Vị Thế Đang Chạy (Live Positions)
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-gray-950 text-gray-400 uppercase">
+                            <tr>
+                                <th class="p-2.5">Ticket</th>
+                                <th class="p-2.5">Sản Phẩm</th>
+                                <th class="p-2.5">Loại</th>
+                                <th class="p-2.5">Volume</th>
+                                <th class="p-2.5">Giá Vào</th>
+                                <th class="p-2.5">Lợi Nhuận</th>
+                                <th class="p-2.5 text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-table-body" class="divide-y divide-gray-800">
+                            <tr><td colspan="7" class="text-center py-4 text-gray-500">Không có vị thế đang chạy</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-      fetch(`${FIREBASE_URL}/pending_order.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(() => alert("✅ Đã đặt lệnh thành công!"))
-      .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
-    }
+            <!-- Lệnh đang chờ khớp -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
+                <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lệnh Đang Chờ Khớp (Pending Orders)
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-gray-950 text-gray-400 uppercase">
+                            <tr>
+                                <th class="p-2.5">Ticket</th>
+                                <th class="p-2.5">Sản Phẩm</th>
+                                <th class="p-2.5">Loại</th>
+                                <th class="p-2.5">Volume</th>
+                                <th class="p-2.5">Giá Đặt</th>
+                                <th class="p-2.5">SL / TP</th>
+                                <th class="p-2.5 text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table-body" class="divide-y divide-gray-800">
+                            <tr><td colspan="7" class="text-center py-4 text-gray-500">Không có lệnh chờ nào</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    function initChart() {
-      const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+        <!-- Hàng 4: Form Đặt Lệnh Kỷ Luật (Risk Filter) -->
+        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl mb-6">
+            <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Đặt Lệnh Kỷ Luật (Risk Filter)
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Sản phẩm giao dịch</label>
+                    <select id="order-symbol" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="XAUUSD">XAUUSD (Vàng)</option>
+                        <option value="BTCUSD">BTCUSD</option>
+                        <option value="EURUSD">EURUSD</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Loại lệnh (Chỉ Limit)</label>
+                    <select id="order-type" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="BUY_LIMIT">BUY LIMIT</option>
+                        <option value="SELL_LIMIT">SELL LIMIT</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Khối lượng (Lot)</label>
+                    <input type="number" id="order-volume" value="0.01" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Giá đặt lệnh (Price)</label>
+                    <input type="number" id="order-price" placeholder="Nhập giá Limit" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Stop Loss (Bắt buộc)</label>
+                    <input type="number" id="order-sl" placeholder="Giá Cắt Lỗ" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Take Profit (Bắt buộc)</label>
+                    <input type="number" id="order-tp" placeholder="Giá Chốt Lời" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between items-center bg-gray-950 p-3.5 rounded-xl border border-gray-800">
+                <span id="risk-status" class="text-xs text-emerald-400 font-medium mb-2 sm:mb-0">✓ Đòn bẩy an toàn (&lt;= 1:10)</span>
+                <button onclick="sendPendingOrder()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/30">Gửi Lệnh Kỷ Luật</button>
+            </div>
+        </div>
 
-      chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Lợi Nhuận Ngày ($)',
-            data: [],
-            backgroundColor: [],
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: { 
-              grid: { color: '#1e2d4a' }, 
-              ticks: { color: '#64748b' } 
-            },
-            x: { 
-              grid: { display: false }, 
-              ticks: { color: '#64748b', maxTicksLimit: 15 } 
-            }
-          },
-          plugins: {
-            legend: { display: false }
-          }
+        <!-- Hàng 5: Biểu đồ Lợi Nhuận Hàng Ngày -->
+        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
+            <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                Biểu Đồ Lợi Nhuận Hàng Ngày
+            </h2>
+            <div class="relative h-72 w-full">
+                <canvas id="dailyProfitChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Xử lý toàn bộ logic -->
+    <script>
+        const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const START_DATE_FILTER = Math.floor(new Date('2026-08-07T00:00:00').getTime() / 1000);
+
+        let profitChart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+            profitChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Lợi nhuận (USD)', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
-      });
-    }
 
-    function changeMonth() {
-      selectedMonth = parseInt(document.getElementById('selectMonth').value);
-      listenRealtimeData();
-    }
+        async function fetchAllData() {
+            try {
+                const [accRes, posRes, ordRes, histRes] = await Promise.all([
+                    fetch(`${FIREBASE_URL}/account.json`),
+                    fetch(`${FIREBASE_URL}/live_positions.json`),
+                    fetch(`${FIREBASE_URL}/live_pending_orders.json`),
+                    fetch(`${FIREBASE_URL}/closed_history.json`)
+                ]);
 
-    function extractTradesAndTransactions(node, targetYear, targetMonth, dailyProfits, statsRef, txRef) {
-      if (!node || typeof node !== 'object') return;
+                const accountData = await accRes.json() || {};
+                const positionsData = await posRes.json() || {};
+                const pendingData = await ordRes.json() || {};
+                const historyData = await histRes.json() || {};
 
-      for (let key in node) {
-        let val = node[key];
-        if (!val) continue;
-
-        if (typeof val === 'object') {
-          let pnl = parseFloat(val.profit !== undefined ? val.profit : (val.cumulativePnl !== undefined ? val.cumulativePnl : NaN));
-          let typeStr = String(val.type || val.action || val.comment || '').toUpperCase();
-          let amount = parseFloat(val.amount || val.balance_change || 0);
-
-          if (typeStr.includes('DEPOSIT') || typeStr.includes('IN') || (amount > 0 && (typeStr.includes('BALANCE') || typeStr === ''))) {
-            let timeVal = val.time || val.timestamp || val.date;
-            if (timeVal) {
-              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
-              if (!isNaN(d.getTime())) {
-                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
-                  if (amount > 0) txRef.deposit += amount;
-                }
-              }
+                updateAccountAndStatsUI(accountData, historyData);
+                updatePositionsUI(positionsData);
+                updatePendingUI(pendingData);
+            } catch (err) {
+                console.error("Lỗi đồng bộ dữ liệu Firebase:", err);
             }
-          }
-          if (typeStr.includes('WITHDRAW') || typeStr.includes('OUT')) {
-            let timeVal = val.time || val.timestamp || val.date;
-            if (timeVal) {
-              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
-              if (!isNaN(d.getTime())) {
-                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
-                  if (amount > 0) txRef.withdraw += amount;
-                }
-              }
-            }
-          }
-
-          if (!isNaN(pnl) && (typeStr === 'BUY' || typeStr === 'SELL' || typeStr.includes('CLOSE') || val.profit !== undefined || val.ticket !== undefined)) {
-            let timeVal = val.close_time || val.time || val.timestamp || val.date;
-            let tradeDate = null;
-
-            if (timeVal) {
-              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
-              if (!isNaN(d.getTime())) {
-                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
-                  tradeDate = d.getDate();
-                }
-              }
-            }
-
-            if (!tradeDate && (key === String(targetMonth + 1) || key === String(targetMonth + 1).padStart(2, '0'))) {
-              extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
-              continue;
-            } else if (!tradeDate && !isNaN(parseInt(key)) && parseInt(key) >= 1 && parseInt(key) <= 31) {
-              tradeDate = parseInt(key);
-            }
-
-            statsRef.total++;
-            statsRef.netProfit += pnl;
-            if (pnl > 0) {
-              statsRef.win++;
-              statsRef.grossProfit += pnl;
-            } else if (pnl < 0) {
-              statsRef.loss++;
-              statsRef.grossLoss += Math.abs(pnl);
-            }
-
-            if (tradeDate && tradeDate >= 1 && tradeDate <= dailyProfits.length) {
-              dailyProfits[tradeDate - 1] += pnl;
-            }
-          } else {
-            extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
-          }
         }
-      }
-    }
 
-    function listenRealtimeData() {
-      fetch(`${FIREBASE_URL}/.json`)
-        .then(res => res.json())
-        .then(allData => {
-          if (!allData) return;
+        function updateAccountAndStatsUI(accountData, historyData) {
+            // Hiển thị balance, equity, margin chung từ thông tin tài khoản
+            document.getElementById('acc-balance').innerText = `$${(accountData.balance || 0).toFixed(2)}`;
+            document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
+            document.getElementById('acc-margin').innerText = `$${(accountData.margin || 0).toFixed(2)}`;
 
-          let acc = allData.account || {};
-          document.getElementById('balanceVal').innerText = `$${parseFloat(acc.balance || 0).toFixed(2)}`;
-          document.getElementById('equityVal').innerText = `$${parseFloat(acc.equity || 0).toFixed(2)}`;
-          document.getElementById('marginVal').innerText = `$${parseFloat(acc.margin || 0).toFixed(2)}`;
+            let filteredDeposit = 0;
+            let filteredWithdraw = 0;
+            let totalNetProfit = 0;
+            let wins = 0;
+            let losses = 0;
+            let grossProfit = 0;
+            let grossLoss = 0;
+            let dailyProfits = {};
 
-          let positions = allData.live_positions || {};
-          currentPositionsData = positions;
-          updateLeverageStatus();
+            if (historyData) {
+                Object.values(historyData).forEach(deal => {
+                    const closeTime = deal.close_time || 0;
+                    
+                    // Lọc dữ liệu chuẩn từ ngày 2026/8/7 trở đi cho toàn bộ các chỉ số Nạp, Rút, Lợi nhuận, Winrate, PF
+                    if (closeTime >= START_DATE_FILTER) {
+                        const profit = deal.profit || 0;
+                        const dealType = deal.type || "";
 
-          const posTbody = document.getElementById('positionsTableBody');
-          if (Object.keys(positions).length === 0) {
-            posTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>';
-          } else {
-            let html = '';
-            for (let key in positions) {
-              let pos = positions[key];
-              let ticket = pos.ticket || key;
-              let symbol = pos.symbol || '';
-              let type = pos.type || '';
-              let volume = pos.volume || 0;
-              let price = pos.price || 0;
-              let sl = pos.s1 !== undefined ? pos.s1 : (pos.sl !== undefined ? pos.sl : 0);
-              let tp = pos.tp || 0;
-              let profit = parseFloat(pos.profit || 0);
+                        // 1. Phân loại Nạp / Rút từ các giao dịch Balance (hoặc profit tương ứng nạp/rút từ 07/08/2026)
+                        if (dealType === "BALANCE" || deal.is_balance || (deal.order_id == 0 && profit != 0)) {
+                            if (profit > 0) filteredDeposit += profit;
+                            else if (profit < 0) filteredWithdraw += Math.abs(profit);
+                        } else {
+                            // 2. Các lệnh giao dịch thông thường
+                            totalNetProfit += profit;
 
-              let pnlColor = profit >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
-              let typeColor = type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
-              html += `
-                <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                  <td class="p-3 font-mono text-slate-400">#${ticket}</td>
-                  <td class="p-3 font-bold">${symbol}</td>
-                  <td class="p-3 ${typeColor} font-bold">${type}</td>
-                  <td class="p-3">${volume}</td>
-                  <td class="p-3 font-mono">${price}</td>
-                  <td class="p-3 text-xs text-slate-400">SL: ${sl}<br>TP: ${tp}</td>
-                  <td class="p-3 ${pnlColor}">$${profit.toFixed(2)}</td>
-                  <td class="p-3 text-center">
-                    <button onclick="requestAction('CLOSE_POSITION', '${ticket}')" class="btn-close">Đóng Lệnh</button>
-                  </td>
-                </tr>
-              `;
+                            if (profit > 0) {
+                                wins++;
+                                grossProfit += profit;
+                            } else if (profit < 0) {
+                                losses++;
+                                grossLoss += Math.abs(profit);
+                            }
+
+                            // 3. Biểu đồ: Tổng số tiền lệnh lãi - tổng số tiền lệnh mất trong ngày (không gồm nạp/rút)
+                            const dateStr = new Date(closeTime * 1000).toISOString().split('T')[0];
+                            if (!dailyProfits[dateStr]) dailyProfits[dateStr] = 0;
+                            dailyProfits[dateStr] += profit;
+                        }
+                    }
+                });
             }
-            posTbody.innerHTML = html;
-          }
 
-          let pendingOrders = allData.live_pending_orders || {};
-          const pendTbody = document.getElementById('pendingOrdersTableBody');
-          if (Object.keys(pendingOrders).length === 0) {
-            pendTbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500">Không có lệnh chờ nào</td></tr>';
-          } else {
-            let html = '';
-            for (let key in pendingOrders) {
-              let ord = pendingOrders[key];
-              let ticket = ord.ticket || key;
-              let symbol = ord.symbol || '';
-              let type = ord.type || '';
-              let volume = ord.volume || 0;
-              let price = ord.price || 0;
-              let sl = ord.s1 !== undefined ? ord.s1 : (ord.sl !== undefined ? ord.sl : 0);
-              let tp = ord.tp || 0;
+            // Gán giá trị Tổng Nạp & Tổng Rút lọc từ 2026/8/7
+            document.getElementById('acc-deposit').innerText = `$${filteredDeposit.toFixed(2)}`;
+            document.getElementById('acc-withdraw').innerText = `$${filteredWithdraw.toFixed(2)}`;
 
-              html += `
-                <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                  <td class="p-3 font-mono text-slate-400">#${ticket}</td>
-                  <td class="p-3 font-bold">${symbol}</td>
-                  <td class="p-3 text-amber-400 font-bold">${type}</td>
-                  <td class="p-3">${volume}</td>
-                  <td class="p-3 font-mono">${price}</td>
-                  <td class="p-3 text-xs text-slate-400">SL: ${sl}<br>TP: ${tp}</td>
-                  <td class="p-3 text-center">
-                    <button onclick="requestAction('CANCEL_ORDER', '${ticket}')" class="btn-close">Hủy Lệnh</button>
-                  </td>
-                </tr>
-              `;
+            // Gán giá trị Thống kê hiệu suất giao dịch lọc từ 2026/8/7
+            const totalTrades = wins + losses;
+            const winrate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+            const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
+
+            document.getElementById('stat-total-trades').innerText = totalTrades;
+            document.getElementById('stat-wins').innerText = wins;
+            document.getElementById('stat-losses').innerText = losses;
+            document.getElementById('stat-winrate').innerText = winrate.toFixed(1) + '%';
+            
+            const netProfitEl = document.getElementById('stat-net-profit');
+            netProfitEl.innerText = (totalNetProfit >= 0 ? '+' : '') + '$' + totalNetProfit.toFixed(2);
+            netProfitEl.className = `text-lg font-bold mt-1 ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('stat-profit-factor').innerText = profitFactor.toFixed(2);
+
+            // Cập nhật biểu đồ hàng ngày
+            const sortedDates = Object.keys(dailyProfits).sort();
+            const sortedValues = sortedDates.map(d => dailyProfits[d]);
+            
+            profitChart.data.labels = sortedDates;
+            profitChart.data.datasets[0].data = sortedValues;
+            profitChart.data.datasets[0].backgroundColor = sortedValues.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)');
+            profitChart.data.datasets[0].borderColor = sortedValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+            profitChart.update();
+        }
+
+        function updatePositionsUI(positions) {
+            const tbody = document.getElementById('positions-table-body');
+            tbody.innerHTML = '';
+            const keys = Object.keys(positions);
+            if (keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Không có vị thế đang chạy</td></tr>`;
+                return;
             }
-            pendTbody.innerHTML = html;
-          }
+            keys.forEach(key => {
+                const p = positions[key];
+                const profitColor = p.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
+                        <td class="p-2.5 font-mono">#${p.ticket}</td>
+                        <td class="p-2.5 font-bold">${p.symbol}</td>
+                        <td class="p-2.5 font-semibold ${p.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${p.type}</td>
+                        <td class="p-2.5">${p.volume}</td>
+                        <td class="p-2.5">${p.price}</td>
+                        <td class="p-2.5 font-bold ${profitColor}">$${p.profit.toFixed(2)}</td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="closePosition('${p.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-2.5 py-1 rounded-lg text-xs transition border border-rose-500/30">Đóng Lệnh</button>
+                        </td>
+                    </tr>`;
+            });
+        }
 
-          const year = new Date().getFullYear();
-          const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
-          let dailyProfits = new Array(daysInMonth).fill(0);
-          let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
+        function updatePendingUI(orders) {
+            const tbody = document.getElementById('pending-table-body');
+            tbody.innerHTML = '';
+            const keys = Object.keys(orders);
+            if (keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Không có lệnh chờ nào</td></tr>`;
+                return;
+            }
+            keys.forEach(key => {
+                const o = orders[key];
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
+                        <td class="p-2.5 font-mono">#${o.ticket}</td>
+                        <td class="p-2.5 font-bold">${o.symbol}</td>
+                        <td class="p-2.5 font-semibold text-amber-400">${o.type}</td>
+                        <td class="p-2.5">${o.volume}</td>
+                        <td class="p-2.5">${o.price}</td>
+                        <td class="p-2.5 text-gray-400">SL: ${o.sl}<br>TP: ${o.tp}</td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="cancelOrder('${o.ticket}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg text-xs transition">Hủy Lệnh</button>
+                        </td>
+                    </tr>`;
+            });
+        }
 
-          let stats = { total: 0, win: 0, loss: 0, netProfit: 0, grossProfit: 0, grossLoss: 0 };
-          let txData = { deposit: parseFloat(acc.deposit || 0), withdraw: parseFloat(acc.withdraw || 0) };
+        async function sendPendingOrder() {
+            const data = {
+                symbol: document.getElementById('order-symbol').value,
+                type: document.getElementById('order-type').value,
+                volume: parseFloat(document.getElementById('order-volume').value),
+                price: parseFloat(document.getElementById('order-price').value),
+                sl: parseFloat(document.getElementById('order-sl').value),
+                tp: parseFloat(document.getElementById('order-tp').value),
+                timestamp: Date.now()
+            };
+            await fetch(`${FIREBASE_URL}/pending_order.json`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            alert("Đã gửi yêu cầu đặt lệnh xuống MT5!");
+        }
 
-          if (allData.history) {
-            extractTradesAndTransactions(allData.history, year, selectedMonth, dailyProfits, stats, txData);
-          }
-          if (allData.closed_history) {
-            extractTradesAndTransactions(allData.closed_history, year, selectedMonth, dailyProfits, stats, txData);
-          }
+        async function cancelOrder(ticket) {
+            const data = { action: 'CANCEL_ORDER', ticket: ticket, timestamp: Date.now() };
+            await fetch(`${FIREBASE_URL}/action_request.json`, { method: 'PUT', body: JSON.stringify(data) });
+            alert(`Đã gửi yêu cầu hủy lệnh #${ticket}`);
+        }
 
-          let winrate = stats.total > 0 ? (stats.win / stats.total) * 100 : 0;
-          let profitFactor = stats.grossLoss > 0 ? (stats.grossProfit / stats.grossLoss) : (stats.grossProfit > 0 ? stats.grossProfit : 0);
+        async function closePosition(ticket) {
+            const data = { action: 'CLOSE_POSITION', ticket: ticket, timestamp: Date.now() };
+            await fetch(`${FIREBASE_URL}/action_request.json`, { method: 'PUT', body: JSON.stringify(data) });
+            alert(`Đã gửi yêu cầu đóng vị thế #${ticket}`);
+        }
 
-          document.getElementById('statTotal').innerText = stats.total;
-          document.getElementById('statWin').innerText = stats.win;
-          document.getElementById('statLoss').innerText = stats.loss;
-          document.getElementById('statWinrate').innerText = winrate.toFixed(1) + '%';
-          
-          let netProfitEl = document.getElementById('statNetProfit');
-          netProfitEl.innerText = (stats.netProfit >= 0 ? '+$' : '-$') + Math.abs(stats.netProfit).toFixed(2);
-          netProfitEl.className = stats.netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
-
-          document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
-          document.getElementById('depositVal').innerText = `$${txData.deposit.toFixed(2)}`;
-          document.getElementById('withdrawVal').innerText = `$${txData.withdraw.toFixed(2)}`;
-
-          if (chartInstance) {
-            let bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
-            chartInstance.data.labels = labels;
-            chartInstance.data.datasets[0].data = dailyProfits;
-            chartInstance.data.datasets[0].backgroundColor = bgColors;
-            chartInstance.update();
-          }
-        })
-        .catch(err => console.error("Lỗi đồng bộ dữ liệu:", err));
-
-      document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối';
-    }
-
-    function requestAction(actionType, ticketId) {
-      if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
-
-      const payload = {
-        action: actionType,
-        ticket: String(ticketId),
-        timestamp: Date.now()
-      };
-
-      fetch(`${FIREBASE_URL}/action_request.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(() => alert(`✅ Đã gửi yêu cầu cho lệnh #${ticketId}`))
-      .catch(err => alert("❌ Lỗi: " + err));
-    }
-
-    window.onload = () => {
-      initChart();
-      listenRealtimeData();
-      setInterval(listenRealtimeData, 2000);
-    };
-  </script>
+        window.onload = () => {
+            initChart();
+            fetchAllData();
+            setInterval(fetchAllData, 3000);
+        };
+    </script>
 </body>
 </html>
