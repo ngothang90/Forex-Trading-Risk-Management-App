@@ -31,7 +31,7 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
     <div class="card p-5">
       <div class="text-xs text-slate-400">Số Dư (Balance)</div>
       <div id="balanceVal" class="text-2xl font-bold text-emerald-400 mt-1">$0.00</div>
@@ -43,6 +43,14 @@
     <div class="card p-5">
       <div class="text-xs text-slate-400">Ký Quỹ (Margin)</div>
       <div id="marginVal" class="text-2xl font-bold text-purple-400 mt-1">$0.00</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs text-slate-400">Tổng Nạp (Deposit)</div>
+      <div id="depositVal" class="text-2xl font-bold text-cyan-400 mt-1">$0.00</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs text-slate-400">Tổng Rút (Withdraw)</div>
+      <div id="withdrawVal" class="text-2xl font-bold text-amber-400 mt-1">$0.00</div>
     </div>
   </div>
 
@@ -210,7 +218,6 @@
       </div>
     </div>
 
-    <!-- CHIỀU CAO BIỂU ĐỒ 450PX -->
     <div class="h-[450px] w-full pt-4">
       <canvas id="dailyProfitChart"></canvas>
     </div>
@@ -223,14 +230,12 @@
     let selectedMonth = new Date().getMonth(); 
     document.getElementById('selectMonth').value = selectedMonth;
 
-    // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
       if (symbol === 'XAUUSD') return 100;      
       if (symbol === 'BTCUSD') return 1;        
       return 1;
     }
 
-    // B. Tính TỔNG ĐÒN BẨY
     function calculateTotalLeverage() {
       const balText = document.getElementById('balanceVal').innerText.replace('$', '').replace(',', '');
       const balance = parseFloat(balText) || 0;
@@ -254,7 +259,6 @@
       return totalNotional / balance;
     }
 
-    // C. Cập nhật giao diện Đòn bẩy & KHÓA NÚT BẮN LỆNH
     function updateLeverageStatus() {
       const totalLev = calculateTotalLeverage();
       document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
@@ -279,7 +283,6 @@
       }
     }
 
-    // D. Gửi ĐẶT LỆNH MỚI
     function handlePlaceOrder(e) {
       e.preventDefault();
 
@@ -308,7 +311,6 @@
       .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
     }
 
-    // E. XỬ LÝ BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY (BAR CHART)
     function initChart() {
       const ctx = document.getElementById('dailyProfitChart').getContext('2d');
 
@@ -348,7 +350,90 @@
       listenRealtimeData();
     }
 
-    // F. THỐNG KÊ HIỆU SUẤT GIAO DỊCH & DỮ LIỆU REALTIME
+    // Hàm đệ quy quét tìm tất cả lệnh giao dịch và nạp rút trong mọi cấu trúc Firebase
+    function extractTradesAndTransactions(node, targetYear, targetMonth, dailyProfits, statsRef, txRef) {
+      if (!node || typeof node !== 'object') return;
+
+      for (let key in node) {
+        let val = node[key];
+        if (!val) continue;
+
+        // Nếu đối tượng chứa thông tin lợi nhuận/giao dịch
+        if (typeof val === 'object') {
+          let pnl = parseFloat(val.profit !== undefined ? val.profit : (val.cumulativePnl !== undefined ? val.cumulativePnl : NaN));
+          let typeStr = String(val.type || val.action || val.comment || '').toUpperCase();
+          let amount = parseFloat(val.amount || val.balance_change || 0);
+
+          // Kiểm tra giao dịch Nạp / Rút tiền
+          if (typeStr.includes('DEPOSIT') || typeStr.includes('IN') || (amount > 0 && (typeStr.includes('BALANCE') || typeStr === ''))) {
+            // Kiểm tra thời gian nếu có trường time/timestamp
+            let timeVal = val.time || val.timestamp || val.date;
+            if (timeVal) {
+              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
+              if (!isNaN(d.getTime())) {
+                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
+                  if (amount > 0) txRef.deposit += amount;
+                }
+              }
+            }
+          }
+          if (typeStr.includes('WITHDRAW') || typeStr.includes('OUT')) {
+            let timeVal = val.time || val.timestamp || val.date;
+            if (timeVal) {
+              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
+              if (!isNaN(d.getTime())) {
+                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
+                  if (amount > 0) txRef.withdraw += amount;
+                }
+              }
+            }
+          }
+
+          // Nếu đây là một lệnh giao dịch đã đóng có số profit hợp lệ
+          if (!isNaN(pnl) && (typeStr === 'BUY' || typeStr === 'SELL' || typeStr.includes('CLOSE') || val.profit !== undefined || val.ticket !== undefined)) {
+            let timeVal = val.close_time || val.time || val.timestamp || val.date;
+            let tradeDate = null;
+
+            if (timeVal) {
+              let d = new Date(typeof timeVal === 'number' && timeVal < 10000000000 ? timeVal * 1000 : timeVal);
+              if (!isNaN(d.getTime())) {
+                if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
+                  tradeDate = d.getDate();
+                }
+              }
+            }
+
+            // Nếu khớp tháng hoặc key của node chính là ngày/tháng
+            if (!tradeDate && (key === String(targetMonth + 1) || key === String(targetMonth + 1).padStart(2, '0'))) {
+              // Đi sâu vào trong nếu key là tháng
+              extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
+              continue;
+            } else if (!tradeDate && !isNaN(parseInt(key)) && parseInt(key) >= 1 && parseInt(key) <= 31) {
+              // Key có thể là ngày trong tháng
+              tradeDate = parseInt(key);
+            }
+
+            statsRef.total++;
+            statsRef.netProfit += pnl;
+            if (pnl > 0) {
+              statsRef.win++;
+              statsRef.grossProfit += pnl;
+            } else if (pnl < 0) {
+              statsRef.loss++;
+              statsRef.grossLoss += Math.abs(pnl);
+            }
+
+            if (tradeDate && tradeDate >= 1 && tradeDate <= dailyProfits.length) {
+              dailyProfits[tradeDate - 1] += pnl;
+            }
+          } else {
+            // Tiếp tục đệ quy vào các nhánh con bên trong
+            extractTradesAndTransactions(val, targetYear, targetMonth, dailyProfits, statsRef, txRef);
+          }
+        }
+      }
+    }
+
     function listenRealtimeData() {
       fetch(`${FIREBASE_URL}/.json`)
         .then(res => res.json())
@@ -436,58 +521,38 @@
             pendTbody.innerHTML = html;
           }
 
-          // 4. History & Statistics (Mapping from Firebase history node)
-          let totalTrades = 0;
-          let winTrades = 0;
-          let lossTrades = 0;
-          let netProfit = 0;
-          let grossProfit = 0;
-          let grossLoss = 0;
-
+          // 4. Thống kê Hiệu suất, Lịch sử & Nạp/Rút
           const year = new Date().getFullYear();
           const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
           let dailyProfits = new Array(daysInMonth).fill(0);
           let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
 
-          let historyNode = allData.history || {};
-          let monthKey = String(selectedMonth + 1).padStart(2, '0');
+          let stats = { total: 0, win: 0, loss: 0, netProfit: 0, grossProfit: 0, grossLoss: 0 };
+          let txData = { deposit: parseFloat(acc.deposit || 0), withdraw: parseFloat(acc.withdraw || 0) };
 
-          if (historyNode[monthKey]) {
-            let daysNode = historyNode[monthKey];
-            for (let dayStr in daysNode) {
-              let dayData = daysNode[dayStr];
-              let dayIdx = parseInt(dayStr) - 1;
-              let pnl = parseFloat(dayData.cumulativePnl || dayData.profit || 0);
-
-              totalTrades++;
-              netProfit += pnl;
-              if (pnl > 0) {
-                winTrades++;
-                grossProfit += pnl;
-              } else if (pnl < 0) {
-                lossTrades++;
-                grossLoss += Math.abs(pnl);
-              }
-
-              if (dayIdx >= 0 && dayIdx < daysInMonth) {
-                dailyProfits[dayIdx] = pnl;
-              }
-            }
+          // Quét toàn bộ các nhánh dữ liệu lịch sử trên Firebase
+          if (allData.history) {
+            extractTradesAndTransactions(allData.history, year, selectedMonth, dailyProfits, stats, txData);
+          }
+          if (allData.closed_history) {
+            extractTradesAndTransactions(allData.closed_history, year, selectedMonth, dailyProfits, stats, txData);
           }
 
-          let winrate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-          let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
+          let winrate = stats.total > 0 ? (stats.win / stats.total) * 100 : 0;
+          let profitFactor = stats.grossLoss > 0 ? (stats.grossProfit / stats.grossLoss) : (stats.grossProfit > 0 ? stats.grossProfit : 0);
 
-          document.getElementById('statTotal').innerText = totalTrades;
-          document.getElementById('statWin').innerText = winTrades;
-          document.getElementById('statLoss').innerText = lossTrades;
+          document.getElementById('statTotal').innerText = stats.total;
+          document.getElementById('statWin').innerText = stats.win;
+          document.getElementById('statLoss').innerText = stats.loss;
           document.getElementById('statWinrate').innerText = winrate.toFixed(1) + '%';
           
           let netProfitEl = document.getElementById('statNetProfit');
-          netProfitEl.innerText = (netProfit >= 0 ? '+$' : '-$') + Math.abs(netProfit).toFixed(2);
-          netProfitEl.className = netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
+          netProfitEl.innerText = (stats.netProfit >= 0 ? '+$' : '-$') + Math.abs(stats.netProfit).toFixed(2);
+          netProfitEl.className = stats.netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
 
           document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
+          document.getElementById('depositVal').innerText = `$${txData.deposit.toFixed(2)}`;
+          document.getElementById('withdrawVal').innerText = `$${txData.withdraw.toFixed(2)}`;
 
           if (chartInstance) {
             let bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
@@ -502,7 +567,6 @@
       document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối';
     }
 
-    // G. Yêu cầu Đóng/Hủy Lệnh
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
 
@@ -521,7 +585,6 @@
       .catch(err => alert("❌ Lỗi: " + err));
     }
 
-    // Khởi chạy ứng dụng
     window.onload = () => {
       initChart();
       listenRealtimeData();
