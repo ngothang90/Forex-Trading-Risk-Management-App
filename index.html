@@ -17,17 +17,21 @@
 </head>
 <body class="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
 
-  <!-- HEADER -->
+  <!-- 1. HEADER & THÔNG TIN TÀI KHOẢN -->
   <div class="card p-5 flex flex-wrap justify-between items-center gap-4">
-    <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
-      🛡️ FOREX DISCIPLINE GATEKEEPER
-    </h1>
-    <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đang đồng bộ...
-    </span>
+    <div>
+      <h1 class="text-xl font-bold text-amber-500 flex items-center gap-2">
+        🛡️ FOREX DISCIPLINE GATEKEEPER
+      </h1>
+    </div>
+    <div>
+      <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối
+      </span>
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="card p-5">
       <div class="text-xs text-slate-400">Số Dư (Balance)</div>
       <div id="balanceVal" class="text-2xl font-bold text-emerald-400 mt-1">$0.00</div>
@@ -40,19 +44,13 @@
       <div class="text-xs text-slate-400">Ký Quỹ (Margin)</div>
       <div id="marginVal" class="text-2xl font-bold text-purple-400 mt-1">$0.00</div>
     </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Tổng Nạp (Deposit)</div>
-      <div id="depositVal" class="text-2xl font-bold text-cyan-400 mt-1">$0.00</div>
-    </div>
-    <div class="card p-5">
-      <div class="text-xs text-slate-400">Tổng Rút (Withdrawal)</div>
-      <div id="withdrawalVal" class="text-2xl font-bold text-rose-400 mt-1">$0.00</div>
-    </div>
   </div>
 
-  <!-- THỐNG KÊ HIỆU SUẤT -->
+  <!-- 1.1. BẢNG THỐNG KÊ HIỆU SUẤT GIAO DỊCH -->
   <div class="card p-5">
-    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">📊 Thống Kê Hiệu Suất Giao Dịch</h2>
+    <h2 class="text-md font-bold text-cyan-400 mb-3 flex items-center gap-2">
+      📊 Thống Kê Hiệu Suất Giao Dịch
+    </h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
         <div class="text-xs text-slate-400">Tổng Lệnh Vào</div>
@@ -81,20 +79,22 @@
     </div>
   </div>
 
-  <!-- ĐẶT LỆNH KỶ LUẬT -->
+  <!-- 2. ĐẶT LỆNH KỶ LUẬT (RISK FILTER) -->
   <div class="card p-6 space-y-4">
-    <h2 class="text-md font-bold text-rose-400 flex items-center gap-2">🎯 Đặt Lệnh Kỷ Luật (Risk Filter)</h2>
+    <h2 class="text-md font-bold text-rose-400 flex items-center gap-2">
+      🎯 Đặt Lệnh Kỷ Luật (Risk Filter)
+    </h2>
     <form id="orderForm" onsubmit="handlePlaceOrder(event)" class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Sản phẩm</label>
+          <label class="block text-xs text-slate-400 mb-1">Sản phẩm giao dịch</label>
           <select id="symbol" class="input-field font-bold text-amber-400" onchange="updateLeverageStatus()">
             <option value="XAUUSD">XAUUSD (Vàng)</option>
             <option value="BTCUSD">BTCUSD (Bitcoin)</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Loại lệnh</label>
+          <label class="block text-xs text-slate-400 mb-1">Loại lệnh (Chỉ Limit)</label>
           <select id="type" class="input-field font-bold text-amber-400">
             <option value="BUY_LIMIT">BUY LIMIT</option>
             <option value="SELL_LIMIT">SELL LIMIT</option>
@@ -108,16 +108,16 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Giá đặt</label>
-          <input type="number" id="price" step="any" placeholder="Giá Limit" required class="input-field" oninput="updateLeverageStatus()">
+          <label class="block text-xs text-slate-400 mb-1">Giá đặt lệnh (Price)</label>
+          <input type="number" id="price" step="any" placeholder="Nhập giá Limit" required class="input-field" oninput="updateLeverageStatus()">
         </div>
         <div>
-          <label class="block text-xs text-rose-400 mb-1">Stop Loss</label>
-          <input type="number" id="sl" step="any" placeholder="Cắt lỗ" required class="input-field border-rose-500/30">
+          <label class="block text-xs text-rose-400 mb-1">Stop Loss (Bắt buộc *)</label>
+          <input type="number" id="sl" step="any" placeholder="Giá Cắt Lỗ" required class="input-field border-rose-500/30">
         </div>
         <div>
-          <label class="block text-xs text-emerald-400 mb-1">Take Profit</label>
-          <input type="number" id="tp" step="any" placeholder="Chốt lời" required class="input-field border-emerald-500/30">
+          <label class="block text-xs text-emerald-400 mb-1">Take Profit (Bắt buộc *)</label>
+          <input type="number" id="tp" step="any" placeholder="Giá Chốt Lời" required class="input-field border-emerald-500/30">
         </div>
       </div>
 
@@ -126,20 +126,29 @@
         <div id="safetyBadge" class="text-emerald-400 font-semibold">✓ An toàn (&lt;= 1:10)</div>
       </div>
 
-      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg border border-slate-700">
+      <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700">
         ĐẶT LỆNH
       </button>
     </form>
   </div>
 
-  <!-- VỊ THẾ Đang CHẠY -->
+  <!-- 3. BẢNG VỊ THẾ ĐANG CHẠY -->
   <div class="card p-6">
-    <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">⚡ Vị Thế Đang Chạy (Open Positions)</h2>
+    <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">
+      ⚡ Vị Thế Đang Chạy (Open Positions)
+    </h2>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
-            <th class="p-3">Ticket</th><th class="p-3">Sản Phẩm</th><th class="p-3">Loại</th><th class="p-3">Volume</th><th class="p-3">Giá Vào</th><th class="p-3">SL / TP</th><th class="p-3">PnL ($)</th><th class="p-3 text-center">Thao Tác</th>
+            <th class="p-3">Ticket</th>
+            <th class="p-3">Sản Phẩm</th>
+            <th class="p-3">Loại</th>
+            <th class="p-3">Volume</th>
+            <th class="p-3">Giá Vào</th>
+            <th class="p-3">SL / TP</th>
+            <th class="p-3">PnL ($)</th>
+            <th class="p-3 text-center">Thao Tác</th>
           </tr>
         </thead>
         <tbody id="positionsTableBody">
@@ -149,14 +158,22 @@
     </div>
   </div>
 
-  <!-- LỆNH ĐANG CHỜ -->
+  <!-- 4. BẢNG LỆNH ĐANG CHỜ KHỚP -->
   <div class="card p-6">
-    <h2 class="text-md font-bold text-amber-400 mb-4 flex items-center gap-2">⏳ Lệnh Đang Chờ Khớp (Pending Orders)</h2>
+    <h2 class="text-md font-bold text-amber-400 mb-4 flex items-center gap-2">
+      ⏳ Lệnh Đang Chờ Khớp (Pending Orders)
+    </h2>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
           <tr>
-            <th class="p-3">Ticket</th><th class="p-3">Sản Phẩm</th><th class="p-3">Loại Lệnh</th><th class="p-3">Volume</th><th class="p-3">Giá Đặt</th><th class="p-3">SL / TP</th><th class="p-3 text-center">Thao Tác</th>
+            <th class="p-3">Ticket</th>
+            <th class="p-3">Sản Phẩm</th>
+            <th class="p-3">Loại Lệnh</th>
+            <th class="p-3">Volume</th>
+            <th class="p-3">Giá Đặt</th>
+            <th class="p-3">SL / TP</th>
+            <th class="p-3 text-center">Thao Tác</th>
           </tr>
         </thead>
         <tbody id="pendingOrdersTableBody">
@@ -166,17 +183,37 @@
     </div>
   </div>
 
-  <!-- BIỂU ĐỒ -->
+  <!-- 5. BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY THEO THÁNG -->
   <div class="card p-6 space-y-4">
     <div class="flex flex-wrap justify-between items-center gap-4">
-      <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">📈 Biểu Đồ Lợi Nhuận Hàng Ngày</h2>
-      <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
-        <option value="0">Tháng 1</option><option value="1">Tháng 2</option><option value="2">Tháng 3</option><option value="3">Tháng 4</option>
-        <option value="4">Tháng 5</option><option value="5">Tháng 6</option><option value="6">Tháng 7</option><option value="7">Tháng 8</option>
-        <option value="8">Tháng 9</option><option value="9">Tháng 10</option><option value="10">Tháng 11</option><option value="11">Tháng 12</option>
-      </select>
+      <div>
+        <h2 class="text-md font-bold text-blue-400 flex items-center gap-2">
+          📈 Biểu Đồ Lợi Nhuận Hàng Ngày (Theo Tháng)
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Theo dõi lãi/lỗ từng ngày trong tháng (Xanh: Lãi, Đỏ: Lỗ)</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="selectMonth" class="bg-slate-900 text-xs border border-slate-800 px-3 py-1.5 rounded text-white font-bold" onchange="changeMonth()">
+          <option value="0">Tháng 1</option>
+          <option value="1">Tháng 2</option>
+          <option value="2">Tháng 3</option>
+          <option value="3">Tháng 4</option>
+          <option value="4">Tháng 5</option>
+          <option value="5">Tháng 6</option>
+          <option value="6">Tháng 7</option>
+          <option value="7">Tháng 8</option>
+          <option value="8">Tháng 9</option>
+          <option value="9">Tháng 10</option>
+          <option value="10">Tháng 11</option>
+          <option value="11">Tháng 12</option>
+        </select>
+      </div>
     </div>
-    <div class="h-[450px] w-full pt-4"><canvas id="dailyProfitChart"></canvas></div>
+
+    <!-- CHIỀU CAO BIỂU ĐỒ 450PX -->
+    <div class="h-[450px] w-full pt-4">
+      <canvas id="dailyProfitChart"></canvas>
+    </div>
   </div>
 
   <script>
@@ -186,12 +223,14 @@
     let selectedMonth = new Date().getMonth(); 
     document.getElementById('selectMonth').value = selectedMonth;
 
+    // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
       if (symbol === 'XAUUSD') return 100;      
       if (symbol === 'BTCUSD') return 1;        
       return 1;
     }
 
+    // B. Tính TỔNG ĐÒN BẨY
     function calculateTotalLeverage() {
       const balText = document.getElementById('balanceVal').innerText.replace('$', '').replace(',', '');
       const balance = parseFloat(balText) || 0;
@@ -215,32 +254,38 @@
       return totalNotional / balance;
     }
 
+    // C. Cập nhật giao diện Đòn bẩy & KHÓA NÚT BẮN LỆNH
     function updateLeverageStatus() {
       const totalLev = calculateTotalLeverage();
       document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
+
       const badge = document.getElementById('safetyBadge');
       const submitBtn = document.getElementById('submitBtn');
 
       if (totalLev > 10) {
         badge.className = "text-rose-500 font-bold flex items-center gap-1 animate-pulse";
-        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10";
+        badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10 (CẤM ĐẶT LỆNH)";
+        
         submitBtn.disabled = true;
         submitBtn.className = "w-full bg-rose-950 text-rose-500 font-bold py-3 rounded-lg border border-rose-800 cursor-not-allowed opacity-80";
         submitBtn.innerText = "⛔ BỊ KHÓA: TỔNG ĐÒN BẨY VƯỢT QUÁ 1:10";
       } else {
         badge.className = "text-emerald-400 font-semibold";
         badge.innerText = "✓ An toàn (<= 1:10)";
+        
         submitBtn.disabled = false;
-        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg border border-slate-700";
+        submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
         submitBtn.innerText = "ĐẶT LỆNH";
       }
     }
 
+    // D. Gửi ĐẶT LỆNH MỚI
     function handlePlaceOrder(e) {
       e.preventDefault();
+
       const totalLev = calculateTotalLeverage();
       if (totalLev > 10) {
-        alert(`⛔ LỆNH BỊ TỪ CHỐI! Tổng đòn bẩy là 1:${totalLev.toFixed(1)}.`);
+        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).\n\nVui lòng giảm Volume hoặc đóng bớt các vị thế đang chạy!`);
         return;
       }
 
@@ -249,7 +294,7 @@
         type: document.getElementById('type').value,
         volume: parseFloat(document.getElementById('volume').value),
         price: parseFloat(document.getElementById('price').value),
-        sl: parseFloat(document.getElementById('sl').value),
+        s1: parseFloat(document.getElementById('sl').value),
         tp: parseFloat(document.getElementById('tp').value),
         timestamp: Date.now()
       };
@@ -260,25 +305,40 @@
         body: JSON.stringify(payload)
       })
       .then(() => alert("✅ Đã đặt lệnh thành công!"))
-      .catch(err => alert("❌ Lỗi: " + err));
+      .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
     }
 
+    // E. XỬ LÝ BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY (BAR CHART)
     function initChart() {
       const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: [],
-          datasets: [{ label: 'Lợi Nhuận Ngày ($)', data: [], backgroundColor: [], borderRadius: 4 }]
+          datasets: [{
+            label: 'Lợi Nhuận Ngày ($)',
+            data: [],
+            backgroundColor: [],
+            borderRadius: 4
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { grid: { color: '#1e2d4a' }, ticks: { color: '#64748b' } },
-            x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 15 } }
+            y: { 
+              grid: { color: '#1e2d4a' }, 
+              ticks: { color: '#64748b' } 
+            },
+            x: { 
+              grid: { display: false }, 
+              ticks: { color: '#64748b', maxTicksLimit: 15 } 
+            }
           },
-          plugins: { legend: { display: false } }
+          plugins: {
+            legend: { display: false }
+          }
         }
       });
     }
@@ -288,6 +348,7 @@
       listenRealtimeData();
     }
 
+    // F. THỐNG KÊ HIỆU SUẤT GIAO DỊCH & DỮ LIỆU REALTIME
     function listenRealtimeData() {
       fetch(`${FIREBASE_URL}/.json`)
         .then(res => res.json())
@@ -296,38 +357,44 @@
 
           // 1. Account Info
           let acc = allData.account || {};
-          document.getElementById('balanceVal').innerText = `$${(acc.balance || 0).toFixed(2)}`;
-          document.getElementById('equityVal').innerText = `$${(acc.equity || 0).toFixed(2)}`;
-          document.getElementById('marginVal').innerText = `$${(acc.margin || 0).toFixed(2)}`;
-          document.getElementById('depositVal').innerText = `$${(acc.deposit || 0).toFixed(2)}`;
-          document.getElementById('withdrawalVal').innerText = `$${(acc.withdrawal || 0).toFixed(2)}`;
+          document.getElementById('balanceVal').innerText = `$${parseFloat(acc.balance || 0).toFixed(2)}`;
+          document.getElementById('equityVal').innerText = `$${parseFloat(acc.equity || 0).toFixed(2)}`;
+          document.getElementById('marginVal').innerText = `$${parseFloat(acc.margin || 0).toFixed(2)}`;
 
-          // 2. Open Positions (Hỗ trợ cả live_positions và live_orders)
-          let positions = allData.live_positions || allData.live_orders || {};
+          // 2. Live Positions
+          let positions = allData.live_positions || {};
           currentPositionsData = positions;
           updateLeverageStatus();
 
           const posTbody = document.getElementById('positionsTableBody');
-          if (!positions || Object.keys(positions).length === 0) {
+          if (Object.keys(positions).length === 0) {
             posTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có vị thế nào đang chạy</td></tr>';
           } else {
             let html = '';
             for (let key in positions) {
               let pos = positions[key];
+              let ticket = pos.ticket || key;
+              let symbol = pos.symbol || '';
+              let type = pos.type || '';
+              let volume = pos.volume || 0;
+              let price = pos.price || 0;
+              let sl = pos.s1 !== undefined ? pos.s1 : (pos.sl !== undefined ? pos.sl : 0);
+              let tp = pos.tp || 0;
               let profit = parseFloat(pos.profit || 0);
+
               let pnlColor = profit >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
-              let typeColor = pos.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
+              let typeColor = type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
               html += `
                 <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                  <td class="p-3 font-mono text-slate-400">#${pos.ticket || key}</td>
-                  <td class="p-3 font-bold">${pos.symbol || ''}</td>
-                  <td class="p-3 ${typeColor} font-bold">${pos.type || ''}</td>
-                  <td class="p-3">${pos.volume || 0}</td>
-                  <td class="p-3 font-mono">${pos.price || 0}</td>
-                  <td class="p-3 text-xs text-slate-400">SL: ${pos.sl || 0}<br>TP: ${pos.tp || 0}</td>
+                  <td class="p-3 font-mono text-slate-400">#${ticket}</td>
+                  <td class="p-3 font-bold">${symbol}</td>
+                  <td class="p-3 ${typeColor} font-bold">${type}</td>
+                  <td class="p-3">${volume}</td>
+                  <td class="p-3 font-mono">${price}</td>
+                  <td class="p-3 text-xs text-slate-400">SL: ${sl}<br>TP: ${tp}</td>
                   <td class="p-3 ${pnlColor}">$${profit.toFixed(2)}</td>
                   <td class="p-3 text-center">
-                    <button onclick="requestAction('CLOSE_POSITION', '${pos.ticket || key}')" class="btn-close">Đóng Lệnh</button>
+                    <button onclick="requestAction('CLOSE_POSITION', '${ticket}')" class="btn-close">Đóng Lệnh</button>
                   </td>
                 </tr>
               `;
@@ -335,25 +402,33 @@
             posTbody.innerHTML = html;
           }
 
-          // 3. Pending Orders
+          // 3. Live Pending Orders
           let pendingOrders = allData.live_pending_orders || {};
           const pendTbody = document.getElementById('pendingOrdersTableBody');
-          if (!pendingOrders || Object.keys(pendingOrders).length === 0) {
+          if (Object.keys(pendingOrders).length === 0) {
             pendTbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500">Không có lệnh chờ nào</td></tr>';
           } else {
             let html = '';
             for (let key in pendingOrders) {
               let ord = pendingOrders[key];
+              let ticket = ord.ticket || key;
+              let symbol = ord.symbol || '';
+              let type = ord.type || '';
+              let volume = ord.volume || 0;
+              let price = ord.price || 0;
+              let sl = ord.s1 !== undefined ? ord.s1 : (ord.sl !== undefined ? ord.sl : 0);
+              let tp = ord.tp || 0;
+
               html += `
                 <tr class="border-b border-slate-800 hover:bg-slate-900/50">
-                  <td class="p-3 font-mono text-slate-400">#${ord.ticket || key}</td>
-                  <td class="p-3 font-bold">${ord.symbol || ''}</td>
-                  <td class="p-3 text-amber-400 font-bold">${ord.type || ''}</td>
-                  <td class="p-3">${ord.volume || 0}</td>
-                  <td class="p-3 font-mono">${ord.price || 0}</td>
-                  <td class="p-3 text-xs text-slate-400">SL: ${ord.sl || 0}<br>TP: ${ord.tp || 0}</td>
+                  <td class="p-3 font-mono text-slate-400">#${ticket}</td>
+                  <td class="p-3 font-bold">${symbol}</td>
+                  <td class="p-3 text-amber-400 font-bold">${type}</td>
+                  <td class="p-3">${volume}</td>
+                  <td class="p-3 font-mono">${price}</td>
+                  <td class="p-3 text-xs text-slate-400">SL: ${sl}<br>TP: ${tp}</td>
                   <td class="p-3 text-center">
-                    <button onclick="requestAction('CANCEL_ORDER', '${ord.ticket || key}')" class="btn-close">Hủy Lệnh</button>
+                    <button onclick="requestAction('CANCEL_ORDER', '${ticket}')" class="btn-close">Hủy Lệnh</button>
                   </td>
                 </tr>
               `;
@@ -361,33 +436,58 @@
             pendTbody.innerHTML = html;
           }
 
-          // 4. History & Thống kê (Hỗ trợ cấu trúc history theo tháng/ngày của bạn)
+          // 4. History & Statistics (Mapping from Firebase history node)
+          let totalTrades = 0;
+          let winTrades = 0;
+          let lossTrades = 0;
           let netProfit = 0;
+          let grossProfit = 0;
+          let grossLoss = 0;
+
           const year = new Date().getFullYear();
           const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
           let dailyProfits = new Array(daysInMonth).fill(0);
           let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
 
           let historyNode = allData.history || {};
-          // Duyệt qua cấu trúc lịch sử theo tháng (ví dụ: "07", "08",...)
           let monthKey = String(selectedMonth + 1).padStart(2, '0');
+
           if (historyNode[monthKey]) {
             let daysNode = historyNode[monthKey];
             for (let dayStr in daysNode) {
               let dayData = daysNode[dayStr];
               let dayIdx = parseInt(dayStr) - 1;
               let pnl = parseFloat(dayData.cumulativePnl || dayData.profit || 0);
+
+              totalTrades++;
               netProfit += pnl;
+              if (pnl > 0) {
+                winTrades++;
+                grossProfit += pnl;
+              } else if (pnl < 0) {
+                lossTrades++;
+                grossLoss += Math.abs(pnl);
+              }
+
               if (dayIdx >= 0 && dayIdx < daysInMonth) {
                 dailyProfits[dayIdx] = pnl;
               }
             }
           }
 
-          document.getElementById('statTotal').innerText = netProfit !== 0 ? 1 : 0;
+          let winrate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+          let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
+
+          document.getElementById('statTotal').innerText = totalTrades;
+          document.getElementById('statWin').innerText = winTrades;
+          document.getElementById('statLoss').innerText = lossTrades;
+          document.getElementById('statWinrate').innerText = winrate.toFixed(1) + '%';
+          
           let netProfitEl = document.getElementById('statNetProfit');
           netProfitEl.innerText = (netProfit >= 0 ? '+$' : '-$') + Math.abs(netProfit).toFixed(2);
           netProfitEl.className = netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
+
+          document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
 
           if (chartInstance) {
             let bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
@@ -397,14 +497,20 @@
             chartInstance.update();
           }
         })
-        .catch(err => console.error("Lỗi đồng bộ:", err));
+        .catch(err => console.error("Lỗi đồng bộ dữ liệu:", err));
 
-      document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đã kết nối';
+      document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối';
     }
 
+    // G. Yêu cầu Đóng/Hủy Lệnh
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
-      const payload = { action: actionType, ticket: String(ticketId), timestamp: Date.now() };
+
+      const payload = {
+        action: actionType,
+        ticket: String(ticketId),
+        timestamp: Date.now()
+      };
 
       fetch(`${FIREBASE_URL}/action_request.json`, {
         method: 'PUT',
@@ -415,6 +521,7 @@
       .catch(err => alert("❌ Lỗi: " + err));
     }
 
+    // Khởi chạy ứng dụng
     window.onload = () => {
       initChart();
       listenRealtimeData();
