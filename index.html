@@ -24,14 +24,17 @@
         🛡️ FOREX DISCIPLINE GATEKEEPER
       </h1>
     </div>
-    <div>
+    <div class="flex items-center gap-3">
+      <span id="connectionError" class="hidden bg-rose-950/80 text-rose-400 border border-rose-500/30 text-xs px-3 py-1.5 rounded-full font-semibold">
+        ⚠️ Lỗi kết nối Firebase (Kiểm tra Rules)
+      </span>
       <span id="statusBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> EA MT5 Đã Kết Nối
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đang đồng bộ...
       </span>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
     <div class="card p-5">
       <div class="text-xs text-slate-400">Số Dư (Balance)</div>
       <div id="balanceVal" class="text-2xl font-bold text-emerald-400 mt-1">$0.00</div>
@@ -43,6 +46,14 @@
     <div class="card p-5">
       <div class="text-xs text-slate-400">Ký Quỹ (Margin)</div>
       <div id="marginVal" class="text-2xl font-bold text-purple-400 mt-1">$0.00</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs text-slate-400">Tổng Nạp (Deposit)</div>
+      <div id="depositVal" class="text-2xl font-bold text-cyan-400 mt-1">$0.00</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-xs text-slate-400">Tổng Rút (Withdrawal)</div>
+      <div id="withdrawalVal" class="text-2xl font-bold text-rose-400 mt-1">$0.00</div>
     </div>
   </div>
 
@@ -132,7 +143,7 @@
     </form>
   </div>
 
-  <!-- 3. BẢNG VỊ THẾ ĐANG CHẠY -->
+  <!-- 3. BẢNG VỊ THẾ Đang CHẠY -->
   <div class="card p-6">
     <h2 class="text-md font-bold text-emerald-400 mb-4 flex items-center gap-2">
       ⚡ Vị Thế Đang Chạy (Open Positions)
@@ -220,19 +231,17 @@
     const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
     let chartInstance = null;
     let currentPositionsData = {}; 
-    let selectedMonth = new Date().getMonth(); // Mặc định tháng hiện tại
+    let selectedMonth = new Date().getMonth(); 
     document.getElementById('selectMonth').value = selectedMonth;
 
-    // A. Quy đổi Contract Size CHỈ CHO XAUUSD VÀ BTCUSD
     function getContractSize(symbol) {
-      if (symbol === 'XAUUSD') return 100;      // 1 Lot Vàng = 100 oz
-      if (symbol === 'BTCUSD') return 1;        // 1 Lot BTC = 1 Coin
+      if (symbol === 'XAUUSD') return 100;      
+      if (symbol === 'BTCUSD') return 1;        
       return 1;
     }
 
-    // B. Tính TỔNG ĐÒN BẨY
     function calculateTotalLeverage() {
-      const balText = document.getElementById('balanceVal').innerText.replace('$', '');
+      const balText = document.getElementById('balanceVal').innerText.replace('$', '').replace(',', '');
       const balance = parseFloat(balText) || 0;
       if (balance <= 0) return 0;
 
@@ -252,7 +261,6 @@
       return totalNotional / balance;
     }
 
-    // C. Cập nhật giao diện Đòn bẩy & KHÓA NÚT BẮN LỆNH
     function updateLeverageStatus() {
       const totalLev = calculateTotalLeverage();
       document.getElementById('leverageVal').innerText = `1:${totalLev.toFixed(1)}`;
@@ -263,27 +271,23 @@
       if (totalLev > 10) {
         badge.className = "text-rose-500 font-bold flex items-center gap-1 animate-pulse";
         badge.innerText = "❌ VI PHẠM: Tổng đòn bẩy > 1:10 (CẤM ĐẶT LỆNH)";
-        
         submitBtn.disabled = true;
         submitBtn.className = "w-full bg-rose-950 text-rose-500 font-bold py-3 rounded-lg border border-rose-800 cursor-not-allowed opacity-80";
         submitBtn.innerText = "⛔ BỊ KHÓA: TỔNG ĐÒN BẨY VƯỢT QUÁ 1:10";
       } else {
         badge.className = "text-emerald-400 font-semibold";
         badge.innerText = "✓ An toàn (<= 1:10)";
-        
         submitBtn.disabled = false;
         submitBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-lg transition duration-200 border border-slate-700";
         submitBtn.innerText = "ĐẶT LỆNH";
       }
     }
 
-    // D. Gửi ĐẶT LỆNH MỚI
     function handlePlaceOrder(e) {
       e.preventDefault();
-
       const totalLev = calculateTotalLeverage();
       if (totalLev > 10) {
-        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).\n\nVui lòng giảm Volume hoặc đóng bớt các vị thế đang chạy!`);
+        alert(`⛔ LỆNH BỊ TỪ CHỐI!\n\nTổng đòn bẩy sau khi vào lệnh sẽ là 1:${totalLev.toFixed(1)} (Vượt quá mức trần kỷ luật 1:10).`);
         return;
       }
 
@@ -306,10 +310,8 @@
       .catch(err => alert("❌ Lỗi đặt lệnh: " + err));
     }
 
-    // E. XỬ LÝ BIỂU ĐỒ LỢI NHUẬN HÀNG NGÀY (BAR CHART)
     function initChart() {
       const ctx = document.getElementById('dailyProfitChart').getContext('2d');
-
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -325,83 +327,44 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { 
-              grid: { color: '#1e2d4a' }, 
-              ticks: { color: '#64748b' } 
-            },
-            x: { 
-              grid: { display: false }, 
-              ticks: { color: '#64748b', maxTicksLimit: 15 } 
-            }
+            y: { grid: { color: '#1e2d4a' }, ticks: { color: '#64748b' } },
+            x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 15 } }
           },
-          plugins: {
-            legend: { display: false }
-          }
+          plugins: { legend: { display: false } }
         }
       });
-
-      updateChartData();
     }
 
     function changeMonth() {
       selectedMonth = parseInt(document.getElementById('selectMonth').value);
-      updateChartData();
+      listenRealtimeData();
     }
 
-    function updateChartData() {
-      if (!chartInstance) return;
-
-      const year = new Date().getFullYear();
-      const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
-      
-      let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
-      let dailyProfits = new Array(daysInMonth).fill(0);
-      let bgColors = new Array(daysInMonth).fill('#10b981');
-
-      fetch(`${FIREBASE_URL}/closed_history.json`)
-        .then(res => res.json())
-        .then(historyData => {
-          if (historyData) {
-            for (let key in historyData) {
-              let item = historyData[key];
-              let closeDate = new Date(item.close_time || item.timestamp);
-              if (closeDate.getMonth() === selectedMonth && closeDate.getFullYear() === year) {
-                let dayIdx = closeDate.getDate() - 1;
-                if (dayIdx >= 0 && dayIdx < daysInMonth) {
-                  dailyProfits[dayIdx] += (item.profit || 0);
-                }
-              }
-            }
-          }
-
-          bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
-
-          chartInstance.data.labels = labels;
-          chartInstance.data.datasets[0].data = dailyProfits;
-          chartInstance.data.datasets[0].backgroundColor = bgColors;
-          chartInstance.update();
-        })
-        .catch(() => {
-          chartInstance.data.labels = labels;
-          chartInstance.data.datasets[0].data = dailyProfits;
-          chartInstance.data.datasets[0].backgroundColor = bgColors;
-          chartInstance.update();
-        });
-    }
-
-    // F. THỐNG KÊ HIỆU SUẤT GIAO DỊCH & DỮ LIỆU REALTIME
     function listenRealtimeData() {
+      let hasError = false;
+
+      // 1. Account Info
       fetch(`${FIREBASE_URL}/account.json`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
         .then(data => {
           if (data) {
-            document.getElementById('balanceVal').innerText = `$${data.balance.toFixed(2)}`;
-            document.getElementById('equityVal').innerText = `$${data.equity.toFixed(2)}`;
-            document.getElementById('marginVal').innerText = `$${data.margin.toFixed(2)}`;
+            document.getElementById('balanceVal').innerText = `$${(data.balance || 0).toFixed(2)}`;
+            document.getElementById('equityVal').innerText = `$${(data.equity || 0).toFixed(2)}`;
+            document.getElementById('marginVal').innerText = `$${(data.margin || 0).toFixed(2)}`;
+            document.getElementById('depositVal').innerText = `$${(data.deposit || 0).toFixed(2)}`;
+            document.getElementById('withdrawalVal').innerText = `$${(data.withdrawal || 0).toFixed(2)}`;
             updateLeverageStatus();
           }
+        })
+        .catch(err => {
+          hasError = true;
+          console.error("Lỗi lấy account:", err);
         });
 
+      // 2. Open Positions
       fetch(`${FIREBASE_URL}/live_positions.json`)
         .then(res => res.json())
         .then(data => {
@@ -416,7 +379,7 @@
           let html = '';
           for (let key in data) {
             let pos = data[key];
-            let pnlColor = pos.profit >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+            let pnlColor = (pos.profit || 0) >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
             let typeColor = pos.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
             html += `
               <tr class="border-b border-slate-800 hover:bg-slate-900/50">
@@ -426,7 +389,7 @@
                 <td class="p-3">${pos.volume}</td>
                 <td class="p-3 font-mono">${pos.price}</td>
                 <td class="p-3 text-xs text-slate-400">SL: ${pos.sl}<br>TP: ${pos.tp}</td>
-                <td class="p-3 ${pnlColor}">$${pos.profit.toFixed(2)}</td>
+                <td class="p-3 ${pnlColor}">$${(pos.profit || 0).toFixed(2)}</td>
                 <td class="p-3 text-center">
                   <button onclick="requestAction('CLOSE_POSITION', '${pos.ticket}')" class="btn-close">Đóng Lệnh</button>
                 </td>
@@ -434,8 +397,10 @@
             `;
           }
           tbody.innerHTML = html;
-        });
+        })
+        .catch(err => console.error("Lỗi lấy live_positions:", err));
 
+      // 3. Pending Orders
       fetch(`${FIREBASE_URL}/live_pending_orders.json`)
         .then(res => res.json())
         .then(data => {
@@ -462,8 +427,10 @@
             `;
           }
           tbody.innerHTML = html;
-        });
+        })
+        .catch(err => console.error("Lỗi lấy pending orders:", err));
 
+      // 4. Closed History & Thống Kê Hiệu Suất + Biểu đồ
       fetch(`${FIREBASE_URL}/closed_history.json`)
         .then(res => res.json())
         .then(historyData => {
@@ -474,12 +441,18 @@
           let grossProfit = 0;
           let grossLoss = 0;
 
+          const year = new Date().getFullYear();
+          const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
+          let dailyProfits = new Array(daysInMonth).fill(0);
+          let labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}`);
+
           if (historyData) {
-            for (let key in historyData) {
-              let item = historyData[key];
+            let items = Array.isArray(historyData) ? historyData.filter(Boolean) : Object.values(historyData);
+            items.forEach(item => {
               totalTrades++;
-              let profit = item.profit || 0;
+              let profit = parseFloat(item.profit) || 0;
               netProfit += profit;
+
               if (profit > 0) {
                 winTrades++;
                 grossProfit += profit;
@@ -487,7 +460,18 @@
                 lossTrades++;
                 grossLoss += Math.abs(profit);
               }
-            }
+
+              let rawTime = item.close_time || item.timestamp;
+              if (rawTime) {
+                let closeDate = new Date(typeof rawTime === 'number' && rawTime < 10000000000 ? rawTime * 1000 : rawTime);
+                if (closeDate.getMonth() === selectedMonth && closeDate.getFullYear() === year) {
+                  let dayIdx = closeDate.getDate() - 1;
+                  if (dayIdx >= 0 && dayIdx < daysInMonth) {
+                    dailyProfits[dayIdx] += profit;
+                  }
+                }
+              }
+            });
           }
 
           let winrate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
@@ -501,16 +485,35 @@
           let netProfitEl = document.getElementById('statNetProfit');
           netProfitEl.innerText = (netProfit >= 0 ? '+$' : '-$') + Math.abs(netProfit).toFixed(2);
           netProfitEl.className = netProfit >= 0 ? "text-lg font-bold text-emerald-400 mt-1" : "text-lg font-bold text-rose-400 mt-1";
-
           document.getElementById('statProfitFactor').innerText = profitFactor.toFixed(2);
+
+          if (chartInstance) {
+            let bgColors = dailyProfits.map(val => val >= 0 ? '#10b981' : '#ef4444');
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].data = dailyProfits;
+            chartInstance.data.datasets[0].backgroundColor = bgColors;
+            chartInstance.update();
+          }
         })
-        .catch(() => {});
+        .catch(err => {
+          hasError = true;
+          console.error("Lỗi lấy closed_history:", err);
+        });
+
+      // Hiển thị cảnh báo nếu lỗi kết nối
+      const errBadge = document.getElementById('connectionError');
+      const statusBadge = document.getElementById('statusBadge');
+      if (hasError) {
+        errBadge.classList.remove('hidden');
+        statusBadge.classList.add('hidden');
+      } else {
+        errBadge.classList.add('hidden');
+        statusBadge.classList.remove('hidden');
+      }
     }
 
-    // G. Yêu cầu Đóng/Hủy Lệnh
     function requestAction(actionType, ticketId) {
       if (!confirm(`Bạn có chắc muốn ${actionType === 'CLOSE_POSITION' ? 'ĐÓNG' : 'HỦY'} lệnh #${ticketId}?`)) return;
-
       const payload = {
         action: actionType,
         ticket: String(ticketId),
@@ -526,11 +529,10 @@
       .catch(err => alert("❌ Lỗi: " + err));
     }
 
-    // Khởi chạy ứng dụng
     window.onload = () => {
       initChart();
-      setInterval(listenRealtimeData, 2000);
       listenRealtimeData();
+      setInterval(listenRealtimeData, 2000);
     };
   </script>
 </body>
