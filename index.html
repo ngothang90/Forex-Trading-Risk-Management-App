@@ -378,17 +378,26 @@
             profitChart.update();
         }
 
+        // Cập nhật Vị Thế Đang Chạy (Đã thêm logic Sắp xếp Sản Phẩm A-Z)
         function updatePositionsUI(positions) {
             const tbody = document.getElementById('positions-table-body');
             tbody.innerHTML = '';
-            const keys = Object.keys(positions);
-            if (keys.length === 0) {
+            
+            if (!positions) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế đang chạy</td></tr>`;
                 return;
             }
-            keys.forEach(key => {
-                const p = positions[key];
-                if(!p) return;
+
+            const posList = Object.values(positions).filter(p => p !== null && p !== undefined);
+            if (posList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế đang chạy</td></tr>`;
+                return;
+            }
+
+            // Sắp xếp Sản Phẩm từ A đến Z
+            posList.sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+
+            posList.forEach(p => {
                 const profitColor = p.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
@@ -404,17 +413,26 @@
             });
         }
 
+        // Cập nhật Lệnh Đang Chờ Khớp (Đã thêm logic Sắp xếp Sản Phẩm A-Z)
         function updatePendingUI(orders) {
             const tbody = document.getElementById('pending-table-body');
             tbody.innerHTML = '';
-            const keys = Object.keys(orders);
-            if (keys.length === 0) {
+
+            if (!orders) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ nào</td></tr>`;
                 return;
             }
-            keys.forEach(key => {
-                const o = orders[key];
-                if(!o) return;
+
+            const ordList = Object.values(orders).filter(o => o !== null && o !== undefined);
+            if (ordList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ nào</td></tr>`;
+                return;
+            }
+
+            // Sắp xếp Sản Phẩm từ A đến Z
+            ordList.sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+
+            ordList.forEach(o => {
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
                         <td class="p-2.5 font-bold">${o.symbol}</td>
