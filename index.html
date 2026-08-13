@@ -26,7 +26,7 @@
             <div class="mt-4 md:mt-0 flex items-center space-x-3">
                 <div id="connection-status" class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
                     <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-xs font-semibold text-emerald-400">EA MT5 Đã Kết Nối</span>
+                    <span class="text-xs font-semibold text-emerald-400">Hệ thống hoạt động</span>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        <!-- Bảng Giá Thị Trường (Từ MT5) -->
+        <!-- Bảng Giá Thị Trường (Tự động kéo từ Binance API) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl flex items-center justify-between">
                 <div class="flex items-center space-x-4">
@@ -86,7 +86,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-300">Vàng (XAUUSD)</h3>
-                        <p class="text-xs text-gray-500">Giá trực tiếp từ MT5</p>
+                        <p class="text-xs text-gray-500">Giá trực tiếp từ API sàn</p>
                     </div>
                 </div>
                 <div class="text-right flex space-x-6">
@@ -107,7 +107,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-300">Bitcoin (BTCUSD)</h3>
-                        <p class="text-xs text-gray-500">Giá trực tiếp từ MT5</p>
+                        <p class="text-xs text-gray-500">Giá trực tiếp từ API sàn</p>
                     </div>
                 </div>
                 <div class="text-right flex space-x-6">
@@ -263,26 +263,58 @@
 
         async function fetchAllData() {
             try {
-                const [accRes, posRes, ordRes, histRes, priceRes] = await Promise.all([
+                // Tách riêng việc lấy giá API và lấy dữ liệu Firebase
+                fetchPublicPrices();
+
+                const [accRes, posRes, ordRes, histRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
                     fetch(`${FIREBASE_URL}/live_pending_orders.json`),
-                    fetch(`${FIREBASE_URL}/closed_history.json`),
-                    fetch(`${FIREBASE_URL}/market_prices.json`)
+                    fetch(`${FIREBASE_URL}/closed_history.json`)
                 ]);
 
                 const accountData = await accRes.json() || {};
                 const positionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
                 const historyData = await histRes.json() || {};
-                const pricesData = await priceRes.json() || {};
 
                 updateAccountAndStatsUI(accountData, historyData);
-                updatePricesUI(pricesData);
                 updatePositionsUI(positionsData);
                 updatePendingUI(pendingData);
             } catch (err) {
                 console.error("Lỗi đồng bộ dữ liệu Firebase:", err);
+            }
+        }
+
+        // Tự động kéo giá trực tiếp từ Binance (Bỏ qua MT5)
+        async function fetchPublicPrices() {
+            try {
+                // Lấy giá BTC
+                const btcRes = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=BTCUSDT');
+                const btcData = await btcRes.json();
+                
+                // Lấy giá Vàng (Dùng PAXGUSDT làm proxy chuẩn)
+                const xauRes = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=PAXGUSDT');
+                const xauData = await xauRes.json();
+
+                // Cập nhật UI BTC
+                const btcBid = parseFloat(btcData.bidPrice).toFixed(2);
+                const btcAsk = parseFloat(btcData.askPrice).toFixed(2);
+                document.getElementById('price-btc-bid').innerText = btcBid;
+                document.getElementById('price-btc-ask').innerText = btcAsk;
+                currentMarketPrices.BTCUSD.bid = parseFloat(btcBid);
+                currentMarketPrices.BTCUSD.ask = parseFloat(btcAsk);
+
+                // Cập nhật UI Vàng
+                const xauBid = parseFloat(xauData.bidPrice).toFixed(2);
+                const xauAsk = parseFloat(xauData.askPrice).toFixed(2);
+                document.getElementById('price-xau-bid').innerText = xauBid;
+                document.getElementById('price-xau-ask').innerText = xauAsk;
+                currentMarketPrices.XAUUSD.bid = parseFloat(xauBid);
+                currentMarketPrices.XAUUSD.ask = parseFloat(xauAsk);
+
+            } catch (err) {
+                console.error("Lỗi lấy giá từ API ngoài:", err);
             }
         }
 
@@ -344,25 +376,6 @@
             profitChart.data.datasets[0].backgroundColor = sortedValues.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)');
             profitChart.data.datasets[0].borderColor = sortedValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
             profitChart.update();
-        }
-
-        function updatePricesUI(prices) {
-            if (prices.XAUUSD) {
-                document.getElementById('price-xau-bid').innerText = prices.XAUUSD.bid || '---';
-                document.getElementById('price-xau-ask').innerText = prices.XAUUSD.ask || '---';
-                currentMarketPrices.XAUUSD.bid = parseFloat(prices.XAUUSD.bid) || 0;
-                currentMarketPrices.XAUUSD.ask = parseFloat(prices.XAUUSD.ask) || 0;
-            }
-            if (prices.BTCUSD) {
-                document.getElementById('price-btc-bid').innerText = prices.BTCUSD.bid || '---';
-                document.getElementById('price-btc-ask').innerText = prices.BTCUSD.ask || '---';
-                currentMarketPrices.BTCUSD.bid = parseFloat(prices.BTCUSD.bid) || 0;
-                currentMarketPrices.BTCUSD.ask = parseFloat(prices.BTCUSD.ask) || 0;
-            }
-            if (prices.EURUSD) {
-                currentMarketPrices.EURUSD.bid = parseFloat(prices.EURUSD.bid) || 0;
-                currentMarketPrices.EURUSD.ask = parseFloat(prices.EURUSD.ask) || 0;
-            }
         }
 
         function updatePositionsUI(positions) {
@@ -432,7 +445,7 @@
             const currentBid = currentMarketPrices[symbol]?.bid || 0;
 
             if (currentAsk === 0 || currentBid === 0) {
-                alert(`CHƯA NHẬN ĐƯỢC GIÁ THỊ TRƯỜNG CHO ${symbol}. Vui lòng đợi EA MT5 cập nhật giá!`);
+                alert(`Đang lấy giá thị trường cho ${symbol}. Vui lòng thử lại sau vài giây!`);
                 return;
             }
 
@@ -497,6 +510,7 @@
         window.onload = () => {
             initChart();
             fetchAllData();
+            // Cập nhật dữ liệu mỗi 3 giây
             setInterval(fetchAllData, 3000);
         };
     </script>
