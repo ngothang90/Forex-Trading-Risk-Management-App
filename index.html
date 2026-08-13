@@ -8,34 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- TradingView Script -->
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
-<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen relative">
-    
-    <!-- MODAL POPUP CẢNH BÁO LỖI (HIỆN GIỮA MÀN HÌNH) -->
-    <div id="error-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden">
-        <div class="bg-gray-900 border border-rose-500/50 p-6 rounded-2xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all">
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="bg-rose-500/20 p-3 rounded-xl border border-rose-500/30">
-                    <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-white uppercase tracking-wider">Lỗi Đặt Lệnh Kỷ Luật</h3>
-                    <p class="text-xs text-rose-400">Kiểm tra lại thông số đầu vào</p>
-                </div>
-            </div>
-            <p id="modal-error-message" class="text-sm text-gray-300 mb-6 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                Xem lại giá đặt lệnh.
-            </p>
-            <div class="flex justify-end">
-                <button onclick="closeErrorModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-rose-600/30 flex items-center space-x-1">
-                    <span>Đóng [X]</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
+<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen">
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         
         <!-- Header -->
@@ -57,7 +31,7 @@
             </div>
         </div>
 
-        <!-- Hàng 1: Thẻ Tài khoản & Nạp rút -->
+        <!-- Hàng 1: Thẻ Tài khoản & Nạp rút (Lọc từ 2026/8/7) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-md">
                 <span class="text-xs font-medium text-gray-400">Số Dư (Balance)</span>
@@ -77,13 +51,13 @@
             </div>
         </div>
 
-        <!-- Hàng 2: Thống Kê Hiệu Suất Giao Dịch -->
+        <!-- Hàng 2: Thống Kê Hiệu Suất Giao Dịch (Lọc từ 2026/8/7) -->
         <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl mb-6">
             <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 Thống Kê Hiệu Suất Giao Dịch (Từ 07/08/2026)
             </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80">
                     <span class="text-xs text-gray-400 block">Lệnh Thắng</span>
                     <p id="stat-wins" class="text-lg font-bold mt-1 text-emerald-400">0</p>
@@ -100,33 +74,58 @@
                     <span class="text-xs text-gray-400 block">Tổng Lợi Nhận (Net Profit)</span>
                     <p id="stat-net-profit" class="text-lg font-bold mt-1 text-white">+$0.00</p>
                 </div>
-                <div class="bg-gray-950/50 p-3.5 rounded-xl border border-gray-800/80 col-span-2 sm:col-span-1">
-                    <span class="text-xs text-gray-400 block">Hệ Số Lợi Nhận (PF)</span>
-                    <p id="stat-profit-factor" class="text-lg font-bold mt-1 text-sky-400">0.00</p>
+            </div>
+        </div>
+
+        <!-- Bảng Giá Thị Trường (Từ MT5) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-amber-500/20 p-3 rounded-xl border border-amber-500/30">
+                        <span class="text-xl font-black text-amber-500">XAU</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-300">Vàng (XAUUSD)</h3>
+                        <p class="text-xs text-gray-500">Giá trực tiếp từ MT5</p>
+                    </div>
+                </div>
+                <div class="text-right flex space-x-6">
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Giá Bán (Bid)</p>
+                        <p id="price-xau-bid" class="text-xl font-bold text-rose-400">---</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Giá Mua (Ask)</p>
+                        <p id="price-xau-ask" class="text-xl font-bold text-emerald-400">---</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-orange-500/20 p-3 rounded-xl border border-orange-500/30">
+                        <span class="text-xl font-black text-orange-500">BTC</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-300">Bitcoin (BTCUSD)</h3>
+                        <p class="text-xs text-gray-500">Giá trực tiếp từ MT5</p>
+                    </div>
+                </div>
+                <div class="text-right flex space-x-6">
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Giá Bán (Bid)</p>
+                        <p id="price-btc-bid" class="text-xl font-bold text-rose-400">---</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Giá Mua (Ask)</p>
+                        <p id="price-btc-ask" class="text-xl font-bold text-emerald-400">---</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Biểu Đồ TradingView (Vàng & BTC) -->
+        <!-- Hàng 3: Bảng Quản Lý Vị Thế & Lệnh Chờ -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
-                <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Biểu Đồ Giá Vàng (XAUUSD) - TradingView
-                </h2>
-                <div id="tradingview_gold" class="h-96 w-full rounded-xl overflow-hidden"></div>
-            </div>
-            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
-                <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Biểu Đồ Giá Bitcoin (BTCUSD) - TradingView
-                </h2>
-                <div id="tradingview_btc" class="h-96 w-full rounded-xl overflow-hidden"></div>
-            </div>
-        </div>
-
-        <!-- Bảng Vị Thế & Lệnh Chờ (Đã bỏ cột Ticket) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Vị thế đang chạy -->
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
                 <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
                     <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -151,6 +150,7 @@
                 </div>
             </div>
 
+            <!-- Lệnh đang chờ khớp -->
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
                 <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
                     <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -176,7 +176,7 @@
             </div>
         </div>
 
-        <!-- Form Đặt Lệnh Kỷ Luật -->
+        <!-- Hàng 4: Form Đặt Lệnh Kỷ Luật (Risk Filter) -->
         <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl mb-6">
             <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -188,10 +188,11 @@
                     <select id="order-symbol" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                         <option value="XAUUSD">XAUUSD (Vàng)</option>
                         <option value="BTCUSD">BTCUSD</option>
+                        <option value="EURUSD">EURUSD</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Loại lệnh (Limit)</label>
+                    <label class="block text-xs text-gray-400 mb-1">Loại lệnh (Chỉ Limit)</label>
                     <select id="order-type" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                         <option value="BUY_LIMIT">BUY LIMIT</option>
                         <option value="SELL_LIMIT">SELL LIMIT</option>
@@ -217,12 +218,12 @@
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row justify-between items-center bg-gray-950 p-3.5 rounded-xl border border-gray-800">
-                <span id="risk-status" class="text-xs text-emerald-400 font-medium mb-2 sm:mb-0">✓ Điều kiện hợp lệ</span>
+                <span id="risk-status" class="text-xs text-emerald-400 font-medium mb-2 sm:mb-0">✓ Đòn bẩy an toàn (&lt;= 1:10)</span>
                 <button onclick="sendPendingOrder()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/30">Gửi Lệnh Kỷ Luật</button>
             </div>
         </div>
 
-        <!-- Biểu đồ Lợi Nhuận Hàng Ngày -->
+        <!-- Hàng 5: Biểu đồ Lợi Nhuận Hàng Ngày -->
         <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl">
             <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
@@ -241,25 +242,7 @@
         const START_DATE_FILTER = Math.floor(new Date('2026-08-07T00:00:00').getTime() / 1000);
 
         let profitChart = null;
-        let currentMarketPrices = { XAUUSD: 0, BTCUSD: 0 };
-
-        function initTradingViewCharts() {
-            new TradingView.widget({
-                "width": "100%", "height": "100%", "symbol": "OANDA:XAUUSD", "interval": "D",
-                "timezone": "Asia/Bangkok", "theme": "dark", "style": "1", "locale": "vi_VN",
-                "toolbar_bg": "#1f2937", "enable_publishing": false, "allow_symbol_change": true,
-                "studies": ["MASimple@tv-basicstudies", "MASimple@tv-basicstudies", "BollingerBands@tv-basicstudies"],
-                "container_id": "tradingview_gold"
-            });
-
-            new TradingView.widget({
-                "width": "100%", "height": "100%", "symbol": "BINANCE:BTCUSDT", "interval": "D",
-                "timezone": "Asia/Bangkok", "theme": "dark", "style": "1", "locale": "vi_VN",
-                "toolbar_bg": "#1f2937", "enable_publishing": false, "allow_symbol_change": true,
-                "studies": ["MASimple@tv-basicstudies", "MASimple@tv-basicstudies", "BollingerBands@tv-basicstudies"],
-                "container_id": "tradingview_btc"
-            });
-        }
+        let currentMarketPrices = { XAUUSD: { bid: 0, ask: 0 }, BTCUSD: { bid: 0, ask: 0 }, EURUSD: { bid: 0, ask: 0 } };
 
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
@@ -267,7 +250,8 @@
                 type: 'bar',
                 data: { labels: [], datasets: [{ label: 'Lợi nhuận (USD)', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }] },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
                         x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
@@ -279,19 +263,22 @@
 
         async function fetchAllData() {
             try {
-                const [accRes, posRes, ordRes, histRes] = await Promise.all([
+                const [accRes, posRes, ordRes, histRes, priceRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
                     fetch(`${FIREBASE_URL}/live_pending_orders.json`),
-                    fetch(`${FIREBASE_URL}/closed_history.json`)
+                    fetch(`${FIREBASE_URL}/closed_history.json`),
+                    fetch(`${FIREBASE_URL}/market_prices.json`)
                 ]);
 
                 const accountData = await accRes.json() || {};
                 const positionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
                 const historyData = await histRes.json() || {};
+                const pricesData = await priceRes.json() || {};
 
                 updateAccountAndStatsUI(accountData, historyData);
+                updatePricesUI(pricesData);
                 updatePositionsUI(positionsData);
                 updatePendingUI(pendingData);
             } catch (err) {
@@ -308,13 +295,12 @@
             let totalNetProfit = 0;
             let wins = 0;
             let losses = 0;
-            let grossProfit = 0;
-            let grossLoss = 0;
             let dailyProfits = {};
 
             if (historyData) {
                 Object.values(historyData).forEach(deal => {
                     const closeTime = deal.close_time || 0;
+                    
                     if (closeTime >= START_DATE_FILTER) {
                         const profit = deal.profit || 0;
                         const dealType = deal.type || "";
@@ -324,8 +310,9 @@
                             else if (profit < 0) filteredWithdraw += Math.abs(profit);
                         } else {
                             totalNetProfit += profit;
-                            if (profit > 0) { wins++; grossProfit += profit; }
-                            else if (profit < 0) { losses++; grossLoss += Math.abs(profit); }
+
+                            if (profit > 0) wins++;
+                            else if (profit < 0) losses++;
 
                             const dateStr = new Date(closeTime * 1000).toISOString().split('T')[0];
                             if (!dailyProfits[dateStr]) dailyProfits[dateStr] = 0;
@@ -340,7 +327,6 @@
 
             const totalTrades = wins + losses;
             const winrate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
-            const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? grossProfit : 0);
 
             document.getElementById('stat-wins').innerText = wins;
             document.getElementById('stat-losses').innerText = losses;
@@ -350,8 +336,6 @@
             netProfitEl.innerText = (totalNetProfit >= 0 ? '+' : '') + '$' + totalNetProfit.toFixed(2);
             netProfitEl.className = `text-lg font-bold mt-1 ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            document.getElementById('stat-profit-factor').innerText = profitFactor.toFixed(2);
-
             const sortedDates = Object.keys(dailyProfits).sort();
             const sortedValues = sortedDates.map(d => dailyProfits[d]);
             
@@ -360,6 +344,25 @@
             profitChart.data.datasets[0].backgroundColor = sortedValues.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)');
             profitChart.data.datasets[0].borderColor = sortedValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
             profitChart.update();
+        }
+
+        function updatePricesUI(prices) {
+            if (prices.XAUUSD) {
+                document.getElementById('price-xau-bid').innerText = prices.XAUUSD.bid || '---';
+                document.getElementById('price-xau-ask').innerText = prices.XAUUSD.ask || '---';
+                currentMarketPrices.XAUUSD.bid = parseFloat(prices.XAUUSD.bid) || 0;
+                currentMarketPrices.XAUUSD.ask = parseFloat(prices.XAUUSD.ask) || 0;
+            }
+            if (prices.BTCUSD) {
+                document.getElementById('price-btc-bid').innerText = prices.BTCUSD.bid || '---';
+                document.getElementById('price-btc-ask').innerText = prices.BTCUSD.ask || '---';
+                currentMarketPrices.BTCUSD.bid = parseFloat(prices.BTCUSD.bid) || 0;
+                currentMarketPrices.BTCUSD.ask = parseFloat(prices.BTCUSD.ask) || 0;
+            }
+            if (prices.EURUSD) {
+                currentMarketPrices.EURUSD.bid = parseFloat(prices.EURUSD.bid) || 0;
+                currentMarketPrices.EURUSD.ask = parseFloat(prices.EURUSD.ask) || 0;
+            }
         }
 
         function updatePositionsUI(positions) {
@@ -372,7 +375,7 @@
             }
             keys.forEach(key => {
                 const p = positions[key];
-                if(p.symbol) currentMarketPrices[p.symbol] = p.price; // Cập nhật giá thị trường ngầm
+                if(!p) return;
                 const profitColor = p.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
@@ -380,7 +383,7 @@
                         <td class="p-2.5 font-semibold ${p.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${p.type}</td>
                         <td class="p-2.5">${p.volume}</td>
                         <td class="p-2.5">${p.price}</td>
-                        <td class="p-2.5 font-bold ${profitColor}">$${p.profit.toFixed(2)}</td>
+                        <td class="p-2.5 font-bold ${profitColor}">$${(p.profit || 0).toFixed(2)}</td>
                         <td class="p-2.5 text-center">
                             <button onclick="closePosition('${p.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-2.5 py-1 rounded-lg text-xs transition border border-rose-500/30">Đóng Lệnh</button>
                         </td>
@@ -398,6 +401,7 @@
             }
             keys.forEach(key => {
                 const o = orders[key];
+                if(!o) return;
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
                         <td class="p-2.5 font-bold">${o.symbol}</td>
@@ -412,29 +416,53 @@
             });
         }
 
-        function showErrorModal(message) {
-            document.getElementById('modal-error-message').innerText = message;
-            document.getElementById('error-modal').classList.remove('hidden');
-        }
-
-        function closeErrorModal() {
-            document.getElementById('error-modal').classList.add('hidden');
-        }
-
         async function sendPendingOrder() {
             const symbol = document.getElementById('order-symbol').value;
             const type = document.getElementById('order-type').value;
             const price = parseFloat(document.getElementById('order-price').value);
-            const marketPrice = currentMarketPrices[symbol] || (symbol === 'XAUUSD' ? 2400 : 60000); // Giá tham chiếu mặc định nếu chưa sync
+            const sl = parseFloat(document.getElementById('order-sl').value);
+            const tp = parseFloat(document.getElementById('order-tp').value);
 
-            // KIỂM TRA KỶ LUẬT ĐẶT LỆNH LIMIT
-            if (type === 'BUY_LIMIT' && price >= marketPrice) {
-                showErrorModal(`Xem lại giá đặt lệnh: Buy Limit (${price}) không được cao hơn hoặc bằng giá thị trường (${marketPrice}).`);
+            if (isNaN(price) || isNaN(sl) || isNaN(tp)) {
+                alert("VUI LÒNG NHẬP ĐẦY ĐỦ: Giá đặt lệnh, Cắt Lỗ (SL) và Chốt Lời (TP)!");
                 return;
             }
-            if (type === 'SELL_LIMIT' && price <= marketPrice) {
-                showErrorModal(`Xem lại giá đặt lệnh: Sell Limit (${price}) không được thấp hơn hoặc bằng giá thị trường (${marketPrice}).`);
+
+            const currentAsk = currentMarketPrices[symbol]?.ask || 0;
+            const currentBid = currentMarketPrices[symbol]?.bid || 0;
+
+            if (currentAsk === 0 || currentBid === 0) {
+                alert(`CHƯA NHẬN ĐƯỢC GIÁ THỊ TRƯỜNG CHO ${symbol}. Vui lòng đợi EA MT5 cập nhật giá!`);
                 return;
+            }
+
+            // --- BẮT LỖI LOGIC ĐẶT LỆNH ---
+            if (type === 'BUY_LIMIT') {
+                if (price >= currentAsk) {
+                    alert(`LỖI ĐẶT LỆNH:\nLoại lệnh: BUY LIMIT\nGiá đặt (${price}) phải NHỎ HƠN giá thị trường hiện tại (~${currentAsk})`);
+                    return;
+                }
+                if (sl >= price) {
+                    alert(`LỖI CẮT LỖ:\nLệnh BUY phải đặt SL (${sl}) NHỎ HƠN giá vào lệnh (${price})`);
+                    return;
+                }
+                if (tp <= price) {
+                    alert(`LỖI CHỐT LỜI:\nLệnh BUY phải đặt TP (${tp}) LỚN HƠN giá vào lệnh (${price})`);
+                    return;
+                }
+            } else if (type === 'SELL_LIMIT') {
+                if (price <= currentBid) {
+                    alert(`LỖI ĐẶT LỆNH:\nLoại lệnh: SELL LIMIT\nGiá đặt (${price}) phải LỚN HƠN giá thị trường hiện tại (~${currentBid})`);
+                    return;
+                }
+                if (sl <= price) {
+                    alert(`LỖI CẮT LỖ:\nLệnh SELL phải đặt SL (${sl}) LỚN HƠN giá vào lệnh (${price})`);
+                    return;
+                }
+                if (tp >= price) {
+                    alert(`LỖI CHỐT LỜI:\nLệnh SELL phải đặt TP (${tp}) NHỎ HƠN giá vào lệnh (${price})`);
+                    return;
+                }
             }
 
             const data = {
@@ -442,8 +470,8 @@
                 type: type,
                 volume: parseFloat(document.getElementById('order-volume').value),
                 price: price,
-                sl: parseFloat(document.getElementById('order-sl').value),
-                tp: parseFloat(document.getElementById('order-tp').value),
+                sl: sl,
+                tp: tp,
                 timestamp: Date.now()
             };
 
@@ -451,7 +479,7 @@
                 method: 'PUT',
                 body: JSON.stringify(data)
             });
-            alert("Đã gửi yêu cầu đặt lệnh xuống MT5!");
+            alert("Đã duyệt kỷ luật! Yêu cầu đặt lệnh đã được gửi xuống MT5.");
         }
 
         async function cancelOrder(ticket) {
@@ -467,7 +495,6 @@
         }
 
         window.onload = () => {
-            initTradingViewCharts();
             initChart();
             fetchAllData();
             setInterval(fetchAllData, 3000);
