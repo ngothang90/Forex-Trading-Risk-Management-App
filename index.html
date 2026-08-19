@@ -340,6 +340,32 @@
             profitChart.update();
         }
 
+        // HÀM SẮP XẾP CHUNG THEO 4 TIÊU CHÍ (1. Symbol -> 2. Type -> 3. Price -> 4. Volume)
+        function sortTableData(itemsArray) {
+            itemsArray.sort((a, b) => {
+                // 1. Cột sản phẩm (A -> Z)
+                let symA = (a.symbol || "").toString();
+                let symB = (b.symbol || "").toString();
+                if (symA !== symB) return symA.localeCompare(symB);
+
+                // 2. Cột loại (A -> Z)
+                let typeA = (a.type || "").toString();
+                let typeB = (b.type || "").toString();
+                if (typeA !== typeB) return typeA.localeCompare(typeB);
+
+                // 3. Cột giá đặt / giá vào (Bé tới lớn)
+                let priceA = parseFloat(a.price) || 0;
+                let priceB = parseFloat(b.price) || 0;
+                if (priceA !== priceB) return priceA - priceB;
+
+                // 4. Volume (Bé tới lớn)
+                let volA = parseFloat(a.volume) || 0;
+                let volB = parseFloat(b.volume) || 0;
+                return volA - volB;
+            });
+            return itemsArray;
+        }
+
         function updatePositionsUI(positions) {
             const tbody = document.getElementById('positions-table-body');
             tbody.innerHTML = '';
@@ -355,7 +381,8 @@
                 return;
             }
 
-            posList.sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+            // Áp dụng sắp xếp chuẩn theo 4 tiêu chí
+            sortTableData(posList);
 
             posList.forEach(p => {
                 const profitColor = p.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
@@ -388,7 +415,8 @@
                 return;
             }
 
-            ordList.sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+            // Áp dụng sắp xếp chuẩn theo 4 tiêu chí
+            sortTableData(ordList);
 
             ordList.forEach(o => {
                 tbody.innerHTML += `
