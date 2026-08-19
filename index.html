@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Discipline Gatekeeper</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; }
@@ -15,11 +13,10 @@
     </style>
 </head>
 <body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen pb-12">
-    <!-- Trên Web max-w-5xl, trên Mobile tối ưu gọn gàng -->
-    <div class="container mx-auto px-4 py-6 max-w-6xl">
+    <div class="container mx-auto px-4 py-6 max-w-6xl space-y-6">
         
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6 bg-gray-900 p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-xl">
+        <div class="flex items-center justify-between bg-gray-900 p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-xl">
             <div class="flex items-center space-x-3">
                 <div class="bg-blue-600 p-2.5 rounded-xl shadow-md shadow-blue-600/30">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -29,14 +26,14 @@
                     <p class="text-xs text-gray-400">Hệ Thống Quản Trị Kỷ Luật Giao Dịch</p>
                 </div>
             </div>
-            <div id="connection-status" class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full">
+            <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full">
                 <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                 <span class="text-xs font-semibold text-emerald-400">Sẵn sàng</span>
             </div>
         </div>
 
-        <!-- Hàng 1: Thẻ Tài khoản (4 cột) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <!-- Thẻ Tài Khoản & Đòn Bẩy -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                 <span class="text-xs text-gray-400 block mb-1">Số Dư (Balance)</span>
                 <p id="acc-balance" class="text-xl sm:text-2xl font-bold text-emerald-400">$0.00</p>
@@ -46,17 +43,45 @@
                 <p id="acc-equity" class="text-xl sm:text-2xl font-bold text-sky-400">$0.00</p>
             </div>
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                <span class="text-xs text-gray-400 block mb-1">Đòn Bẩy</span>
+                <p id="acc-leverage" class="text-xl sm:text-2xl font-bold text-purple-400">1:25</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                 <span class="text-xs text-gray-400 block mb-1">Tổng Nạp</span>
                 <p id="acc-deposit" class="text-xl sm:text-2xl font-bold text-blue-400">$0.00</p>
             </div>
-            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 col-span-2 sm:col-span-1">
                 <span class="text-xs text-gray-400 block mb-1">Tổng Rút</span>
                 <p id="acc-withdraw" class="text-xl sm:text-2xl font-bold text-amber-400">$0.00</p>
             </div>
         </div>
 
-        <!-- Hàng 2: Thống Kê Hiệu Suất -->
-        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-6">
+        <!-- Khối Lượng Tối Đa Vào Lệnh (XAU & BTC) -->
+        <div class="bg-gradient-to-r from-gray-900 via-gray-900 to-blue-950/40 p-5 rounded-2xl border border-gray-800 shadow-lg">
+            <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Khối Lượng Tối Đa Cho Phép (Max Lot)
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-gray-400 block">XAUUSD (Vàng)</span>
+                        <span class="text-[10px] text-gray-500">Dựa trên đòn bẩy hiện tại</span>
+                    </div>
+                    <p id="max-lot-xau" class="text-lg font-bold text-amber-400">0.00 Lot</p>
+                </div>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-gray-400 block">BTCUSD (Bitcoin)</span>
+                        <span class="text-[10px] text-gray-500">Dựa trên đòn bẩy hiện tại</span>
+                    </div>
+                    <p id="max-lot-btc" class="text-lg font-bold text-amber-400">0.00 Lot</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống Kê Hiệu Suất -->
+        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
             <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 Hiệu Suất Giao Dịch (Từ 07/08)
@@ -77,141 +102,148 @@
             </div>
         </div>
 
-        <!-- Bảng Giá Trực Tiếp -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-black text-amber-500">XAUUSD</span>
-                    <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded">Vàng</span>
-                </div>
-                <div class="flex justify-between items-end text-sm sm:text-base font-bold">
-                    <span id="price-xau-bid" class="text-rose-400">---</span>
-                    <span id="price-xau-ask" class="text-emerald-400">---</span>
+        <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp (Grid 2 cột trên màn hình lớn) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Vị Thế Đang Chạy -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Vị Thế Đang Chạy
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
+                            <tr>
+                                <th class="p-3">Mã</th>
+                                <th class="p-3">Loại</th>
+                                <th class="p-3">Vol</th>
+                                <th class="p-3">Giá Vào</th>
+                                <th class="p-3">Lợi Nhuận</th>
+                                <th class="p-3 text-right">Xử Lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-table-body" class="divide-y divide-gray-800/60">
+                            <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-black text-orange-500">BTCUSD</span>
-                    <span class="text-[10px] bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded">Bitcoin</span>
-                </div>
-                <div class="flex justify-between items-end text-sm sm:text-base font-bold">
-                    <span id="price-btc-bid" class="text-rose-400">---</span>
-                    <span id="price-btc-ask" class="text-emerald-400">---</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Vị Thế Đang Chạy -->
-        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-6">
-            <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                Vị Thế Đang Chạy
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-3">Sản Phẩm</th>
-                            <th class="p-3">Loại</th>
-                            <th class="p-3">Volume</th>
-                            <th class="p-3">Giá Vào</th>
-                            <th class="p-3">Lợi Nhuận</th>
-                            <th class="p-3 text-right">Xử Lý</th>
-                        </tr>
-                    </thead>
-                    <tbody id="positions-table-body" class="divide-y divide-gray-800/60">
-                        <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Lệnh Chờ Khớp -->
-        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-6">
-            <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Lệnh Chờ Khớp
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-3">Sản Phẩm</th>
-                            <th class="p-3">Loại</th>
-                            <th class="p-3">Volume</th>
-                            <th class="p-3">Giá Đặt</th>
-                            <th class="p-3">SL / TP</th>
-                            <th class="p-3 text-right">Xử Lý</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pending-table-body" class="divide-y divide-gray-800/60">
-                        <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ</td></tr>
-                    </tbody>
-                </table>
+            <!-- Lệnh Chờ Khớp -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lệnh Chờ Khớp
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
+                            <tr>
+                                <th class="p-3">Mã</th>
+                                <th class="p-3">Loại</th>
+                                <th class="p-3">Vol</th>
+                                <th class="p-3">Giá Đặt</th>
+                                <th class="p-3">SL / TP</th>
+                                <th class="p-3 text-right">Xử Lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table-body" class="divide-y divide-gray-800/60">
+                            <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Form Đặt Lệnh Kỷ Luật -->
-        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-6">
-            <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                Đặt Lệnh Kỷ Luật
-            </h2>
-            <div class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Sản phẩm</label>
-                        <select id="order-symbol" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                            <option value="XAUUSD">XAUUSD (Vàng)</option>
-                            <option value="BTCUSD">BTCUSD</option>
-                            <option value="EURUSD">EURUSD</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Loại lệnh</label>
-                        <select id="order-type" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                            <option value="BUY_LIMIT">BUY LIMIT</option>
-                            <option value="SELL_LIMIT">SELL LIMIT</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Khối lượng (Lot)</label>
-                        <input type="number" id="order-volume" value="0.01" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Giá đặt (Price)</label>
-                        <input type="number" id="order-price" placeholder="Nhập giá Limit" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Stop Loss (Bắt buộc)</label>
-                        <input type="number" id="order-sl" placeholder="Nhập giá SL" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">Take Profit (Bắt buộc)</label>
-                        <input type="number" id="order-tp" placeholder="Nhập giá TP" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                    </div>
-                </div>
-
-                <button onclick="sendPendingOrder()" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/30 mt-2">
-                    Gửi Lệnh Kỷ Luật
-                </button>
-            </div>
-        </div>
-
-        <!-- Biểu Đồ Lợi Nhuận -->
+        <!-- Lịch Sử Giao Dịch Trong Ngày -->
         <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
             <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                Biểu Đồ Lợi Nhuận Theo Ngày
+                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Lịch Sử Giao Dịch Trong Ngày
             </h2>
-            <div class="relative h-64 sm:h-80 w-full">
-                <canvas id="dailyProfitChart"></canvas>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                    <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
+                        <tr>
+                            <th class="p-3">Sản Phẩm</th>
+                            <th class="p-3">Loại</th>
+                            <th class="p-3">Volume</th>
+                            <th class="p-3">Giá Đóng</th>
+                            <th class="p-3">Lợi Nhuận</th>
+                            <th class="p-3 text-right">Thời Gian Đóng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-gray-800/60">
+                        <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Form Đặt Lệnh Kỷ Luật & Biểu Đồ (Grid 2 cột trên màn hình lớn) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Form Đặt Lệnh -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Đặt Lệnh Kỷ Luật
+                </h2>
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Sản phẩm</label>
+                            <select id="order-symbol" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                                <option value="XAUUSD">XAUUSD (Vàng)</option>
+                                <option value="BTCUSD">BTCUSD</option>
+                                <option value="EURUSD">EURUSD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Loại lệnh</label>
+                            <select id="order-type" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                                <option value="BUY_LIMIT">BUY LIMIT</option>
+                                <option value="SELL_LIMIT">SELL LIMIT</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Khối lượng (Lot)</label>
+                            <input type="number" id="order-volume" value="0.01" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Giá đặt (Price)</label>
+                            <input type="number" id="order-price" placeholder="Nhập giá Limit" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Stop Loss</label>
+                            <input type="number" id="order-sl" placeholder="Nhập giá SL" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-medium">Take Profit</label>
+                            <input type="number" id="order-tp" placeholder="Nhập giá TP" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <button onclick="sendPendingOrder()" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/30 mt-2">
+                        Gửi Lệnh Kỷ Luật
+                    </button>
+                </div>
+            </div>
+
+            <!-- Biểu Đồ Lợi Nhuận -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800 flex flex-col">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    Biểu Đồ Lợi Nhuận Theo Ngày
+                </h2>
+                <div class="relative flex-grow h-64 sm:h-72 w-full">
+                    <canvas id="dailyProfitChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -221,9 +253,7 @@
     <script>
         const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
         const START_DATE_FILTER = Math.floor(new Date('2026-08-07T00:00:00').getTime() / 1000);
-
         let profitChart = null;
-        let currentMarketPrices = { XAUUSD: { bid: 0, ask: 0 }, BTCUSD: { bid: 0, ask: 0 }, EURUSD: { bid: 0, ask: 0 } };
 
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
@@ -244,8 +274,6 @@
 
         async function fetchAllData() {
             try {
-                fetchPublicPrices();
-
                 const [accRes, posRes, ordRes, histRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
@@ -253,65 +281,55 @@
                     fetch(`${FIREBASE_URL}/closed_history.json`)
                 ]);
 
-                const accountData = await accRes.json() || {};
-                const positionsData = await posRes.json() || {};
-                const pendingData = await ordRes.json() || {};
                 const historyData = await histRes.json() || {};
-
-                updateAccountAndStatsUI(accountData, historyData);
-                updatePositionsUI(positionsData);
-                updatePendingUI(pendingData);
+                updateAccountAndStatsUI(await accRes.json() || {}, historyData);
+                updateTableUI('positions-table-body', await posRes.json(), true);
+                updateTableUI('pending-table-body', await ordRes.json(), false);
+                updateHistoryUI(historyData);
             } catch (err) {
                 console.error("Lỗi kết nối Firebase:", err);
             }
         }
 
-        async function fetchPublicPrices() {
-            try {
-                const btcRes = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=BTCUSDT');
-                const btcData = await btcRes.json();
-                
-                const xauRes = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=PAXGUSDT');
-                const xauData = await xauRes.json();
-
-                const btcBid = parseFloat(btcData.bidPrice).toFixed(1);
-                const btcAsk = parseFloat(btcData.askPrice).toFixed(1);
-                document.getElementById('price-btc-bid').innerText = btcBid;
-                document.getElementById('price-btc-ask').innerText = btcAsk;
-                currentMarketPrices.BTCUSD.bid = parseFloat(btcBid);
-                currentMarketPrices.BTCUSD.ask = parseFloat(btcAsk);
-
-                const xauBid = parseFloat(xauData.bidPrice).toFixed(2);
-                const xauAsk = parseFloat(xauData.askPrice).toFixed(2);
-                document.getElementById('price-xau-bid').innerText = xauBid;
-                document.getElementById('price-xau-ask').innerText = xauAsk;
-                currentMarketPrices.XAUUSD.bid = parseFloat(xauBid);
-                currentMarketPrices.XAUUSD.ask = parseFloat(xauAsk);
-            } catch (err) {}
-        }
-
         function updateAccountAndStatsUI(accountData, historyData) {
-            document.getElementById('acc-balance').innerText = `$${(accountData.balance || 0).toFixed(2)}`;
+            const balance = accountData.balance || 0;
+            document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
+
+            // Xác định đòn bẩy tự động theo số dư
+            let leverage = 5;
+            if (balance < 500) {
+                leverage = 25;
+            } else if (balance <= 2000) {
+                leverage = 10;
+            }
+            document.getElementById('acc-leverage').innerText = `1:${leverage}`;
+
+            // Tính toán khối lượng tối đa (Max Lot) dựa trên Balance và Đòn bẩy
+            // Công thức ước tính dựa trên giá trung bình thị trường chuẩn: XAU (~$2600/oz, 1 lot = 100 oz), BTC (~$65,000, 1 lot = 1 BTC)
+            const estXauPrice = 2600;
+            const estBtcPrice = 65000;
+            
+            const maxNotional = balance * leverage;
+            const maxLotXau = maxNotional / (estXauPrice * 100);
+            const maxLotBtc = maxNotional / (estBtcPrice * 1);
+
+            document.getElementById('max-lot-xau').innerText = `${maxLotXau.toFixed(2)} Lot`;
+            document.getElementById('max-lot-btc').innerText = `${maxLotBtc.toFixed(2)} Lot`;
 
             let filteredDeposit = 0, filteredWithdraw = 0, totalNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
 
             if (historyData) {
                 Object.values(historyData).forEach(deal => {
-                    const closeTime = deal.close_time || 0;
-                    if (closeTime >= START_DATE_FILTER) {
+                    if ((deal.close_time || 0) >= START_DATE_FILTER) {
                         const profit = deal.profit || 0;
-                        const dealType = deal.type || "";
-
-                        if (dealType === "BALANCE" || deal.is_balance || (deal.order_id == 0 && profit != 0)) {
+                        if (deal.type === "BALANCE" || deal.is_balance || (deal.order_id == 0 && profit != 0)) {
                             if (profit > 0) filteredDeposit += profit;
                             else if (profit < 0) filteredWithdraw += Math.abs(profit);
                         } else {
                             totalNetProfit += profit;
-                            if (profit > 0) wins++;
-                            else if (profit < 0) losses++;
-
-                            const dateStr = new Date(closeTime * 1000).toISOString().split('T')[0].slice(5);
+                            if (profit > 0) wins++; else if (profit < 0) losses++;
+                            const dateStr = new Date(deal.close_time * 1000).toISOString().split('T')[0].slice(5);
                             dailyProfits[dateStr] = (dailyProfits[dateStr] || 0) + profit;
                         }
                     }
@@ -320,13 +338,9 @@
 
             document.getElementById('acc-deposit').innerText = `$${filteredDeposit.toFixed(2)}`;
             document.getElementById('acc-withdraw').innerText = `$${filteredWithdraw.toFixed(2)}`;
-
-            const totalTrades = wins + losses;
-            const winrate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
-
             document.getElementById('stat-wins').innerText = wins;
             document.getElementById('stat-losses').innerText = losses;
-            document.getElementById('stat-winrate').innerText = winrate.toFixed(1) + '%';
+            document.getElementById('stat-winrate').innerText = ((wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0).toFixed(1) + '%';
             
             const netProfitEl = document.getElementById('stat-net-profit');
             netProfitEl.innerText = (totalNetProfit >= 0 ? '+' : '') + '$' + totalNetProfit.toFixed(2);
@@ -340,153 +354,128 @@
             profitChart.update();
         }
 
-        // HÀM SẮP XẾP CHUNG THEO 4 TIÊU CHÍ (1. Symbol -> 2. Type -> 3. Price -> 4. Volume)
-        function sortTableData(itemsArray) {
-            itemsArray.sort((a, b) => {
-                // 1. Cột sản phẩm (A -> Z)
-                let symA = (a.symbol || "").toString();
-                let symB = (b.symbol || "").toString();
-                if (symA !== symB) return symA.localeCompare(symB);
-
-                // 2. Cột loại (A -> Z)
-                let typeA = (a.type || "").toString();
-                let typeB = (b.type || "").toString();
-                if (typeA !== typeB) return typeA.localeCompare(typeB);
-
-                // 3. Cột giá đặt / giá vào (Bé tới lớn)
-                let priceA = parseFloat(a.price) || 0;
-                let priceB = parseFloat(b.price) || 0;
-                if (priceA !== priceB) return priceA - priceB;
-
-                // 4. Volume (Bé tới lớn)
-                let volA = parseFloat(a.volume) || 0;
-                let volB = parseFloat(b.volume) || 0;
-                return volA - volB;
-            });
-            return itemsArray;
+        function sortTableData(items) {
+            return items.sort((a, b) => 
+                (a.symbol || "").localeCompare(b.symbol || "") || 
+                (a.type || "").localeCompare(b.type || "") || 
+                (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0) || 
+                (parseFloat(a.volume) || 0) - (parseFloat(b.volume) || 0)
+            );
         }
 
-        function updatePositionsUI(positions) {
-            const tbody = document.getElementById('positions-table-body');
+        function updateTableUI(elementId, data, isPosition) {
+            const tbody = document.getElementById(elementId);
             tbody.innerHTML = '';
             
-            if (!positions) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế</td></tr>`;
+            if (!data) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">${isPosition ? 'Không có vị thế' : 'Không có lệnh chờ'}</td></tr>`;
                 return;
             }
 
-            const posList = Object.values(positions).filter(p => p);
-            if (posList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có vị thế</td></tr>`;
+            const list = Object.values(data).filter(x => x);
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">${isPosition ? 'Không có vị thế' : 'Không có lệnh chờ'}</td></tr>`;
                 return;
             }
 
-            // Áp dụng sắp xếp chuẩn theo 4 tiêu chí
-            sortTableData(posList);
+            sortTableData(list);
 
-            posList.forEach(p => {
-                const profitColor = p.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-800/40">
-                        <td class="p-3 font-bold">${p.symbol}</td>
-                        <td class="p-3 font-semibold ${p.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${p.type}</td>
-                        <td class="p-3">${p.volume}</td>
-                        <td class="p-3">${p.price}</td>
-                        <td class="p-3 font-bold ${profitColor}">$${(p.profit || 0).toFixed(2)}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="closePosition('${p.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 active:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-rose-500/30 transition">Đóng</button>
-                        </td>
-                    </tr>`;
+            list.forEach(item => {
+                if (isPosition) {
+                    const profitColor = item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                    tbody.innerHTML += `
+                        <tr class="border-b border-gray-800/40">
+                            <td class="p-3 font-bold">${item.symbol}</td>
+                            <td class="p-3 font-semibold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type}</td>
+                            <td class="p-3">${item.volume}</td>
+                            <td class="p-3">${item.price}</td>
+                            <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="sendAction('CLOSE_POSITION', '${item.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-rose-500/30 transition">Đóng</button>
+                            </td>
+                        </tr>`;
+                } else {
+                    tbody.innerHTML += `
+                        <tr class="border-b border-gray-800/40">
+                            <td class="p-3 font-bold">${item.symbol}</td>
+                            <td class="p-3 font-semibold text-amber-400">${item.type}</td>
+                            <td class="p-3">${item.volume}</td>
+                            <td class="p-3">${item.price}</td>
+                            <td class="p-3 text-gray-300 text-xs">SL: ${item.sl} | TP: ${item.tp}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="sendAction('CANCEL_ORDER', '${item.ticket}')" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Hủy</button>
+                            </td>
+                        </tr>`;
+                }
             });
         }
 
-        function updatePendingUI(orders) {
-            const tbody = document.getElementById('pending-table-body');
+        function updateHistoryUI(historyData) {
+            const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
 
-            if (!orders) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ</td></tr>`;
+            if (!historyData) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
 
-            const ordList = Object.values(orders).filter(o => o);
-            if (ordList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lệnh chờ</td></tr>`;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const list = Object.values(historyData).filter(deal => {
+                if (!deal || !deal.close_time) return false;
+                const dealType = deal.type || "";
+                const profit = deal.profit || 0;
+                if (dealType === "BALANCE" || deal.is_balance || (deal.order_id == 0 && profit != 0)) return false;
+
+                const dealDateStr = new Date(deal.close_time * 1000).toISOString().split('T')[0];
+                return dealDateStr === todayStr;
+            });
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
 
-            // Áp dụng sắp xếp chuẩn theo 4 tiêu chí
-            sortTableData(ordList);
+            list.sort((a, b) => b.close_time - a.close_time);
 
-            ordList.forEach(o => {
+            list.forEach(deal => {
+                const profitColor = deal.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                const timeStr = new Date(deal.close_time * 1000).toLocaleTimeString();
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
-                        <td class="p-3 font-bold">${o.symbol}</td>
-                        <td class="p-3 font-semibold text-amber-400">${o.type}</td>
-                        <td class="p-3">${o.volume}</td>
-                        <td class="p-3">${o.price}</td>
-                        <td class="p-3 text-gray-300 text-xs">SL: ${o.sl} | TP: ${o.tp}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="cancelOrder('${o.ticket}')" class="bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Hủy</button>
-                        </td>
+                        <td class="p-3 font-bold">${deal.symbol}</td>
+                        <td class="p-3 font-semibold ${deal.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${deal.type}</td>
+                        <td class="p-3">${deal.volume}</td>
+                        <td class="p-3">${deal.price}</td>
+                        <td class="p-3 font-bold ${profitColor}">$${(deal.profit || 0).toFixed(2)}</td>
+                        <td class="p-3 text-right text-gray-400 text-xs">${timeStr}</td>
                     </tr>`;
             });
         }
 
         async function sendPendingOrder() {
-            const symbol = document.getElementById('order-symbol').value;
-            const type = document.getElementById('order-type').value;
-            const price = parseFloat(document.getElementById('order-price').value);
-            const sl = parseFloat(document.getElementById('order-sl').value);
-            const tp = parseFloat(document.getElementById('order-tp').value);
+            const data = {
+                symbol: document.getElementById('order-symbol').value,
+                type: document.getElementById('order-type').value,
+                volume: parseFloat(document.getElementById('order-volume').value),
+                price: parseFloat(document.getElementById('order-price').value),
+                sl: parseFloat(document.getElementById('order-sl').value),
+                tp: parseFloat(document.getElementById('order-tp').value),
+                timestamp: Date.now()
+            };
 
-            if (isNaN(price) || isNaN(sl) || isNaN(tp)) {
+            if (isNaN(data.price) || isNaN(data.sl) || isNaN(data.tp)) {
                 alert("Vui lòng nhập đủ: Giá đặt, SL và TP!");
                 return;
             }
-
-            const currentAsk = currentMarketPrices[symbol]?.ask || 0;
-            const currentBid = currentMarketPrices[symbol]?.bid || 0;
-
-            if (currentAsk === 0 || currentBid === 0) {
-                alert("Đang cập nhật giá thị trường, vui lòng thử lại sau vài giây!");
-                return;
-            }
-
-            if (type === 'BUY_LIMIT') {
-                if (price >= currentAsk) { alert(`BUY LIMIT: Giá đặt (${price}) phải nhỏ hơn giá hiện tại (~${currentAsk})`); return; }
-                if (sl >= price) { alert(`BUY LIMIT: SL (${sl}) phải nhỏ hơn giá đặt (${price})`); return; }
-                if (tp <= price) { alert(`BUY LIMIT: TP (${tp}) phải lớn hơn giá đặt (${price})`); return; }
-            } else if (type === 'SELL_LIMIT') {
-                if (price <= currentBid) { alert(`SELL LIMIT: Giá đặt (${price}) phải lớn hơn giá hiện tại (~${currentBid})`); return; }
-                if (sl <= price) { alert(`SELL LIMIT: SL (${sl}) phải lớn hơn giá đặt (${price})`); return; }
-                if (tp >= price) { alert(`SELL LIMIT: TP (${tp}) phải nhỏ hơn giá đặt (${price})`); return; }
-            }
-
-            const data = {
-                symbol: symbol,
-                type: type,
-                volume: parseFloat(document.getElementById('order-volume').value),
-                price: price,
-                sl: sl,
-                tp: tp,
-                timestamp: Date.now()
-            };
 
             await fetch(`${FIREBASE_URL}/pending_order.json`, { method: 'PUT', body: JSON.stringify(data) });
             alert("Đã gửi lệnh thành công!");
         }
 
-        async function cancelOrder(ticket) {
-            const data = { action: 'CANCEL_ORDER', ticket: ticket, timestamp: Date.now() };
+        async function sendAction(action, ticket) {
+            const data = { action, ticket, timestamp: Date.now() };
             await fetch(`${FIREBASE_URL}/action_request.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert(`Đã gửi yêu cầu hủy lệnh #${ticket}`);
-        }
-
-        async function closePosition(ticket) {
-            const data = { action: 'CLOSE_POSITION', ticket: ticket, timestamp: Date.now() };
-            await fetch(`${FIREBASE_URL}/action_request.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert(`Đã gửi yêu cầu đóng lệnh #${ticket}`);
+            alert(`Đã gửi yêu cầu ${action === 'CLOSE_POSITION' ? 'đóng lệnh' : 'hủy lệnh'} #${ticket}`);
         }
 
         window.onload = () => {
