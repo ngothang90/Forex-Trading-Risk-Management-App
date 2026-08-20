@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <!-- Thẻ Tài Khoản & Đòn Bẩy -->
+        <!-- Thẻ Tài Khoản (Đã đổi vị trí Đòn Bẩy ra sau Tổng Rút) -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                 <span class="text-xs text-gray-400 block mb-1">Số Dư (Balance)</span>
@@ -43,37 +43,37 @@
                 <p id="acc-equity" class="text-xl sm:text-2xl font-bold text-sky-400">$0.00</p>
             </div>
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                <span class="text-xs text-gray-400 block mb-1">Đòn Bẩy</span>
-                <p id="acc-leverage" class="text-xl sm:text-2xl font-bold text-purple-400">1:25</p>
-            </div>
-            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                 <span class="text-xs text-gray-400 block mb-1">Tổng Nạp</span>
                 <p id="acc-deposit" class="text-xl sm:text-2xl font-bold text-blue-400">$0.00</p>
             </div>
-            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 col-span-2 sm:col-span-1">
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                 <span class="text-xs text-gray-400 block mb-1">Tổng Rút</span>
                 <p id="acc-withdraw" class="text-xl sm:text-2xl font-bold text-amber-400">$0.00</p>
             </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 col-span-2 sm:col-span-1">
+                <span class="text-xs text-gray-400 block mb-1">Đòn Bẩy</span>
+                <p id="acc-leverage" class="text-xl sm:text-2xl font-bold text-purple-400">1:25</p>
+            </div>
         </div>
 
-        <!-- Khối Lượng Tối Đa Vào Lệnh (XAU & BTC) -->
+        <!-- Khối Lượng Tối Đa Cho Phép (Max Lot - Đã trừ vị thế đang chạy) -->
         <div class="bg-gradient-to-r from-gray-900 via-gray-900 to-blue-950/40 p-5 rounded-2xl border border-gray-800 shadow-lg">
             <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-3 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Khối Lượng Tối Đa Cho Phép (Max Lot)
+                Khối Lượng Tối Đa Cho Phép (Max Lot - Đã Trừ Vị Thế)
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
                     <div>
                         <span class="text-xs text-gray-400 block">XAUUSD (Vàng)</span>
-                        <span class="text-[10px] text-gray-500">Dựa trên đòn bẩy hiện tại</span>
+                        <span class="text-[10px] text-gray-500">Đã trừ khối lượng lệnh đang mở</span>
                     </div>
                     <p id="max-lot-xau" class="text-lg font-bold text-amber-400">0.00 Lot</p>
                 </div>
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
                     <div>
                         <span class="text-xs text-gray-400 block">BTCUSD (Bitcoin)</span>
-                        <span class="text-[10px] text-gray-500">Dựa trên đòn bẩy hiện tại</span>
+                        <span class="text-[10px] text-gray-500">Đã trừ khối lượng lệnh đang mở</span>
                     </div>
                     <p id="max-lot-btc" class="text-lg font-bold text-amber-400">0.00 Lot</p>
                 </div>
@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp (Grid 2 cột trên màn hình lớn) -->
+        <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Vị Thế Đang Chạy -->
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
@@ -155,32 +155,59 @@
             </div>
         </div>
 
-        <!-- Lịch Sử Giao Dịch Trong Ngày -->
-        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
-            <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Lịch Sử Giao Dịch Trong Ngày
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead class="bg-gray-950 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-3">Sản Phẩm</th>
-                            <th class="p-3">Loại</th>
-                            <th class="p-3">Volume</th>
-                            <th class="p-3">Giá Đóng</th>
-                            <th class="p-3">Lợi Nhuận</th>
-                            <th class="p-3 text-right">Thời Gian Đóng</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body" class="divide-y divide-gray-800/60">
-                        <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>
-                    </tbody>
-                </table>
+        <!-- Lệnh Không Khớp / Bị Hủy Trong Ngày & Lịch Sử Giao Dịch -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Lệnh Không Khớp / Bị Hủy Trong Ngày -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    Lệnh Không Khớp / Đã Hủy Trong Ngày
+                </h2>
+                <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase sticky top-0">
+                            <tr>
+                                <th class="p-3">Thời gian</th>
+                                <th class="p-3">Mã</th>
+                                <th class="p-3">Loại</th>
+                                <th class="p-3">Vol</th>
+                                <th class="p-3">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unmatched-table-body" class="divide-y divide-gray-800/60">
+                            <tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Lịch Sử Giao Dịch Trong Ngày -->
+            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lịch Sử Giao Dịch Trong Ngày
+                </h2>
+                <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase sticky top-0">
+                            <tr>
+                                <th class="p-3">Sản Phẩm</th>
+                                <th class="p-3">Loại</th>
+                                <th class="p-3">Volume</th>
+                                <th class="p-3">Giá Đóng</th>
+                                <th class="p-3">Lợi Nhuận</th>
+                                <th class="p-3 text-right">Thời Gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-gray-800/60">
+                            <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Form Đặt Lệnh Kỷ Luật & Biểu Đồ (Grid 2 cột trên màn hình lớn) -->
+        <!-- Form Đặt Lệnh Kỷ Luật & Biểu Đồ -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Form Đặt Lệnh -->
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
@@ -196,6 +223,9 @@
                                 <option value="XAUUSD">XAUUSD (Vàng)</option>
                                 <option value="BTCUSD">BTCUSD</option>
                                 <option value="EURUSD">EURUSD</option>
+                                <option value="USDJPY">USDJPY</option>
+                                <option value="GBPEUR">GBPEUR</option>
+                                <option value="GBPUSD">GBPUSD</option>
                             </select>
                         </div>
                         <div>
@@ -274,29 +304,32 @@
 
         async function fetchAllData() {
             try {
-                const [accRes, posRes, ordRes, histRes] = await Promise.all([
+                const [accRes, posRes, ordRes, histRes, unmatchedRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
                     fetch(`${FIREBASE_URL}/live_pending_orders.json`),
-                    fetch(`${FIREBASE_URL}/closed_history.json`)
+                    fetch(`${FIREBASE_URL}/closed_history.json`),
+                    fetch(`${FIREBASE_URL}/daily_unmatched.json`)
                 ]);
 
                 const historyData = await histRes.json() || {};
-                updateAccountAndStatsUI(await accRes.json() || {}, historyData);
-                updateTableUI('positions-table-body', await posRes.json(), true);
+                const positionsData = await posRes.json() || {};
+                
+                updateAccountAndStatsUI(await accRes.json() || {}, historyData, positionsData);
+                updateTableUI('positions-table-body', positionsData, true);
                 updateTableUI('pending-table-body', await ordRes.json(), false);
                 updateHistoryUI(historyData);
+                updateUnmatchedUI(await unmatchedRes.json() || {});
             } catch (err) {
                 console.error("Lỗi kết nối Firebase:", err);
             }
         }
 
-        function updateAccountAndStatsUI(accountData, historyData) {
+        function updateAccountAndStatsUI(accountData, historyData, positionsData) {
             const balance = accountData.balance || 0;
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
 
-            // Xác định đòn bẩy tự động theo số dư
             let leverage = 5;
             if (balance < 500) {
                 leverage = 25;
@@ -305,17 +338,32 @@
             }
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
-            // Tính toán khối lượng tối đa (Max Lot) dựa trên Balance và Đòn bẩy
-            // Công thức ước tính dựa trên giá trung bình thị trường chuẩn: XAU (~$2600/oz, 1 lot = 100 oz), BTC (~$65,000, 1 lot = 1 BTC)
+            let runningXauVol = 0;
+            let runningBtcVol = 0;
+            if (positionsData) {
+                Object.values(positionsData).forEach(p => {
+                    if (!p) return;
+                    let sym = (p.symbol || "").toUpperCase();
+                    if (sym.includes("XAU") || sym.includes("GOLD")) {
+                        runningXauVol += parseFloat(p.volume || 0);
+                    } else if (sym.includes("BTC")) {
+                        runningBtcVol += parseFloat(p.volume || 0);
+                    }
+                });
+            }
+
             const estXauPrice = 2600;
             const estBtcPrice = 65000;
             
             const maxNotional = balance * leverage;
-            const maxLotXau = maxNotional / (estXauPrice * 100);
-            const maxLotBtc = maxNotional / (estBtcPrice * 1);
+            const totalMaxLotXau = maxNotional / (estXauPrice * 100);
+            const totalMaxLotBtc = maxNotional / (estBtcPrice * 1);
 
-            document.getElementById('max-lot-xau').innerText = `${maxLotXau.toFixed(2)} Lot`;
-            document.getElementById('max-lot-btc').innerText = `${maxLotBtc.toFixed(2)} Lot`;
+            const netMaxLotXau = Math.max(0, totalMaxLotXau - runningXauVol);
+            const netMaxLotBtc = Math.max(0, totalMaxLotBtc - runningBtcVol);
+
+            document.getElementById('max-lot-xau').innerText = `${netMaxLotXau.toFixed(2)} Lot`;
+            document.getElementById('max-lot-btc').innerText = `${netMaxLotBtc.toFixed(2)} Lot`;
 
             let filteredDeposit = 0, filteredWithdraw = 0, totalNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
 
@@ -448,6 +496,42 @@
                         <td class="p-3">${deal.price}</td>
                         <td class="p-3 font-bold ${profitColor}">$${(deal.profit || 0).toFixed(2)}</td>
                         <td class="p-3 text-right text-gray-400 text-xs">${timeStr}</td>
+                    </tr>`;
+            });
+        }
+
+        function updateUnmatchedUI(unmatchedData) {
+            const tbody = document.getElementById('unmatched-table-body');
+            tbody.innerHTML = '';
+
+            if (!unmatchedData) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
+                return;
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const list = Object.values(unmatchedData).filter(item => {
+                if (!item || !item.time) return false;
+                const itemDateStr = new Date(item.time * 1000).toISOString().split('T')[0];
+                return itemDateStr === todayStr;
+            });
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
+                return;
+            }
+
+            list.sort((a, b) => b.time - a.time);
+
+            list.forEach(item => {
+                const timeStr = new Date(item.time * 1000).toLocaleTimeString();
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-800/40">
+                        <td class="p-3 text-gray-400 text-xs">${timeStr}</td>
+                        <td class="p-3 font-bold">${item.symbol}</td>
+                        <td class="p-3 font-semibold text-amber-400">${item.type}</td>
+                        <td class="p-3">${item.volume}</td>
+                        <td class="p-3 text-rose-400 text-xs">${item.status || 'Đã hủy / Không khớp'}</td>
                     </tr>`;
             });
         }
