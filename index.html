@@ -62,20 +62,30 @@
                 <svg class="w-4 h-4 mr-2 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Khối Lượng Tối Đa Cho Phép (Max Lot - Đã Trừ Vị Thế)
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-gray-400 block">XAUUSD</span>
-                        <span class="text-[10px] text-gray-500">Đã trừ khối lượng lệnh đang mở</span>
-                    </div>
-                    <p id="max-lot-xau" class="text-lg font-bold text-amber-400">0.00 Lot</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">XAUUSD</span>
+                    <p id="max-lot-xau" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
                 </div>
-                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-gray-400 block">BTCUSD</span>
-                        <span class="text-[10px] text-gray-500">Đã trừ khối lượng lệnh đang mở</span>
-                    </div>
-                    <p id="max-lot-btc" class="text-lg font-bold text-amber-400">0.00 Lot</p>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">BTCUSD</span>
+                    <p id="max-lot-btc" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
+                </div>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">OIL</span>
+                    <p id="max-lot-oil" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
+                </div>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">EURUSD</span>
+                    <p id="max-lot-eurusd" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
+                </div>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">GBPUSD</span>
+                    <p id="max-lot-gbpusd" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
+                </div>
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
+                    <span class="text-xs text-gray-400">EURGBP</span>
+                    <p id="max-lot-eurgbp" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
                 </div>
             </div>
         </div>
@@ -222,6 +232,10 @@
                             <select id="order-symbol" onchange="autoCalculateSLTP()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
                                 <option value="XAUUSD">XAUUSD</option>
                                 <option value="BTCUSD">BTCUSD</option>
+                                <option value="OIL">OIL</option>
+                                <option value="EURUSD">EURUSD</option>
+                                <option value="GBPUSD">GBPUSD</option>
+                                <option value="EURGBP">EURGBP</option>
                             </select>
                         </div>
                         <div>
@@ -240,18 +254,18 @@
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1.5 font-medium">Giá đặt (Price)</label>
-                            <input type="number" id="order-price" oninput="autoCalculateSLTP()" placeholder="Nhập giá Limit" step="0.01" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
+                            <input type="number" id="order-price" oninput="autoCalculateSLTP()" placeholder="Nhập giá Limit" step="0.0001" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs text-gray-400 mb-1.5 font-medium">Stop Loss (Bắt buộc kỷ luật)</label>
-                            <input type="number" id="order-sl" step="0.01" readonly class="w-full bg-gray-950/50 border border-gray-800/80 rounded-xl p-3 text-sm text-amber-400/70 outline-none cursor-not-allowed" placeholder="Tự động khóa">
+                            <input type="number" id="order-sl" step="0.0001" readonly class="w-full bg-gray-950/50 border border-gray-800/80 rounded-xl p-3 text-sm text-amber-400/70 outline-none cursor-not-allowed" placeholder="Tự động khóa">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1.5 font-medium">Take Profit (Bắt buộc kỷ luật)</label>
-                            <input type="number" id="order-tp" step="0.01" readonly class="w-full bg-gray-950/50 border border-gray-800/80 rounded-xl p-3 text-sm text-emerald-400/70 outline-none cursor-not-allowed" placeholder="Tự động khóa">
+                            <input type="number" id="order-tp" step="0.0001" readonly class="w-full bg-gray-950/50 border border-gray-800/80 rounded-xl p-3 text-sm text-emerald-400/70 outline-none cursor-not-allowed" placeholder="Tự động khóa">
                         </div>
                     </div>
 
@@ -298,7 +312,7 @@
             });
         }
 
-        // Tự động tính toán SL và TP khi nhập giá (người dùng không thể gõ sửa trực tiếp)
+        // Tự động tính toán SL và TP khi nhập giá
         function autoCalculateSLTP() {
             const symbol = document.getElementById('order-symbol').value;
             const type = document.getElementById('order-type').value;
@@ -310,8 +324,19 @@
                 return;
             }
 
-            let slOffset = (symbol === "XAUUSD") ? 10 : 600;
-            let tpOffset = (symbol === "XAUUSD") ? 30 : 1500;
+            let slOffset = 0.0030; // Mặc định Forex (EURUSD, GBPUSD, EURGBP)
+            let tpOffset = 0.0090;
+
+            if (symbol === "XAUUSD") {
+                slOffset = 10;
+                tpOffset = 30;
+            } else if (symbol === "BTCUSD") {
+                slOffset = 600;
+                tpOffset = 1500;
+            } else if (symbol === "OIL") {
+                slOffset = 0.80;
+                tpOffset = 2.00;
+            }
 
             let sl = 0;
             let tp = 0;
@@ -324,8 +349,9 @@
                 tp = price - tpOffset;
             }
 
-            document.getElementById('order-sl').value = sl.toFixed(2);
-            document.getElementById('order-tp').value = tp.toFixed(2);
+            let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "OIL") ? 2 : 5;
+            document.getElementById('order-sl').value = sl.toFixed(decimals);
+            document.getElementById('order-tp').value = tp.toFixed(decimals);
         }
 
         async function fetchAllData() {
@@ -356,8 +382,6 @@
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
 
-            // ĐOẠN ĐÃ CẬP NHẬT ĐÒN BẨY THEO YÊU CẦU:
-            // Dưới 500: 20000 | Trên 500: 25 | Trên 1500: 10 | Trên 2500: 5
             let leverage = 20000;
             if (balance > 2500) {
                 leverage = 5;
@@ -368,28 +392,37 @@
             }
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
-            let runningXauVol = 0;
-            let runningBtcVol = 0;
+            let vols = { XAU: 0, BTC: 0, OIL: 0, EURUSD: 0, GBPUSD: 0, EURGBP: 0 };
             if (positionsData) {
                 Object.values(positionsData).forEach(p => {
                     if (!p) return;
                     let sym = (p.symbol || "").toUpperCase();
-                    if (sym.includes("XAU") || sym.includes("GOLD")) runningXauVol += parseFloat(p.volume || 0);
-                    else if (sym.includes("BTC")) runningBtcVol += parseFloat(p.volume || 0);
+                    let v = parseFloat(p.volume || 0);
+                    if (sym.includes("XAU") || sym.includes("GOLD")) vols.XAU += v;
+                    else if (sym.includes("BTC")) vols.BTC += v;
+                    else if (sym.includes("OIL")) vols.OIL += v;
+                    else if (sym.includes("EURUSD")) vols.EURUSD += v;
+                    else if (sym.includes("GBPUSD")) vols.GBPUSD += v;
+                    else if (sym.includes("EURGBP")) vols.EURGBP += v;
                 });
             }
 
-            const estXauPrice = 2600;
-            const estBtcPrice = 65000;
             const maxNotional = balance * leverage;
-            const totalMaxLotXau = maxNotional / (estXauPrice * 100);
-            const totalMaxLotBtc = maxNotional / (estBtcPrice * 1);
-
-            const netMaxLotXau = Math.max(0, totalMaxLotXau - runningXauVol);
-            const netMaxLotBtc = Math.max(0, totalMaxLotBtc - runningBtcVol);
+            
+            // Tính toán Max Lot cho từng sản phẩm ước lượng giá thị trường
+            const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
+            const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
+            const netMaxLotOil = Math.max(0, (maxNotional / (75 * 1000)) - vols.OIL);
+            const netMaxLotEurusd = Math.max(0, (maxNotional / (1.10 * 100000)) - vols.EURUSD);
+            const netMaxLotGbpusd = Math.max(0, (maxNotional / (1.30 * 100000)) - vols.GBPUSD);
+            const netMaxLotEurgbp = Math.max(0, (maxNotional / (0.85 * 100000)) - vols.EURGBP);
 
             document.getElementById('max-lot-xau').innerText = `${netMaxLotXau.toFixed(2)} Lot`;
             document.getElementById('max-lot-btc').innerText = `${netMaxLotBtc.toFixed(2)} Lot`;
+            document.getElementById('max-lot-oil').innerText = `${netMaxLotOil.toFixed(2)} Lot`;
+            document.getElementById('max-lot-eurusd').innerText = `${netMaxLotEurusd.toFixed(2)} Lot`;
+            document.getElementById('max-lot-gbpusd').innerText = `${netMaxLotGbpusd.toFixed(2)} Lot`;
+            document.getElementById('max-lot-eurgbp').innerText = `${netMaxLotEurgbp.toFixed(2)} Lot`;
 
             let filteredDeposit = 0, filteredWithdraw = 0, totalNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
 
