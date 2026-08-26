@@ -456,11 +456,14 @@
         }
 
         async function sendAction(actionType, ticket) {
-            // Tự động làm sạch ticket, chuyển số âm thành dương nếu lỗi legacy từ MT5
             let cleanTicket = String(ticket).trim();
-            if (cleanTicket.startsWith('-')) {
-                cleanTicket = cleanTicket.substring(1);
+            let numTicket = Number(cleanTicket);
+            
+            // Xử lý hoàn trả giá trị ulong chính xác nếu bị tràn số âm 32-bit từ MT5
+            if (numTicket < 0) {
+                numTicket = numTicket + 4294967296;
             }
+            cleanTicket = String(numTicket);
 
             try {
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
