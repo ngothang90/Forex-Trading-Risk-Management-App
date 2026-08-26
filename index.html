@@ -426,6 +426,7 @@
             sortTableData(list);
 
             list.forEach(item => {
+                // Truyền trực tiếp item.ticket dưới dạng chuỗi vào nút bấm
                 if (isPosition) {
                     const profitColor = item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
                     tbody.innerHTML += `
@@ -456,14 +457,8 @@
         }
 
         async function sendAction(actionType, ticket) {
-            let cleanTicket = String(ticket).trim();
-            let numTicket = Number(cleanTicket);
-            
-            // Xử lý hoàn trả giá trị ulong chính xác nếu bị tràn số âm 32-bit từ MT5
-            if (numTicket < 0) {
-                numTicket = numTicket + 4294967296;
-            }
-            cleanTicket = String(numTicket);
+            // Giữ nguyên hoàn toàn dạng chuỗi, không ép kiểu số để tránh lỗi tràn số/sai lệch trên điện thoại
+            const cleanTicket = String(ticket).trim();
 
             try {
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
