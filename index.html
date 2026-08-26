@@ -73,7 +73,7 @@
                 </div>
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
                     <span class="text-xs text-gray-400">USOIL</span>
-                    <p id="max-lot-oil" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
+                    <p id="max-lot-usoil" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
                 </div>
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
                     <span class="text-xs text-gray-400">EURUSD</span>
@@ -400,7 +400,7 @@
                     let v = parseFloat(p.volume || 0);
                     if (sym.includes("XAU") || sym.includes("GOLD")) vols.XAU += v;
                     else if (sym.includes("BTC")) vols.BTC += v;
-                    else if (sym.includes("OIL") || sym.includes("USOIL")) vols.USOIL += v;
+                    else if (sym.includes("USOIL") || sym.includes("OIL")) vols.USOIL += v;
                     else if (sym.includes("EURUSD")) vols.EURUSD += v;
                     else if (sym.includes("GBPUSD")) vols.GBPUSD += v;
                     else if (sym.includes("EURGBP")) vols.EURGBP += v;
@@ -412,14 +412,14 @@
             // Tính toán Max Lot cho từng sản phẩm ước lượng giá thị trường
             const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
             const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
-            const netMaxLotOil = Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL);
+            const netMaxLotUsoil = Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL);
             const netMaxLotEurusd = Math.max(0, (maxNotional / (1.10 * 100000)) - vols.EURUSD);
             const netMaxLotGbpusd = Math.max(0, (maxNotional / (1.30 * 100000)) - vols.GBPUSD);
             const netMaxLotEurgbp = Math.max(0, (maxNotional / (0.85 * 100000)) - vols.EURGBP);
 
             document.getElementById('max-lot-xau').innerText = `${netMaxLotXau.toFixed(2)} Lot`;
             document.getElementById('max-lot-btc').innerText = `${netMaxLotBtc.toFixed(2)} Lot`;
-            document.getElementById('max-lot-oil').innerText = `${netMaxLotOil.toFixed(2)} Lot`;
+            document.getElementById('max-lot-usoil').innerText = `${netMaxLotUsoil.toFixed(2)} Lot`;
             document.getElementById('max-lot-eurusd').innerText = `${netMaxLotEurusd.toFixed(2)} Lot`;
             document.getElementById('max-lot-gbpusd').innerText = `${netMaxLotGbpusd.toFixed(2)} Lot`;
             document.getElementById('max-lot-eurgbp').innerText = `${netMaxLotEurgbp.toFixed(2)} Lot`;
@@ -510,29 +510,30 @@
                             <td class="p-3">${item.price}</td>
                             <td class="p-3 text-gray-300 text-xs">SL: ${item.sl} | TP: ${item.tp}</td>
                             <td class="p-3 text-right">
-                                <button onclick="sendAction('CANCEL_ORDER', '${item.ticket || item.id}')" class="bg-amber-500/25 hover:bg-amber-500 text-amber-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-amber-500/30 transition">Hủy</button>
+                                <button onclick="sendAction('CANCEL_PENDING', '${item.ticket}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-rose-500/30 transition">Hủy</button>
                             </td>
                         </tr>`;
                 }
             });
         }
 
-        function updateHistoryUI(data) {
+        function updateHistoryUI(historyData) {
             const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
-            if (!data) {
+            if (!historyData) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
-            const list = Object.values(data).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER && x.type !== "BALANCE" && !x.is_balance && (x.order_id != 0 || x.profit == 0));
+            const list = Object.values(historyData).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER);
             if (list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
             list.sort((a, b) => (b.close_time || 0) - (a.close_time || 0));
             list.forEach(item => {
+                if (item.type === "BALANCE" || item.is_balance || (item.order_id == 0 && item.profit != 0)) return;
                 const profitColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                const timeStr = item.close_time ? new Date(item.close_time * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : '';
+                const timeStr = item.close_time ? new Date(item.close_time * 1000).toLocaleTimeString() : '';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
                         <td class="p-3 font-bold">${item.symbol || ''}</td>
@@ -545,30 +546,48 @@
             });
         }
 
-        function updateUnmatchedUI(data) {
+        function updateUnmatchedUI(unmatchedData) {
             const tbody = document.getElementById('unmatched-table-body');
             tbody.innerHTML = '';
-            if (!data) {
+            if (!unmatchedData) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
                 return;
             }
-            const list = Object.values(data).filter(x => x);
+            const list = Object.values(unmatchedData).filter(x => x);
             if (list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
                 return;
             }
-            list.sort((a, b) => (b.time || 0) - (a.time || 0));
             list.forEach(item => {
-                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : '';
+                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString() : '';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
                         <td class="p-3 text-gray-400 text-xs">${timeStr}</td>
                         <td class="p-3 font-bold">${item.symbol || ''}</td>
                         <td class="p-3 font-semibold text-amber-400">${item.type || ''}</td>
                         <td class="p-3">${item.volume || 0}</td>
-                        <td class="p-3 text-rose-400 text-xs font-semibold">${item.status || 'Đã hủy'}</td>
+                        <td class="p-3 text-rose-400 font-semibold">${item.status || 'Đã hủy'}</td>
                     </tr>`;
             });
+        }
+
+        async function sendAction(actionType, ticket) {
+            try {
+                const res = await fetch(`${FIREBASE_URL}/actions.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: actionType, ticket: ticket, timestamp: Date.now() })
+                });
+                if (res.ok) {
+                    alert('Đã gửi yêu cầu xử lý thành công!');
+                    setTimeout(fetchAllData, 1000);
+                } else {
+                    alert('Lỗi khi gửi yêu cầu!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối khi gửi yêu cầu.');
+            }
         }
 
         async function sendPendingOrder() {
@@ -579,67 +598,47 @@
             const sl = parseFloat(document.getElementById('order-sl').value);
             const tp = parseFloat(document.getElementById('order-tp').value);
 
-            if (isNaN(price) || isNaN(sl) || isNaN(tp)) {
-                alert("Vui lòng nhập đầy đủ giá đặt hợp lệ!");
+            if (isNaN(price) || isNaN(volume)) {
+                alert('Vui lòng nhập đầy đủ giá và khối lượng hợp lệ!');
                 return;
             }
 
             const orderData = {
-                symbol,
-                type,
-                volume,
-                price,
-                sl,
-                tp,
-                time: Math.floor(Date.now() / 1000)
+                symbol: symbol,
+                type: type,
+                volume: volume,
+                price: price,
+                sl: sl,
+                tp: tp,
+                timestamp: Date.now()
             };
 
             try {
-                const res = await fetch(`${FIREBASE_URL}/live_pending_orders.json`, {
+                const res = await fetch(`${FIREBASE_URL}/pending_requests.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
                 });
                 if (res.ok) {
-                    alert("Gửi lệnh thành công!");
+                    alert('Đã gửi lệnh kỷ luật thành công!');
                     document.getElementById('order-price').value = '';
                     document.getElementById('order-sl').value = '';
                     document.getElementById('order-tp').value = '';
-                    fetchAllData();
-                } else {
-                    alert("Có lỗi khi gửi lệnh lên hệ thống.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Lỗi kết nối khi gửi lệnh.");
-            }
-        }
-
-        async function sendAction(action, ticket) {
-            if (!confirm(`Bạn có chắc chắn muốn thực hiện hành động ${action} cho vé ${ticket}?`)) return;
-            try {
-                const endpoint = action === 'CLOSE_POSITION' ? 'close_requests' : 'cancel_requests';
-                const res = await fetch(`${FIREBASE_URL}/${endpoint}/${ticket}.json`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, ticket, time: Math.floor(Date.now() / 1000) })
-                });
-                if (res.ok) {
-                    alert("Đã gửi yêu cầu xử lý thành công!");
                     setTimeout(fetchAllData, 1000);
                 } else {
-                    alert("Gửi yêu cầu thất bại.");
+                    alert('Lỗi khi gửi lệnh!');
                 }
-            } catch (err) {
-                console.error(err);
-                alert("Lỗi kết nối.");
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối khi gửi lệnh.');
             }
         }
 
+        // Initialize on load
         window.onload = () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 5000); // Tự động cập nhật mỗi 5 giây
+            setInterval(fetchAllData, 5000);
         };
     </script>
 </body>
