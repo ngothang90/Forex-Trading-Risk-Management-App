@@ -165,61 +165,9 @@
             </div>
         </div>
 
-        <!-- Lệnh Không Khớp / Bị Hủy Trong Ngày & Lịch Sử Giao Dịch -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Lệnh Không Khớp / Bị Hủy Trong Ngày -->
-            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
-                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                    Lệnh Không Khớp / Đã Hủy Trong Ngày
-                </h2>
-                <div class="overflow-x-auto max-h-60 overflow-y-auto">
-                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase sticky top-0">
-                            <tr>
-                                <th class="p-3">Thời gian</th>
-                                <th class="p-3">Mã</th>
-                                <th class="p-3">Loại</th>
-                                <th class="p-3">Vol</th>
-                                <th class="p-3">Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody id="unmatched-table-body" class="divide-y divide-gray-800/60">
-                            <tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Lịch Sử Giao Dịch Trong Ngày -->
-            <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
-                <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Lịch Sử Giao Dịch Trong Ngày
-                </h2>
-                <div class="overflow-x-auto max-h-60 overflow-y-auto">
-                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                        <thead class="bg-gray-950 text-gray-400 text-xs uppercase sticky top-0">
-                            <tr>
-                                <th class="p-3">Sản Phẩm</th>
-                                <th class="p-3">Loại</th>
-                                <th class="p-3">Volume</th>
-                                <th class="p-3">Giá Đóng</th>
-                                <th class="p-3">Lợi Nhuận</th>
-                                <th class="p-3 text-right">Thời Gian</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-table-body" class="divide-y divide-gray-800/60">
-                            <tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <!-- Form Đặt Lệnh Kỷ Luật & Biểu Đồ -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Form Đặt Lệnh (Khóa cứng hoàn toàn SL/TP) -->
+            <!-- Form Đặt Lệnh -->
             <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
                 <h2 class="text-sm sm:text-base font-bold text-gray-200 uppercase tracking-wider mb-4 flex items-center">
                     <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -312,7 +260,6 @@
             });
         }
 
-        // Tự động tính toán SL và TP khi nhập giá
         function autoCalculateSLTP() {
             const symbol = document.getElementById('order-symbol').value;
             const type = document.getElementById('order-type').value;
@@ -324,7 +271,7 @@
                 return;
             }
 
-            let slOffset = 0.0030; // Mặc định Forex (EURUSD, GBPUSD, EURGBP)
+            let slOffset = 0.0030;
             let tpOffset = 0.0090;
 
             if (symbol === "XAUUSD") {
@@ -356,12 +303,11 @@
 
         async function fetchAllData() {
             try {
-                const [accRes, posRes, ordRes, histRes, unmatchedRes] = await Promise.all([
+                const [accRes, posRes, ordRes, histRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
                     fetch(`${FIREBASE_URL}/live_pending_orders.json`),
-                    fetch(`${FIREBASE_URL}/closed_history.json`),
-                    fetch(`${FIREBASE_URL}/daily_unmatched.json`)
+                    fetch(`${FIREBASE_URL}/closed_history.json`)
                 ]);
 
                 const historyData = await histRes.json() || {};
@@ -370,8 +316,6 @@
                 updateAccountAndStatsUI(await accRes.json() || {}, historyData, positionsData);
                 updateTableUI('positions-table-body', positionsData, true);
                 updateTableUI('pending-table-body', await ordRes.json(), false);
-                updateHistoryUI(historyData);
-                updateUnmatchedUI(await unmatchedRes.json() || {});
             } catch (err) {
                 console.error("Lỗi kết nối Firebase:", err);
             }
@@ -383,13 +327,9 @@
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
 
             let leverage = 20000;
-            if (balance > 2500) {
-                leverage = 5;
-            } else if (balance > 1500) {
-                leverage = 10;
-            } else if (balance > 500) {
-                leverage = 25;
-            }
+            if (balance > 2500) leverage = 5;
+            else if (balance > 1500) leverage = 10;
+            else if (balance > 500) leverage = 25;
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
             let vols = { XAU: 0, BTC: 0, USOIL: 0, EURUSD: 0, GBPUSD: 0, EURGBP: 0 };
@@ -408,8 +348,6 @@
             }
 
             const maxNotional = balance * leverage;
-            
-            // Tính toán Max Lot cho từng sản phẩm ước lượng giá thị trường
             const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
             const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
             const netMaxLotUsoil = Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL);
@@ -517,60 +455,6 @@
             });
         }
 
-        function updateHistoryUI(historyData) {
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = '';
-            if (!historyData) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
-                return;
-            }
-            const list = Object.values(historyData).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER);
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
-                return;
-            }
-            list.sort((a, b) => (b.close_time || 0) - (a.close_time || 0));
-            list.forEach(item => {
-                if (item.type === "BALANCE" || item.is_balance || (item.order_id == 0 && item.profit != 0)) return;
-                const profitColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                const timeStr = item.close_time ? new Date(item.close_time * 1000).toLocaleTimeString() : '';
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-800/40">
-                        <td class="p-3 font-bold">${item.symbol || ''}</td>
-                        <td class="p-3 font-semibold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type || ''}</td>
-                        <td class="p-3">${item.volume || 0}</td>
-                        <td class="p-3">${item.close_price || item.price || 0}</td>
-                        <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
-                        <td class="p-3 text-right text-gray-400 text-xs">${timeStr}</td>
-                    </tr>`;
-            });
-        }
-
-        function updateUnmatchedUI(unmatchedData) {
-            const tbody = document.getElementById('unmatched-table-body');
-            tbody.innerHTML = '';
-            if (!unmatchedData) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
-                return;
-            }
-            const list = Object.values(unmatchedData).filter(x => x);
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
-                return;
-            }
-            list.forEach(item => {
-                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString() : '';
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-800/40">
-                        <td class="p-3 text-gray-400 text-xs">${timeStr}</td>
-                        <td class="p-3 font-bold">${item.symbol || ''}</td>
-                        <td class="p-3 font-semibold text-amber-400">${item.type || ''}</td>
-                        <td class="p-3">${item.volume || 0}</td>
-                        <td class="p-3 text-rose-400 font-semibold">${item.status || 'Đã hủy'}</td>
-                    </tr>`;
-            });
-        }
-
         async function sendAction(actionType, ticket) {
             try {
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
@@ -634,7 +518,6 @@
             }
         }
 
-        // Initialize on load
         window.onload = () => {
             initChart();
             fetchAllData();
