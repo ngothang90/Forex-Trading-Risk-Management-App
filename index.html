@@ -382,7 +382,7 @@
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
 
-            let leverage = 20000;
+            let leverage = 25;
             if (balance > 2500) {
                 leverage = 5;
             } else if (balance > 1500) {
@@ -409,7 +409,6 @@
 
             const maxNotional = balance * leverage;
             
-            // Tính toán Max Lot cho từng sản phẩm ước lượng giá thị trường
             const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
             const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
             const netMaxLotOil = Math.max(0, (maxNotional / (75 * 1000)) - vols.OIL);
@@ -485,7 +484,7 @@
                 return;
             }
 
-            sortTableData(list);
+            sortTableRow(list);
 
             list.forEach(item => {
                 if (isPosition) {
@@ -517,6 +516,10 @@
             });
         }
 
+        function sortTableRow(items) {
+            return items.sort((a, b) => (a.symbol || "").localeCompare(b.symbol || ""));
+        }
+
         function updateHistoryUI(historyData) {
             const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
@@ -524,32 +527,22 @@
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
-
-            const todayStr = new Date().toISOString().split('T')[0];
-            const list = Object.values(historyData).filter(deal => {
-                if (!deal || !deal.close_time) return false;
-                const dealType = deal.type || "";
-                const profit = deal.profit || 0;
-                if (dealType === "BALANCE" || deal.is_balance || (deal.order_id == 0 && profit != 0)) return false;
-                return new Date(deal.close_time * 1000).toISOString().split('T')[0] === todayStr;
-            });
-
+            const list = Object.values(historyData).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER && x.type !== "BALANCE");
             if (list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
-
-            list.sort((a, b) => b.close_time - a.close_time);
-            list.forEach(deal => {
-                const profitColor = deal.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
+            list.forEach(item => {
+                const pColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                const timeStr = new Date((item.close_time || 0) * 1000).toLocaleTimeString();
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
-                        <td class="p-3 font-bold">${deal.symbol}</td>
-                        <td class="p-3 font-semibold ${deal.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${deal.type}</td>
-                        <td class="p-3">${deal.volume}</td>
-                        <td class="p-3">${deal.price}</td>
-                        <td class="p-3 font-bold ${profitColor}">$${(deal.profit || 0).toFixed(2)}</td>
-                        <td class="p-3 text-right text-gray-400 text-xs">${new Date(deal.close_time * 1000).toLocaleTimeString()}</td>
+                        <td class="p-3 font-bold">${item.symbol || ''}</td>
+                        <td class="p-3 font-semibold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type || ''}</td>
+                        <td class="p-3">${item.volume || 0}</td>
+                        <td class="p-3">${item.close_price || 0}</td>
+                        <td class="p-3 font-bold ${pColor}">$${(item.profit || 0).toFixed(2)}</td>
+                        <td class="p-3 text-right text-gray-400 text-xs">${timeStr}</td>
                     </tr>`;
             });
         }
@@ -557,76 +550,88 @@
         function updateUnmatchedUI(unmatchedData) {
             const tbody = document.getElementById('unmatched-table-body');
             tbody.innerHTML = '';
-            if (!unmatchedData) {
+            if (!unmatchedData || Object.keys(unmatchedData).length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
                 return;
             }
-
-            const todayStr = new Date().toISOString().split('T')[0];
-            const list = Object.values(unmatchedData).filter(item => {
-                if (!item || !item.time) return false;
-                return new Date(item.time * 1000).toISOString().split('T')[0] === todayStr;
-            });
-
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
-                return;
-            }
-
-            list.sort((a, b) => b.time - a.time);
-            list.forEach(item => {
+            Object.values(unmatchedData).forEach(item => {
+                if (!item) return;
+                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString() : '';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
-                        <td class="p-3 text-gray-400 text-xs">${new Date(item.time * 1000).toLocaleTimeString()}</td>
-                        <td class="p-3 font-bold">${item.symbol}</td>
-                        <td class="p-3 font-semibold text-amber-400">${item.type}</td>
-                        <td class="p-3">${item.volume}</td>
-                        <td class="p-3 text-rose-400 text-xs">${item.status || 'Đã hủy / Không khớp'}</td>
+                        <td class="p-3 text-gray-400 text-xs">${timeStr}</td>
+                        <td class="p-3 font-bold">${item.symbol || ''}</td>
+                        <td class="p-3 font-semibold text-amber-400">${item.type || ''}</td>
+                        <td class="p-3">${item.volume || 0}</td>
+                        <td class="p-3 text-rose-400">${item.status || 'Đã hủy'}</td>
                     </tr>`;
             });
         }
 
         async function sendPendingOrder() {
-            autoCalculateSLTP();
-
+            const symbol = document.getElementById('order-symbol').value;
+            const type = document.getElementById('order-type').value;
+            const volume = parseFloat(document.getElementById('order-volume').value);
             const price = parseFloat(document.getElementById('order-price').value);
             const sl = parseFloat(document.getElementById('order-sl').value);
             const tp = parseFloat(document.getElementById('order-tp').value);
 
-            if (isNaN(price)) {
-                alert("Vui lòng nhập giá đặt (Price) hợp lệ!");
+            if (isNaN(price) || isNaN(volume)) {
+                alert("Vui lòng nhập đầy đủ giá và khối lượng!");
                 return;
             }
 
-            if (isNaN(sl) || isNaN(tp)) {
-                alert("Hệ thống chưa tính được SL/TP, hãy kiểm tra lại giá nhập!");
-                return;
-            }
-
-            const data = {
-                symbol: document.getElementById('order-symbol').value,
-                type: document.getElementById('order-type').value,
-                volume: parseFloat(document.getElementById('order-volume').value),
+            const orderData = {
+                ticket: Date.now().toString(),
+                symbol: symbol,
+                type: type,
+                volume: volume,
                 price: price,
                 sl: sl,
                 tp: tp,
-                timestamp: Date.now()
+                time: Math.floor(Date.now() / 1000)
             };
 
-            await fetch(`${FIREBASE_URL}/pending_order.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert("Đã gửi lệnh kỷ luật thành công với SL/TP khóa cứng!");
+            try {
+                const response = await fetch(`${FIREBASE_URL}/live_pending_orders/${orderData.ticket}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                if (response.ok) {
+                    alert("Đã gửi lệnh kỷ luật thành công!");
+                    document.getElementById('order-price').value = '';
+                    document.getElementById('order-sl').value = '';
+                    document.getElementById('order-tp').value = '';
+                    fetchAllData();
+                } else {
+                    alert("Lỗi khi gửi lệnh lên hệ thống.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Không thể kết nối đến cơ sở dữ liệu.");
+            }
         }
 
-        async function sendAction(action, ticket) {
-            const data = { action, ticket, timestamp: Date.now() };
-            await fetch(`${FIREBASE_URL}/action_request.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert(`Đã gửi yêu cầu ${action === 'CLOSE_POSITION' ? 'đóng lệnh' : 'hủy lệnh'} #${ticket}`);
+        async function sendAction(actionType, ticket) {
+            if (!confirm(`Bạn có chắc chắn muốn thực hiện hành động ${actionType} cho vé ${ticket}?`)) return;
+            try {
+                if (actionType === 'CLOSE_POSITION') {
+                    await fetch(`${FIREBASE_URL}/live_positions/${ticket}.json`, { method: 'DELETE' });
+                } else if (actionType === 'CANCEL_ORDER') {
+                    await fetch(`${FIREBASE_URL}/live_pending_orders/${ticket}.json`, { method: 'DELETE' });
+                }
+                fetchAllData();
+            } catch (e) {
+                console.error(e);
+                alert("Lỗi khi thao tác với lệnh.");
+            }
         }
 
         window.onload = () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 3000);
+            setInterval(fetchAllData, 5000); // Tự động làm mới mỗi 5 giây
         };
     </script>
 </body>
