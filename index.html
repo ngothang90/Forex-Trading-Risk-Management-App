@@ -72,7 +72,7 @@
                     <p id="max-lot-btc" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
                 </div>
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
-                    <span class="text-xs text-gray-400">OIL</span>
+                    <span class="text-xs text-gray-400">USOIL</span>
                     <p id="max-lot-oil" class="text-base sm:text-lg font-bold text-amber-400 mt-2">0.00 Lot</p>
                 </div>
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800/80 flex flex-col justify-between">
@@ -232,7 +232,7 @@
                             <select id="order-symbol" onchange="autoCalculateSLTP()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
                                 <option value="XAUUSD">XAUUSD</option>
                                 <option value="BTCUSD">BTCUSD</option>
-                                <option value="OIL">OIL</option>
+                                <option value="USOIL">USOIL</option>
                                 <option value="EURUSD">EURUSD</option>
                                 <option value="GBPUSD">GBPUSD</option>
                                 <option value="EURGBP">EURGBP</option>
@@ -333,7 +333,7 @@
             } else if (symbol === "BTCUSD") {
                 slOffset = 600;
                 tpOffset = 1500;
-            } else if (symbol === "OIL") {
+            } else if (symbol === "USOIL") {
                 slOffset = 0.80;
                 tpOffset = 2.00;
             }
@@ -349,7 +349,7 @@
                 tp = price - tpOffset;
             }
 
-            let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "OIL") ? 2 : 5;
+            let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "USOIL") ? 2 : 5;
             document.getElementById('order-sl').value = sl.toFixed(decimals);
             document.getElementById('order-tp').value = tp.toFixed(decimals);
         }
@@ -382,7 +382,7 @@
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(accountData.equity || 0).toFixed(2)}`;
 
-            let leverage = 25;
+            let leverage = 20000;
             if (balance > 2500) {
                 leverage = 5;
             } else if (balance > 1500) {
@@ -392,7 +392,7 @@
             }
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
-            let vols = { XAU: 0, BTC: 0, OIL: 0, EURUSD: 0, GBPUSD: 0, EURGBP: 0 };
+            let vols = { XAU: 0, BTC: 0, USOIL: 0, EURUSD: 0, GBPUSD: 0, EURGBP: 0 };
             if (positionsData) {
                 Object.values(positionsData).forEach(p => {
                     if (!p) return;
@@ -400,7 +400,7 @@
                     let v = parseFloat(p.volume || 0);
                     if (sym.includes("XAU") || sym.includes("GOLD")) vols.XAU += v;
                     else if (sym.includes("BTC")) vols.BTC += v;
-                    else if (sym.includes("OIL")) vols.OIL += v;
+                    else if (sym.includes("OIL") || sym.includes("USOIL")) vols.USOIL += v;
                     else if (sym.includes("EURUSD")) vols.EURUSD += v;
                     else if (sym.includes("GBPUSD")) vols.GBPUSD += v;
                     else if (sym.includes("EURGBP")) vols.EURGBP += v;
@@ -409,9 +409,10 @@
 
             const maxNotional = balance * leverage;
             
+            // Tính toán Max Lot cho từng sản phẩm ước lượng giá thị trường
             const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
             const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
-            const netMaxLotOil = Math.max(0, (maxNotional / (75 * 1000)) - vols.OIL);
+            const netMaxLotOil = Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL);
             const netMaxLotEurusd = Math.max(0, (maxNotional / (1.10 * 100000)) - vols.EURUSD);
             const netMaxLotGbpusd = Math.max(0, (maxNotional / (1.30 * 100000)) - vols.GBPUSD);
             const netMaxLotEurgbp = Math.max(0, (maxNotional / (0.85 * 100000)) - vols.EURGBP);
@@ -484,7 +485,7 @@
                 return;
             }
 
-            sortTableRow(list);
+            sortTableData(list);
 
             list.forEach(item => {
                 if (isPosition) {
@@ -509,61 +510,63 @@
                             <td class="p-3">${item.price}</td>
                             <td class="p-3 text-gray-300 text-xs">SL: ${item.sl} | TP: ${item.tp}</td>
                             <td class="p-3 text-right">
-                                <button onclick="sendAction('CANCEL_ORDER', '${item.ticket}')" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Hủy</button>
+                                <button onclick="sendAction('CANCEL_ORDER', '${item.ticket || item.id}')" class="bg-amber-500/25 hover:bg-amber-500 text-amber-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-amber-500/30 transition">Hủy</button>
                             </td>
                         </tr>`;
                 }
             });
         }
 
-        function sortTableRow(items) {
-            return items.sort((a, b) => (a.symbol || "").localeCompare(b.symbol || ""));
-        }
-
-        function updateHistoryUI(historyData) {
+        function updateHistoryUI(data) {
             const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
-            if (!historyData) {
+            if (!data) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
-            const list = Object.values(historyData).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER && x.type !== "BALANCE");
+            const list = Object.values(data).filter(x => x && (x.close_time || 0) >= START_DATE_FILTER && x.type !== "BALANCE" && !x.is_balance && (x.order_id != 0 || x.profit == 0));
             if (list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Không có lịch sử trong ngày</td></tr>`;
                 return;
             }
+            list.sort((a, b) => (b.close_time || 0) - (a.close_time || 0));
             list.forEach(item => {
-                const pColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                const timeStr = new Date((item.close_time || 0) * 1000).toLocaleTimeString();
+                const profitColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                const timeStr = item.close_time ? new Date(item.close_time * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : '';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
                         <td class="p-3 font-bold">${item.symbol || ''}</td>
                         <td class="p-3 font-semibold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type || ''}</td>
                         <td class="p-3">${item.volume || 0}</td>
-                        <td class="p-3">${item.close_price || 0}</td>
-                        <td class="p-3 font-bold ${pColor}">$${(item.profit || 0).toFixed(2)}</td>
+                        <td class="p-3">${item.close_price || item.price || 0}</td>
+                        <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
                         <td class="p-3 text-right text-gray-400 text-xs">${timeStr}</td>
                     </tr>`;
             });
         }
 
-        function updateUnmatchedUI(unmatchedData) {
+        function updateUnmatchedUI(data) {
             const tbody = document.getElementById('unmatched-table-body');
             tbody.innerHTML = '';
-            if (!unmatchedData || Object.keys(unmatchedData).length === 0) {
+            if (!data) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
                 return;
             }
-            Object.values(unmatchedData).forEach(item => {
-                if (!item) return;
-                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString() : '';
+            const list = Object.values(data).filter(x => x);
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Không có lệnh hủy/không khớp trong ngày</td></tr>`;
+                return;
+            }
+            list.sort((a, b) => (b.time || 0) - (a.time || 0));
+            list.forEach(item => {
+                const timeStr = item.time ? new Date(item.time * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : '';
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-800/40">
                         <td class="p-3 text-gray-400 text-xs">${timeStr}</td>
                         <td class="p-3 font-bold">${item.symbol || ''}</td>
                         <td class="p-3 font-semibold text-amber-400">${item.type || ''}</td>
                         <td class="p-3">${item.volume || 0}</td>
-                        <td class="p-3 text-rose-400">${item.status || 'Đã hủy'}</td>
+                        <td class="p-3 text-rose-400 text-xs font-semibold">${item.status || 'Đã hủy'}</td>
                     </tr>`;
             });
         }
@@ -576,62 +579,67 @@
             const sl = parseFloat(document.getElementById('order-sl').value);
             const tp = parseFloat(document.getElementById('order-tp').value);
 
-            if (isNaN(price) || isNaN(volume)) {
-                alert("Vui lòng nhập đầy đủ giá và khối lượng!");
+            if (isNaN(price) || isNaN(sl) || isNaN(tp)) {
+                alert("Vui lòng nhập đầy đủ giá đặt hợp lệ!");
                 return;
             }
 
             const orderData = {
-                ticket: Date.now().toString(),
-                symbol: symbol,
-                type: type,
-                volume: volume,
-                price: price,
-                sl: sl,
-                tp: tp,
+                symbol,
+                type,
+                volume,
+                price,
+                sl,
+                tp,
                 time: Math.floor(Date.now() / 1000)
             };
 
             try {
-                const response = await fetch(`${FIREBASE_URL}/live_pending_orders/${orderData.ticket}.json`, {
-                    method: 'PUT',
+                const res = await fetch(`${FIREBASE_URL}/live_pending_orders.json`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
                 });
-                if (response.ok) {
-                    alert("Đã gửi lệnh kỷ luật thành công!");
+                if (res.ok) {
+                    alert("Gửi lệnh thành công!");
                     document.getElementById('order-price').value = '';
                     document.getElementById('order-sl').value = '';
                     document.getElementById('order-tp').value = '';
                     fetchAllData();
                 } else {
-                    alert("Lỗi khi gửi lệnh lên hệ thống.");
+                    alert("Có lỗi khi gửi lệnh lên hệ thống.");
                 }
-            } catch (e) {
-                console.error(e);
-                alert("Không thể kết nối đến cơ sở dữ liệu.");
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi kết nối khi gửi lệnh.");
             }
         }
 
-        async function sendAction(actionType, ticket) {
-            if (!confirm(`Bạn có chắc chắn muốn thực hiện hành động ${actionType} cho vé ${ticket}?`)) return;
+        async function sendAction(action, ticket) {
+            if (!confirm(`Bạn có chắc chắn muốn thực hiện hành động ${action} cho vé ${ticket}?`)) return;
             try {
-                if (actionType === 'CLOSE_POSITION') {
-                    await fetch(`${FIREBASE_URL}/live_positions/${ticket}.json`, { method: 'DELETE' });
-                } else if (actionType === 'CANCEL_ORDER') {
-                    await fetch(`${FIREBASE_URL}/live_pending_orders/${ticket}.json`, { method: 'DELETE' });
+                const endpoint = action === 'CLOSE_POSITION' ? 'close_requests' : 'cancel_requests';
+                const res = await fetch(`${FIREBASE_URL}/${endpoint}/${ticket}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ticket, time: Math.floor(Date.now() / 1000) })
+                });
+                if (res.ok) {
+                    alert("Đã gửi yêu cầu xử lý thành công!");
+                    setTimeout(fetchAllData, 1000);
+                } else {
+                    alert("Gửi yêu cầu thất bại.");
                 }
-                fetchAllData();
-            } catch (e) {
-                console.error(e);
-                alert("Lỗi khi thao tác với lệnh.");
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi kết nối.");
             }
         }
 
         window.onload = () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 5000); // Tự động làm mới mỗi 5 giây
+            setInterval(fetchAllData, 5000); // Tự động cập nhật mỗi 5 giây
         };
     </script>
 </body>
