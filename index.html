@@ -456,11 +456,17 @@
         }
 
         async function sendAction(actionType, ticket) {
+            // Tự động làm sạch ticket, chuyển số âm thành dương nếu lỗi legacy từ MT5
+            let cleanTicket = String(ticket).trim();
+            if (cleanTicket.startsWith('-')) {
+                cleanTicket = cleanTicket.substring(1);
+            }
+
             try {
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: actionType, ticket: ticket, timestamp: Date.now() })
+                    body: JSON.stringify({ action: actionType, ticket: cleanTicket, timestamp: Date.now() })
                 });
                 if (res.ok) {
                     alert('Đã gửi yêu cầu xử lý thành công!');
