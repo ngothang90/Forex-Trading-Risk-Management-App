@@ -58,22 +58,22 @@
             <div class="grid grid-cols-3 gap-3 w-full md:w-auto text-center">
                 <div class="badge-3d px-4 py-3 rounded-xl">
                     <span class="block text-xs text-slate-400 font-semibold mb-1">Số dư</span>
-                    <span id="lblBalance" class="text-base md:text-xl font-black text-white">$0.00</span>
+                    <span id="lblBalance" class="text-base md:text-xl font-black text-white">$1,850.00</span>
                 </div>
                 <div class="badge-3d px-4 py-3 rounded-xl">
                     <span class="block text-xs text-slate-400 font-semibold mb-1">Tài sản</span>
-                    <span id="lblEquity" class="text-base md:text-xl font-black text-emerald-400">$0.00</span>
+                    <span id="lblEquity" class="text-base md:text-xl font-black text-emerald-400">$1,970.50</span>
                 </div>
                 <div class="badge-3d px-4 py-3 rounded-xl">
                     <span class="block text-xs text-slate-400 font-semibold mb-1">Đòn bẩy</span>
-                    <span id="lblLeverage" class="text-base md:text-xl font-black text-cyan-400">1:8</span>
+                    <span id="lblLeverage" class="text-base md:text-xl font-black text-cyan-400">1:25</span>
                 </div>
             </div>
         </header>
 
         <!-- MAX LOT VỚI TỪNG CẶP TIỀN -->
         <section class="card-3d rounded-2xl p-5">
-            <h2 class="text-sm md:text-base font-extrabold text-cyan-300 uppercase tracking-wider mb-3">Khối lượng lệnh tối đa vào thêm (Max Lot)</h2>
+            <h2 class="text-sm md:text-base font-extrabold text-cyan-300 uppercase tracking-wider mb-3">Khối lượng lệnh vào thêm (Max Lot)</h2>
             <div id="maxLotContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <!-- Dynamic Grid -->
             </div>
@@ -87,26 +87,26 @@
                 <div class="space-y-3 text-sm font-semibold">
                     <div class="flex justify-between items-center badge-3d p-3 rounded-xl">
                         <span class="text-slate-400">Thắng / Thua</span>
-                        <span><span id="lblWins" class="text-emerald-400 font-black">0</span> / <span id="lblLosses" class="text-rose-400 font-black">0</span></span>
+                        <span><span id="lblWins" class="text-emerald-400 font-black">24</span> / <span id="lblLosses" class="text-rose-400 font-black">8</span></span>
                     </div>
                     <div class="flex justify-between items-center badge-3d p-3 rounded-xl">
                         <span class="text-slate-400">Tỉ lệ thắng</span>
-                        <span id="lblWinRate" class="font-black text-cyan-300">0%</span>
+                        <span id="lblWinRate" class="font-black text-cyan-300">75.0%</span>
                     </div>
                     <div class="flex justify-between items-center badge-3d p-3 rounded-xl">
                         <span class="text-slate-400">LN ròng ngày</span>
-                        <span id="lblDailyNet" class="font-black text-emerald-400">$0.00</span>
+                        <span id="lblDailyNet" class="font-black text-emerald-400">+$125.50</span>
                     </div>
                     <div class="flex justify-between items-center badge-3d p-3 rounded-xl">
                         <span class="text-slate-400">LN ròng (từ 01/08/2026)</span>
-                        <span id="lblTotalNet" class="font-black text-emerald-400">$0.00</span>
+                        <span id="lblTotalNet" class="font-black text-emerald-400">+$1,240.00</span>
                     </div>
                 </div>
             </div>
 
             <!-- Biểu đồ lợi nhuận theo ngày -->
             <div class="card-3d rounded-2xl p-5 lg:col-span-2 flex flex-col justify-between">
-                <h2 class="text-base font-extrabold text-cyan-300 uppercase tracking-wider border-b border-slate-700/60 pb-2 mb-3">Biểu đồ lợi nhuận theo ngày (Xanh / Đỏ)</h2>
+                <h2 class="text-base font-extrabold text-cyan-300 uppercase tracking-wider border-b border-slate-700/60 pb-2 mb-3">Biểu đồ lợi nhuận theo ngày (01/08 - 28/08/2026)</h2>
                 <div class="relative h-56 w-full">
                     <canvas id="profitChart"></canvas>
                 </div>
@@ -173,7 +173,25 @@
                             </tr>
                         </thead>
                         <tbody id="runningTable" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">Không có vị thế.</td></tr>
+                            <!-- Dữ liệu mẫu minh họa -->
+                            <tr class="font-semibold">
+                                <td class="py-3 text-cyan-300 font-bold">XAUUSD</td>
+                                <td class="py-3 text-emerald-400 font-black">BUY</td>
+                                <td class="py-3">0.10</td>
+                                <td class="py-3 text-emerald-400 font-bold">+$45.00</td>
+                                <td class="py-3 text-right">
+                                    <button onclick="closeOrder(this)" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Đóng</button>
+                                </td>
+                            </tr>
+                            <tr class="font-semibold">
+                                <td class="py-3 text-cyan-300 font-bold">BTCUSD</td>
+                                <td class="py-3 text-rose-400 font-black">SELL</td>
+                                <td class="py-3">0.05</td>
+                                <td class="py-3 text-rose-400 font-bold">-$15.50</td>
+                                <td class="py-3 text-right">
+                                    <button onclick="closeOrder(this)" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Đóng</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -194,7 +212,25 @@
                             </tr>
                         </thead>
                         <tbody id="pendingTable" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">Không có lệnh chờ.</td></tr>
+                            <!-- Dữ liệu mẫu minh họa -->
+                            <tr class="font-semibold">
+                                <td class="py-3 text-cyan-300 font-bold">XAUUSD</td>
+                                <td class="py-3 text-emerald-400 font-black">BUYLIMIT</td>
+                                <td class="py-3">0.15</td>
+                                <td class="py-3 text-slate-200">2480.00</td>
+                                <td class="py-3 text-right">
+                                    <button onclick="cancelOrder(this)" class="bg-amber-600/80 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Hủy</button>
+                                </td>
+                            </tr>
+                            <tr class="font-semibold">
+                                <td class="py-3 text-cyan-300 font-bold">USOIL</td>
+                                <td class="py-3 text-rose-400 font-black">SELLLIMIT</td>
+                                <td class="py-3">0.50</td>
+                                <td class="py-3 text-slate-200">77.50</td>
+                                <td class="py-3 text-right">
+                                    <button onclick="cancelOrder(this)" class="bg-amber-600/80 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Hủy</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -204,7 +240,7 @@
 
     <script>
         let profitChartInstance = null;
-        let mockPrices = { "XAUUSD": 2500.0, "BTCUSD": 65000.0, "USOIL": 75.0, "EURUSD": 1.1000, "GBPUSD": 1.3000, "EURGBP": 0.8500 };
+        let mockPrices = { "XAUUSD": 2510.5, "BTCUSD": 64200.0, "USOIL": 75.8, "EURUSD": 1.1080, "GBPUSD": 1.3120, "EURGBP": 0.8450 };
         const contractSizes = { "XAUUSD": 100, "BTCUSD": 1, "USOIL": 1000, "EURUSD": 100000, "GBPUSD": 100000, "EURGBP": 100000 };
         const disciplineRules = {
             "XAUUSD": { minPip: 10, sl: 10, tp: 30 },
@@ -249,8 +285,6 @@
 
         function renderDashboard(balance, notionalRunning) {
             const lev = getLeverage(balance);
-            document.getElementById('lblBalance').innerText = `$${balance.toFixed(2)}`;
-            document.getElementById('lblEquity').innerText = `$${(balance + 120.5).toFixed(2)}`;
             document.getElementById('lblLeverage').innerText = `1:${lev}`;
 
             const container = document.getElementById('maxLotContainer');
@@ -276,9 +310,21 @@
 
         function initChart() {
             const ctx = document.getElementById('profitChart').getContext('2d');
-            // Thống kê bắt đầu từ 01/08/2026
-            const dates = ["01/08", "02/08", "03/08", "04/08", "05/08", "06/08", "07/08", "08/08"];
-            const profits = [50, -20, 110, 85, -40, 130, 200, -15];
+            
+            // Tự động tạo mảng ngày từ 01/08/2026 đến hết ngày hôm nay (28/08/2026)
+            const dates = [];
+            const profits = [];
+            
+            // Random dữ liệu lợi nhuận minh họa cho các ngày từ 1 đến 28 tháng 8 năm 2026
+            for (let day = 1; day <= 28; day++) {
+                let dayStr = day < 10 ? `0${day}/08` : `${day}/08`;
+                dates.push(dayStr);
+                
+                // Giả lập lợi nhuận ngày (trộn lẫn lời và lỗ, không tính nạp rút)
+                let pnl = Math.sin(day) * 80 + (Math.random() * 150 - 60);
+                profits.push(Math.round(pnl * 100) / 100);
+            }
+
             const colors = profits.map(p => p >= 0 ? '#22c55e' : '#ef4444');
 
             if(profitChartInstance) profitChartInstance.destroy();
@@ -289,7 +335,7 @@
                     datasets: [{
                         data: profits,
                         backgroundColor: colors,
-                        borderRadius: 6
+                        borderRadius: 4
                     }]
                 },
                 options: {
@@ -297,8 +343,14 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { weight: 'bold' } } },
-                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { weight: 'bold' } } }
+                        x: { 
+                            grid: { color: '#1e293b' }, 
+                            ticks: { color: '#94a3b8', font: { weight: 'bold', size: 10 }, maxTicksLimit: 14 } 
+                        },
+                        y: { 
+                            grid: { color: '#1e293b' }, 
+                            ticks: { color: '#94a3b8', font: { weight: 'bold' } } 
+                        }
                     }
                 }
             });
@@ -309,9 +361,22 @@
             alert("Đã gửi lệnh limit kỷ luật thành công!");
         }
 
+        function closeOrder(btn) {
+            if(confirm("Bạn có chắc chắn muốn đóng lệnh này không?")) {
+                btn.closest('tr').remove();
+            }
+        }
+
+        function cancelOrder(btn) {
+            if(confirm("Bạn có chắc chắn muốn hủy lệnh chờ này không?")) {
+                btn.closest('tr').remove();
+            }
+        }
+
         window.onload = function() {
-            renderDashboard(1200.0, { "XAUUSD": 12500, "BTCUSD": 32500 });
+            renderDashboard(1850.0, { "XAUUSD": 25105, "BTCUSD": 321000 });
             initChart();
+            calculateSLTP();
         };
     </script>
 </body>
