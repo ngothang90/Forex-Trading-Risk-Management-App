@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <!-- Thống Kê Hiệu Suất (4 Cột) -->
+        <!-- Thống Kê Hiệu Suất -->
         <div class="glass-card p-4 sm:p-6 rounded-2xl">
             <h2 class="text-sm sm:text-lg font-bold text-slate-200 uppercase tracking-wider mb-3 sm:mb-4 flex items-center">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
@@ -208,7 +208,6 @@
                     <input type="number" id="order-price" oninput="autoCalculateSLTP()" placeholder="Nhập giá..." step="0.0001" class="w-full glass-input rounded-xl p-3 text-xs sm:text-base font-semibold outline-none">
                 </div>
             </div>
-            <!-- Biến ẩn chứa giá trị SL/TP gửi ngầm -->
             <input type="hidden" id="order-sl">
             <input type="hidden" id="order-tp">
 
@@ -221,13 +220,12 @@
         <div class="glass-card p-4 sm:p-6 rounded-2xl shadow-xl">
             <h2 class="text-sm sm:text-lg font-bold text-slate-200 uppercase tracking-wider mb-3 sm:mb-4 flex items-center">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                Biểu Đồ Lợi Nhuận Theo Ngày (Tổng Ăn – Trừ Tổng Mất)
+                Biểu Đồ Lợi Nhuận Theo Ngày
             </h2>
             <div class="relative w-full h-72 sm:h-96">
                 <canvas id="dailyProfitChart"></canvas>
             </div>
         </div>
-
     </div>
 
     <!-- JavaScript Logic -->
@@ -235,7 +233,6 @@
         const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
         const START_DATE_FILTER = Math.floor(new Date('2026-08-01T00:00:00').getTime() / 1000);
         let profitChart = null;
-        let cachedPendingOrders = {};
 
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
@@ -265,34 +262,39 @@
                 return;
             }
 
-            let slOffset = 0.0030;
-            let tpOffset = 0.0060;
+            let slOffset = 0.0030, tpOffset = 0.0060;
+            if (symbol === "XAUUSD") { slOffset = 10; tpOffset = 30; }
+            else if (symbol === "BTCUSD") { slOffset = 300; tpOffset = 600; }
+            else if (symbol === "USOIL") { slOffset = 0.80; tpOffset = 2.00; }
 
-            if (symbol === "XAUUSD") {
-                slOffset = 10;
-                tpOffset = 30;
-            } else if (symbol === "BTCUSD") {
-                slOffset = 300;
-                tpOffset = 600;
-            } else if (symbol === "USOIL") {
-                slOffset = 0.80;
-                tpOffset = 2.00;
-            }
-
-            let sl = 0;
-            let tp = 0;
-
-            if (type === "BUY_LIMIT") {
-                sl = price - slOffset;
-                tp = price + tpOffset;
-            } else if (type === "SELL_LIMIT") {
-                sl = price + slOffset;
-                tp = price - tpOffset;
-            }
+            let sl = 0, tp = 0;
+            if (type === "BUY_LIMIT") { sl = price - slOffset; tp = price + tpOffset; }
+            else if (type === "SELL_LIMIT") { sl = price + slOffset; tp = price - tpOffset; }
 
             let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "USOIL") ? 2 : 5;
             document.getElementById('order-sl').value = sl.toFixed(decimals);
             document.getElementById('order-tp').value = tp.toFixed(decimals);
+        }
+
+        // Trích xuất mã Ticket thông minh từ mọi cấu trúc dữ liệu Firebase
+        function extractTicket(item) {
+            if (!item) return '';
+            const candidates = [
+                item.ticket, item.order_id, item.order, item.id, 
+                item.Ticket, item.Order, item.position, item.Position
+            ];
+            for (let val of candidates) {
+                if (val !== undefined && val !== null && val !== '') {
+                    let strVal = String(val).trim();
+                    if (!isNaN(parseInt(strVal, 10)) && parseInt(strVal, 10) > 0) {
+                        return strVal;
+                    }
+                }
+            }
+            if (item.firebaseKey && String(item.firebaseKey).trim() !== '') {
+                return String(item.firebaseKey).trim();
+            }
+            return '';
         }
 
         async function fetchAllData() {
@@ -307,7 +309,6 @@
                 const historyData = await histRes.json() || {};
                 const positionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
-                cachedPendingOrders = pendingData;
                 
                 updateAccountAndStatsUI(await accRes.json() || {}, historyData, positionsData);
                 updateTableUI('positions-table-body', positionsData, true);
@@ -343,19 +344,12 @@
             }
 
             const maxNotional = balance * leverage;
-            const netMaxLotXau = Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU);
-            const netMaxLotBtc = Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC);
-            const netMaxLotUsoil = Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL);
-            const netMaxLotEurusd = Math.max(0, (maxNotional / (1.10 * 100000)) - vols.EURUSD);
-            const netMaxLotGbpusd = Math.max(0, (maxNotional / (1.30 * 100000)) - vols.GBPUSD);
-            const netMaxLotEurgbp = Math.max(0, (maxNotional / (0.85 * 100000)) - vols.EURGBP);
-
-            document.getElementById('max-lot-xau').innerText = `${netMaxLotXau.toFixed(2)} Lot`;
-            document.getElementById('max-lot-btc').innerText = `${netMaxLotBtc.toFixed(2)} Lot`;
-            document.getElementById('max-lot-usoil').innerText = `${netMaxLotUsoil.toFixed(2)} Lot`;
-            document.getElementById('max-lot-eurusd').innerText = `${netMaxLotEurusd.toFixed(2)} Lot`;
-            document.getElementById('max-lot-gbpusd').innerText = `${netMaxLotGbpusd.toFixed(2)} Lot`;
-            document.getElementById('max-lot-eurgbp').innerText = `${netMaxLotEurgbp.toFixed(2)} Lot`;
+            document.getElementById('max-lot-xau').innerText = `${Math.max(0, (maxNotional / (2600 * 100)) - vols.XAU).toFixed(2)} Lot`;
+            document.getElementById('max-lot-btc').innerText = `${Math.max(0, (maxNotional / (65000 * 1)) - vols.BTC).toFixed(2)} Lot`;
+            document.getElementById('max-lot-usoil').innerText = `${Math.max(0, (maxNotional / (75 * 1000)) - vols.USOIL).toFixed(2)} Lot`;
+            document.getElementById('max-lot-eurusd').innerText = `${Math.max(0, (maxNotional / (1.10 * 100000)) - vols.EURUSD).toFixed(2)} Lot`;
+            document.getElementById('max-lot-gbpusd').innerText = `${Math.max(0, (maxNotional / (1.30 * 100000)) - vols.GBPUSD).toFixed(2)} Lot`;
+            document.getElementById('max-lot-eurgbp').innerText = `${Math.max(0, (maxNotional / (0.85 * 100000)) - vols.EURGBP).toFixed(2)} Lot`;
 
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
             const todayStr = new Date().toISOString().split('T')[0];
@@ -367,15 +361,9 @@
                         if (deal.type !== "BALANCE" && !deal.is_balance && (deal.order_id != 0 || profit == 0)) {
                             totalNetProfit += profit;
                             if (profit > 0) wins++; else if (profit < 0) losses++;
-                            
-                            const dealDateObj = new Date(deal.close_time * 1000);
-                            const dateStr = dealDateObj.toISOString().split('T')[0];
-                            
+                            const dateStr = new Date(deal.close_time * 1000).toISOString().split('T')[0];
                             dailyProfits[dateStr.slice(5)] = (dailyProfits[dateStr.slice(5)] || 0) + profit;
-
-                            if (dateStr === todayStr) {
-                                todayNetProfit += profit;
-                            }
+                            if (dateStr === todayStr) todayNetProfit += profit;
                         }
                     }
                 });
@@ -405,77 +393,37 @@
             return items.sort((a, b) => 
                 (a.symbol || "").localeCompare(b.symbol || "") || 
                 (a.type || "").localeCompare(b.type || "") || 
-                (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0) || 
-                (parseFloat(a.volume) || 0) - (parseFloat(b.volume) || 0)
+                (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0)
             );
         }
 
-        function updateTableUI(elementId, data, isPosition) {
-            const tbody = document.getElementById(elementId);
-            tbody.innerHTML = '';
-            
-            if (!data) {
-                tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium text-xs sm:text-sm">${isPosition ? 'Không có vị thế' : 'Không có lệnh chờ'}</td></tr>`;
-                return;
-            }
-
-            const list = Object.entries(data).map(([key, val]) => ({ ...val, firebaseKey: key })).filter(x => x);
-            
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium text-xs sm:text-sm">${isPosition ? 'Không có vị thế' : 'Không có lệnh chờ'}</td></tr>`;
-                return;
-            }
-
-            sortTableData(list);
-
-            list.forEach(item => {
-                const identifier = item.ticket || item.firebaseKey;
-
-                if (isPosition) {
-                    const profitColor = item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
-                            <td class="p-3 font-bold text-slate-100">${item.symbol}</td>
-                            <td class="p-3 font-bold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type}</td>
-                            <td class="p-3 font-semibold text-slate-200">${item.volume}</td>
-                            <td class="p-3 font-semibold text-slate-200">${item.price}</td>
-                            <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
-                            <td class="p-3 text-right">
-                                <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Đóng</button>
-                            </td>
-                        </tr>`;
-                } else {
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
-                            <td class="p-3 font-bold text-slate-100">${item.symbol}</td>
-                            <td class="p-3 font-bold text-amber-400">${item.type}</td>
-                            <td class="p-3 font-semibold text-slate-200">${item.volume}</td>
-                            <td class="p-3 font-semibold text-slate-200">${item.price}</td>
-                            <td class="p-3 text-right">
-                                <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Hủy</button>
-                            </td>
-                        </tr>`;
-                }
-            });
-        }
-
         async function sendAction(actionType, identifier) {
-            const cleanId = String(identifier).trim();
-            console.log(`Gửi hành động [${actionType}] với ID: ${cleanId}`);
-            
-            if (!cleanId || cleanId === "undefined") {
-                alert('Lỗi: Mã định danh không hợp lệ!');
+            const ticketStr = String(identifier || '').trim();
+            if (!ticketStr || ticketStr === 'undefined' || ticketStr === 'null') {
+                alert('Lỗi: Mã Ticket không tìm thấy trên hệ thống!');
                 return;
             }
+
+            const parsedInt = parseInt(ticketStr, 10);
+            const ticketInt = (!isNaN(parsedInt) && parsedInt > 0) ? parsedInt : 0;
 
             try {
+                const payload = {
+                    action: actionType, 
+                    ticket: ticketInt > 0 ? ticketInt : ticketStr,          
+                    ticket_str: ticketStr,      
+                    order_id: ticketInt > 0 ? ticketInt : ticketStr,        
+                    timestamp: Date.now() 
+                };
+
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: actionType, ticket: cleanId, timestamp: Date.now() })
+                    body: JSON.stringify(payload)
                 });
+                
                 if (res.ok) {
-                    alert('Đã gửi yêu cầu xử lý thành công!');
+                    alert(`Đã gửi yêu cầu [${actionType}] thành công tới Bot!`);
                     setTimeout(fetchAllData, 1000);
                 } else {
                     alert('Lỗi khi gửi yêu cầu lên Firebase!');
@@ -484,6 +432,60 @@
                 console.error(e);
                 alert('Lỗi kết nối mạng khi gửi yêu cầu.');
             }
+        }
+
+        function updateTableUI(elementId, data, isPosition) {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
+            
+            if (!data) {
+                tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium">Không có dữ liệu</td></tr>`;
+                return;
+            }
+
+            const list = Object.entries(data).map(([key, val]) => {
+                if (typeof val === 'object' && val !== null) {
+                    return { ...val, firebaseKey: key };
+                }
+                return { ticket: key, firebaseKey: key };
+            }).filter(x => x);
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium">Không có dữ liệu</td></tr>`;
+                return;
+            }
+
+            sortTableData(list);
+
+            list.forEach(item => {
+                const identifier = extractTicket(item);
+
+                if (isPosition) {
+                    const profitColor = item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
+                            <td class="p-3 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
+                            <td class="p-3 font-bold ${item.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}">${item.type || 'N/A'}</td>
+                            <td class="p-3 font-semibold text-slate-200">${item.volume || '0.00'}</td>
+                            <td class="p-3 font-semibold text-slate-200">${item.price || '0.00'}</td>
+                            <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Đóng</button>
+                            </td>
+                        </tr>`;
+                } else {
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
+                            <td class="p-3 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
+                            <td class="p-3 font-bold text-amber-400">${item.type || 'N/A'}</td>
+                            <td class="p-3 font-semibold text-slate-200">${item.volume || '0.00'}</td>
+                            <td class="p-3 font-semibold text-slate-200">${item.price || '0.00'}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Hủy</button>
+                            </td>
+                        </tr>`;
+                }
+            });
         }
 
         async function sendPendingOrder() {
@@ -501,28 +503,7 @@
                 return;
             }
 
-            let isDuplicate = false;
-            if (cachedPendingOrders) {
-                Object.values(cachedPendingOrders).forEach(ord => {
-                    if (ord && ord.symbol === symbol && ord.type === type && Math.abs(ord.price - price) < 0.00001) {
-                        isDuplicate = true;
-                    }
-                });
-            }
-            if (isDuplicate) {
-                alert('Lệnh chờ này đã tồn tại! Hệ thống từ chối nhập trùng.');
-                return;
-            }
-
-            const orderData = {
-                symbol: symbol,
-                type: type,
-                volume: volume,
-                price: price,
-                sl: isNaN(sl) ? 0 : sl,
-                tp: isNaN(tp) ? 0 : tp,
-                timestamp: Date.now()
-            };
+            const orderData = { symbol, type, volume, price, sl: isNaN(sl) ? 0 : sl, tp: isNaN(tp) ? 0 : tp, timestamp: Date.now() };
 
             try {
                 const res = await fetch(`${FIREBASE_URL}/pending_requests.json`, {
@@ -533,23 +514,18 @@
                 if (res.ok) {
                     alert('Đã gửi lệnh kỷ luật thành công!');
                     document.getElementById('order-price').value = '';
-                    document.getElementById('order-sl').value = '';
-                    document.getElementById('order-tp').value = '';
                     setTimeout(fetchAllData, 1000);
-                } else {
-                    alert('Lỗi khi gửi lệnh lên Firebase!');
-                }
+                } else alert('Lỗi khi gửi lệnh lên Firebase!');
             } catch (e) {
                 console.error(e);
                 alert('Lỗi kết nối mạng khi gửi lệnh.');
             }
         }
 
-        // Khởi tạo ứng dụng và thiết lập tự động cập nhật dữ liệu định kỳ (polling)
         window.addEventListener('DOMContentLoaded', () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 3000); // Tự động đồng bộ mỗi 3 giây
+            setInterval(fetchAllData, 3000);
         });
     </script>
 </body>
