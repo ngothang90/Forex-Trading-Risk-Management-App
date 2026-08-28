@@ -309,6 +309,23 @@
             return item.firebaseKey ? String(item.firebaseKey).replace('t_', '').trim() : '';
         }
 
+        // Hàm hỗ trợ sắp xếp danh sách theo: Mã (A-Z) -> Loại (A-Z) -> Khối lượng (0-9)
+        function sortOrdersList(list) {
+            return list.sort((a, b) => {
+                const symA = String(a.symbol || '').toUpperCase();
+                const symB = String(b.symbol || '').toUpperCase();
+                if (symA !== symB) return symA.localeCompare(symB);
+
+                const typeA = String(a.type || '').toUpperCase();
+                const typeB = String(b.type || '').toUpperCase();
+                if (typeA !== typeB) return typeA.localeCompare(typeB);
+
+                const volA = parseFloat(a.volume || 0);
+                const volB = parseFloat(b.volume || 0);
+                return volA - volB;
+            });
+        }
+
         async function fetchAllData() {
             try {
                 const [accRes, posRes, ordRes, histRes, priceRes] = await Promise.all([
@@ -422,12 +439,15 @@
                 return;
             }
 
-            const list = Object.entries(data).map(([key, val]) => {
+            let rawList = Object.entries(data).map(([key, val]) => {
                 if (typeof val === 'object' && val !== null) return { ...val, firebaseKey: key };
                 return { ticket: key, firebaseKey: key };
             }).filter(x => x);
 
-            list.forEach(item => {
+            // Sắp xếp danh sách trước khi hiển thị lên bảng
+            const sortedList = sortOrdersList(rawList);
+
+            sortedList.forEach(item => {
                 const identifier = extractTicket(item);
                 const isBuy = item.type === 'BUY' || item.type === 'BUY_LIMIT';
                 const badgeClass = isBuy ? 'badge-buy' : 'badge-sell';
