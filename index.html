@@ -255,6 +255,34 @@
             "EURGBP": 0.8500
         };
 
+        function normalizeSymbol(rawSym) {
+            if (!rawSym) return "XAUUSD";
+            let s = String(rawSym).toUpperCase().trim();
+            if (s.includes("XAU")) return "XAUUSD";
+            if (s.includes("BTC")) return "BTCUSD";
+            if (s.includes("OIL") || s.includes("USO")) return "USOIL";
+            if (s.includes("EURUSD")) return "EURUSD";
+            if (s.includes("GBPUSD")) return "GBPUSD";
+            if (s.includes("EURGBP")) return "EURGBP";
+            return s;
+        }
+
+        function getCurrentPrice(symbol) {
+            let normSym = normalizeSymbol(symbol);
+            if (livePrices && typeof livePrices === 'object') {
+                let pObj = livePrices[normSym] || livePrices[symbol] || livePrices[String(symbol).toLowerCase()];
+                if (pObj !== undefined && pObj !== null) {
+                    if (typeof pObj === 'number' && pObj > 0) return pObj;
+                    if (typeof pObj === 'string' && parseFloat(pObj) > 0) return parseFloat(pObj);
+                    if (typeof pObj === 'object') {
+                        let val = pObj.ask || pObj.price || pObj.bid || pObj.last;
+                        if (val && parseFloat(val) > 0) return parseFloat(val);
+                    }
+                }
+            }
+            return DEFAULT_PRICES[normSym] || 1;
+        }
+
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
             profitChart = new Chart(ctx, {
@@ -273,7 +301,7 @@
         }
 
         function autoCalculateSLTP() {
-            const symbol = document.getElementById('order-symbol').value;
+            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
             const type = document.getElementById('order-type').value;
             const price = parseFloat(document.getElementById('order-price').value);
 
@@ -309,7 +337,6 @@
             return item.firebaseKey ? String(item.firebaseKey).replace('t_', '').trim() : '';
         }
 
-        // Hàm hỗ trợ sắp xếp danh sách theo: Mã (A-Z) -> Loại (A-Z) -> Khối lượng (0-9)
         function sortOrdersList(list) {
             return list.sort((a, b) => {
                 const symA = String(a.symbol || '').toUpperCase();
@@ -320,8 +347,8 @@
                 const typeB = String(b.type || '').toUpperCase();
                 if (typeA !== typeB) return typeA.localeCompare(typeB);
 
-                const volA = parseFloat(a.volume || 0);
-                const volB = parseFloat(b.volume || 0);
+                const volA = parseFloat(a.volume || a.lots || 0);
+                const volB = parseFloat(b.volume || b.lots || 0);
                 return volA - volB;
             });
         }
@@ -337,11 +364,12 @@
                 ]);
 
                 livePrices = await priceRes.json() || {};
+                const accountData = await accRes.json() || {};
                 const historyData = await histRes.json() || {};
                 const positionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
                 
-                updateAccountAndStatsUI(await accRes.json() || {}, historyData, positionsData);
+                updateAccountAndStatsUI(accountData, historyData, positionsData);
                 updateTableUI('positions-table-body', positionsData, true);
                 updateTableUI('pending-table-body', pendingData, false);
             } catch (err) {
@@ -350,36 +378,61 @@
         }
 
         function updateAccountAndStatsUI(accountData, historyData, positionsData) {
-            const balance = parseFloat(accountData.balance || 0);
-            const equity = parseFloat(accountData.equity || 0);
+            // Trích xuất Balance linh hoạt từ mọi kiểu cấu trúc Firebase
+            let balance = 0;
+            if (accountData) {
+                if (typeof accountData === 'number') balance = accountData;
+                else if (typeof accountData === 'object') {
+                    balance = parseFloat(
+                        accountData.balance || 
+                        accountData.Balance || 
+                        accountData.equity || 
+                        accountData.Equity || 
+                        (accountData.account ? accountData.account.balance : 0) || 0
+                    );
+                }
+            }
+
+            let equity = balance;
+            if (accountData && typeof accountData === 'object') {
+                equity = parseFloat(accountData.equity || accountData.Equity || balance);
+            }
+
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${equity.toFixed(2)}`;
 
+            // Đòn bẩy web quy định theo số dư Balance
             let leverage = 2000;
             if (balance >= 2500) leverage = 8;
             else if (balance >= 500) leverage = 25;
             else leverage = 2000;
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
+            // Tính tổng Notional đang chạy từ các vị thế mở
             let runningNotional = 0;
             if (positionsData && typeof positionsData === 'object') {
                 Object.values(positionsData).forEach(p => {
-                    if (!p) return;
-                    let sym = (p.symbol || "").toUpperCase();
-                    let vol = parseFloat(p.volume || 0);
+                    if (!p || typeof p !== 'object') return;
+                    let sym = normalizeSymbol(p.symbol || p.Symbol || "");
+                    let vol = parseFloat(p.volume || p.lots || p.Volume || 0);
                     let cSize = CONTRACT_SIZES[sym] || 100000;
-                    let pPrice = (livePrices[sym] && livePrices[sym].ask) ? parseFloat(livePrices[sym].ask) : (parseFloat(p.price) || DEFAULT_PRICES[sym] || 1);
-                    if (!isNaN(vol) && !isNaN(pPrice)) {
+                    let pPrice = getCurrentPrice(sym);
+                    if (!isNaN(vol) && vol > 0 && !isNaN(pPrice) && pPrice > 0) {
                         runningNotional += (vol * cSize * pPrice);
                     }
                 });
             }
 
+            // In log hỗ trợ kiểm tra F12 Console
+            console.log("MaxLot Calc Info:", { balance, leverage, totalBuyingPower: balance * leverage, runningNotional });
+
+            // Tính Max Lot tối đa được vào thêm cho từng cặp
             const symbols = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP"];
             symbols.forEach(sym => {
-                let currPrice = (livePrices[sym] && livePrices[sym].ask) ? parseFloat(livePrices[sym].ask) : DEFAULT_PRICES[sym];
+                let currPrice = getCurrentPrice(sym);
                 let cSize = CONTRACT_SIZES[sym] || 100000;
                 let maxLot = 0;
+                
                 if (currPrice > 0 && balance > 0) {
                     let totalBuyingPower = balance * leverage;
                     let availNotional = totalBuyingPower - runningNotional;
@@ -387,22 +440,24 @@
                         maxLot = availNotional / (cSize * currPrice);
                     }
                 }
+                
                 calculatedMaxLots[sym] = Math.max(0, maxLot);
                 const el = document.getElementById(`max-lot-${sym}`);
                 if (el) el.innerText = `${calculatedMaxLots[sym].toFixed(2)} Lot`;
             });
 
+            // Thống kê hiệu suất lịch sử
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
             const todayStr = new Date().toISOString().split('T')[0];
 
             if (historyData) {
                 Object.values(historyData).forEach(deal => {
                     if ((deal.close_time || 0) >= START_DATE_FILTER) {
-                        const profit = deal.profit || 0;
+                        const profit = parseFloat(deal.profit || 0);
                         if (deal.type !== "BALANCE" && !deal.is_balance && (deal.order_id != 0 || profit == 0)) {
                             totalNetProfit += profit;
                             if (profit > 0) wins++; else if (profit < 0) losses++;
-                            const dateStr = new Date(deal.close_time * 1000).toISOString().split('T')[0];
+                            const dateStr = new Date((deal.close_time || 0) * 1000).toISOString().split('T')[0];
                             dailyProfits[dateStr.slice(5)] = (dailyProfits[dateStr.slice(5)] || 0) + profit;
                             if (dateStr === todayStr) todayNetProfit += profit;
                         }
@@ -444,23 +499,22 @@
                 return { ticket: key, firebaseKey: key };
             }).filter(x => x);
 
-            // Sắp xếp danh sách trước khi hiển thị lên bảng
             const sortedList = sortOrdersList(rawList);
 
             sortedList.forEach(item => {
                 const identifier = extractTicket(item);
-                const isBuy = item.type === 'BUY' || item.type === 'BUY_LIMIT';
+                const isBuy = String(item.type || '').toUpperCase().includes('BUY');
                 const badgeClass = isBuy ? 'badge-buy' : 'badge-sell';
 
                 if (isPosition) {
-                    const profitColor = (item.profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                    const profitColor = (parseFloat(item.profit) || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
                             <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
                             <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
-                            <td class="p-2 font-semibold text-slate-200">${item.volume || '0.00'}</td>
+                            <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
                             <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
-                            <td class="p-2 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
+                            <td class="p-2 font-bold ${profitColor}">$${(parseFloat(item.profit) || 0).toFixed(2)}</td>
                             <td class="p-2 text-right">
                                 <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/40 transition">Đóng</button>
                             </td>
@@ -470,7 +524,7 @@
                         <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
                             <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
                             <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
-                            <td class="p-2 font-semibold text-slate-200">${item.volume || '0.00'}</td>
+                            <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
                             <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
                             <td class="p-2 text-right">
                                 <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/40 transition">Hủy</button>
@@ -498,7 +552,8 @@
         }
 
         async function sendPendingOrder() {
-            const symbol = document.getElementById('order-symbol').value;
+            const rawSym = document.getElementById('order-symbol').value;
+            const symbol = normalizeSymbol(rawSym);
             const type = document.getElementById('order-type').value;
             const volume = parseFloat(document.getElementById('order-volume').value);
             const price = parseFloat(document.getElementById('order-price').value);
