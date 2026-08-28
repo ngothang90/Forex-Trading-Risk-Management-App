@@ -419,7 +419,6 @@
                 return;
             }
 
-            // Map kèm theo firebaseKey để định danh chính xác tuyệt đối khi bấm hủy/đóng
             const list = Object.entries(data).map(([key, val]) => ({ ...val, firebaseKey: key })).filter(x => x);
             
             if (list.length === 0) {
@@ -538,19 +537,20 @@
                     document.getElementById('order-tp').value = '';
                     setTimeout(fetchAllData, 1000);
                 } else {
-                    alert('Lỗi khi gửi lệnh!');
+                    alert('Lỗi khi gửi lệnh lên Firebase!');
                 }
             } catch (e) {
                 console.error(e);
-                alert('Lỗi kết nối khi gửi lệnh.');
+                alert('Lỗi kết nối mạng khi gửi lệnh.');
             }
         }
 
-        window.onload = () => {
+        // Khởi tạo ứng dụng và thiết lập tự động cập nhật dữ liệu định kỳ (polling)
+        window.addEventListener('DOMContentLoaded', () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 5000);
-        };
+            setInterval(fetchAllData, 3000); // Tự động đồng bộ mỗi 3 giây
+        });
     </script>
 </body>
 </html>
