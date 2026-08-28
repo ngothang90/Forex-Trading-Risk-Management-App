@@ -419,7 +419,9 @@
                 return;
             }
 
-            const list = Object.values(data).filter(x => x);
+            // Map kèm theo firebaseKey để định danh chính xác tuyệt đối khi bấm hủy/đóng
+            const list = Object.entries(data).map(([key, val]) => ({ ...val, firebaseKey: key })).filter(x => x);
+            
             if (list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium text-xs sm:text-sm">${isPosition ? 'Không có vị thế' : 'Không có lệnh chờ'}</td></tr>`;
                 return;
@@ -428,6 +430,8 @@
             sortTableData(list);
 
             list.forEach(item => {
+                const identifier = item.ticket || item.firebaseKey;
+
                 if (isPosition) {
                     const profitColor = item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400';
                     tbody.innerHTML += `
@@ -438,7 +442,7 @@
                             <td class="p-3 font-semibold text-slate-200">${item.price}</td>
                             <td class="p-3 font-bold ${profitColor}">$${(item.profit || 0).toFixed(2)}</td>
                             <td class="p-3 text-right">
-                                <button onclick="sendAction('CLOSE_POSITION', '${item.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Đóng</button>
+                                <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Đóng</button>
                             </td>
                         </tr>`;
                 } else {
@@ -449,30 +453,37 @@
                             <td class="p-3 font-semibold text-slate-200">${item.volume}</td>
                             <td class="p-3 font-semibold text-slate-200">${item.price}</td>
                             <td class="p-3 text-right">
-                                <button onclick="sendAction('CANCEL_PENDING', '${item.ticket}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Hủy</button>
+                                <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 transition">Hủy</button>
                             </td>
                         </tr>`;
                 }
             });
         }
 
-        async function sendAction(actionType, ticket) {
-            const cleanTicket = String(ticket).trim();
+        async function sendAction(actionType, identifier) {
+            const cleanId = String(identifier).trim();
+            console.log(`Gửi hành động [${actionType}] với ID: ${cleanId}`);
+            
+            if (!cleanId || cleanId === "undefined") {
+                alert('Lỗi: Mã định danh không hợp lệ!');
+                return;
+            }
+
             try {
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: actionType, ticket: cleanTicket, timestamp: Date.now() })
+                    body: JSON.stringify({ action: actionType, ticket: cleanId, timestamp: Date.now() })
                 });
                 if (res.ok) {
-                    alert('Đã gửi yêu cầu thành công!');
+                    alert('Đã gửi yêu cầu xử lý thành công!');
                     setTimeout(fetchAllData, 1000);
                 } else {
-                    alert('Lỗi khi gửi yêu cầu!');
+                    alert('Lỗi khi gửi yêu cầu lên Firebase!');
                 }
             } catch (e) {
                 console.error(e);
-                alert('Lỗi kết nối khi gửi yêu cầu.');
+                alert('Lỗi kết nối mạng khi gửi yêu cầu.');
             }
         }
 
