@@ -311,6 +311,7 @@
                 return;
             }
 
+            // GIỮ NGUYÊN GIÁ TRỊ CŨ CHO SL/TP AUTO
             let slOffset = 0.0030, tpOffset = 0.0060;
             if (symbol === "XAUUSD") { slOffset = 10; tpOffset = 30; }
             else if (symbol === "BTCUSD") { slOffset = 300; tpOffset = 600; }
@@ -378,7 +379,6 @@
         }
 
         function updateAccountAndStatsUI(accountData, historyData, positionsData) {
-            // Trích xuất Balance linh hoạt từ mọi kiểu cấu trúc Firebase
             let balance = 0;
             if (accountData) {
                 if (typeof accountData === 'number') balance = accountData;
@@ -401,14 +401,12 @@
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${equity.toFixed(2)}`;
 
-            // Đòn bẩy web quy định theo số dư Balance
             let leverage = 2000;
             if (balance >= 2500) leverage = 8;
             else if (balance >= 500) leverage = 25;
             else leverage = 2000;
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
-            // Tính tổng Notional đang chạy từ các vị thế mở
             let runningNotional = 0;
             if (positionsData && typeof positionsData === 'object') {
                 Object.values(positionsData).forEach(p => {
@@ -423,10 +421,8 @@
                 });
             }
 
-            // In log hỗ trợ kiểm tra F12 Console
             console.log("MaxLot Calc Info:", { balance, leverage, totalBuyingPower: balance * leverage, runningNotional });
 
-            // Tính Max Lot tối đa được vào thêm cho từng cặp
             const symbols = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP"];
             symbols.forEach(sym => {
                 let currPrice = getCurrentPrice(sym);
@@ -446,7 +442,6 @@
                 if (el) el.innerText = `${calculatedMaxLots[sym].toFixed(2)} Lot`;
             });
 
-            // Thống kê hiệu suất lịch sử
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
             const todayStr = new Date().toISOString().split('T')[0];
 
