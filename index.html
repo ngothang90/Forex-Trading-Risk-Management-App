@@ -7,7 +7,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper">
-    <!-- Kết thúc cấu hình iOS -->
     <title>Gatekeeper Pro - Discipline Trading</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -316,7 +315,6 @@
                 return;
             }
 
-            // GIỮ NGUYÊN GIÁ TRỊ CŨ CHO SL/TP AUTO
             let slOffset = 0.0030, tpOffset = 0.0060;
             if (symbol === "XAUUSD") { slOffset = 10; tpOffset = 30; }
             else if (symbol === "BTCUSD") { slOffset = 300; tpOffset = 600; }
@@ -425,8 +423,6 @@
                     }
                 });
             }
-
-            console.log("MaxLot Calc Info:", { balance, leverage, totalBuyingPower: balance * leverage, runningNotional });
 
             const symbols = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP"];
             symbols.forEach(sym => {
