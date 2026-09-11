@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Cấu hình cho iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper">
@@ -130,7 +129,6 @@
 
         <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-            <!-- Vị Thế Đang Chạy -->
             <div class="glass-card p-3.5 rounded-xl">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -155,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- Lệnh Chờ Khớp -->
             <div class="glass-card p-3.5 rounded-xl">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -244,21 +241,13 @@
         let calculatedMaxLots = {};
 
         const CONTRACT_SIZES = {
-            "XAUUSD": 100,
-            "BTCUSD": 1,
-            "USOIL": 1000,
-            "EURUSD": 100000,
-            "GBPUSD": 100000,
-            "EURGBP": 100000
+            "XAUUSD": 100, "BTCUSD": 1, "USOIL": 1000,
+            "EURUSD": 100000, "GBPUSD": 100000, "EURGBP": 100000
         };
 
         const DEFAULT_PRICES = {
-            "XAUUSD": 2500.0,
-            "BTCUSD": 60000.0,
-            "USOIL": 75.0,
-            "EURUSD": 1.0800,
-            "GBPUSD": 1.2700,
-            "EURGBP": 0.8500
+            "XAUUSD": 2500.0, "BTCUSD": 60000.0, "USOIL": 75.0,
+            "EURUSD": 1.0800, "GBPUSD": 1.2700, "EURGBP": 0.8500
         };
 
         function normalizeSymbol(rawSym) {
@@ -289,11 +278,21 @@
             return DEFAULT_PRICES[normSym] || 1;
         }
 
+        // Chuyển timestamp Unix sang chuỗi Ngày Địa Phương (YYYY-MM-DD)
+        function formatLocalDate(timestampSec) {
+            if (!timestampSec) return '';
+            const d = new Date(timestampSec * 1000);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
             profitChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Lợi nhuận ($)', data: [], backgroundColor: [], borderColor: [], borderWidth: 1, borderRadius: 4 }] },
+                data: { labels: [], datasets: [{ label: 'Lợi nhuận ròng ($)', data: [], backgroundColor: [], borderColor: [], borderWidth: 1, borderRadius: 4 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -353,14 +352,10 @@
                 const symA = String(a.symbol || '').toUpperCase();
                 const symB = String(b.symbol || '').toUpperCase();
                 if (symA !== symB) return symA.localeCompare(symB);
-
                 const typeA = String(a.type || '').toUpperCase();
                 const typeB = String(b.type || '').toUpperCase();
                 if (typeA !== typeB) return typeA.localeCompare(typeB);
-
-                const volA = parseFloat(a.volume || a.lots || 0);
-                const volB = parseFloat(b.volume || b.lots || 0);
-                return volA - volB;
+                return parseFloat(a.volume || a.lots || 0) - parseFloat(b.volume || b.lots || 0);
             });
         }
 
@@ -389,23 +384,13 @@
         }
 
         function updateAccountAndStatsUI(accountData, historyData, positionsData) {
-            let balance = 0;
-            if (accountData) {
-                if (typeof accountData === 'number') balance = accountData;
-                else if (typeof accountData === 'object') {
-                    balance = parseFloat(
-                        accountData.balance || 
-                        accountData.Balance || 
-                        accountData.equity || 
-                        accountData.Equity || 
-                        (accountData.account ? accountData.account.balance : 0) || 0
-                    );
-                }
-            }
-
-            let equity = balance;
+            let balance = 0, equity = 0;
             if (accountData && typeof accountData === 'object') {
+                balance = parseFloat(accountData.balance || accountData.Balance || 0);
                 equity = parseFloat(accountData.equity || accountData.Equity || balance);
+            } else if (typeof accountData === 'number') {
+                balance = accountData;
+                equity = accountData;
             }
 
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
@@ -414,7 +399,6 @@
             let leverage = 2000;
             if (balance >= 2500) leverage = 8;
             else if (balance >= 500) leverage = 25;
-            else leverage = 2000;
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
             let runningNotional = 0;
@@ -425,7 +409,7 @@
                     let vol = parseFloat(p.volume || p.lots || p.Volume || 0);
                     let cSize = CONTRACT_SIZES[sym] || 100000;
                     let pPrice = getCurrentPrice(sym);
-                    if (!isNaN(vol) && vol > 0 && !isNaN(pPrice) && pPrice > 0) {
+                    if (!isNaN(vol) && vol > 0 && pPrice > 0) {
                         runningNotional += (vol * cSize * pPrice);
                     }
                 });
@@ -436,33 +420,48 @@
                 let currPrice = getCurrentPrice(sym);
                 let cSize = CONTRACT_SIZES[sym] || 100000;
                 let maxLot = 0;
-                
                 if (currPrice > 0 && balance > 0) {
                     let totalBuyingPower = balance * leverage;
                     let availNotional = totalBuyingPower - runningNotional;
-                    if (availNotional > 0) {
-                        maxLot = availNotional / (cSize * currPrice);
-                    }
+                    if (availNotional > 0) maxLot = availNotional / (cSize * currPrice);
                 }
-                
                 calculatedMaxLots[sym] = Math.max(0, maxLot);
                 const el = document.getElementById(`max-lot-${sym}`);
                 if (el) el.innerText = `${calculatedMaxLots[sym].toFixed(2)} Lot`;
             });
 
-            let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0, dailyProfits = {};
-            const todayStr = new Date().toISOString().split('T')[0];
+            // TÍNH TOÁN LỢI NHUẬN RÒNG CHÍNH XÁC (PROFIT + SWAP + COMMISSION)
+            let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0;
+            let dailyProfits = {};
+            const todayStr = formatLocalDate(Math.floor(Date.now() / 1000));
 
             if (historyData) {
                 Object.values(historyData).forEach(deal => {
-                    if ((deal.close_time || 0) >= START_DATE_FILTER) {
-                        const profit = parseFloat(deal.profit || 0);
-                        if (deal.type !== "BALANCE" && !deal.is_balance && (deal.order_id != 0 || profit == 0)) {
-                            totalNetProfit += profit;
-                            if (profit > 0) wins++; else if (profit < 0) losses++;
-                            const dateStr = new Date((deal.close_time || 0) * 1000).toISOString().split('T')[0];
-                            dailyProfits[dateStr.slice(5)] = (dailyProfits[dateStr.slice(5)] || 0) + profit;
-                            if (dateStr === todayStr) todayNetProfit += profit;
+                    if (!deal || typeof deal !== 'object') return;
+                    const timeSec = parseInt(deal.close_time || deal.time || deal.time_msc / 1000 || 0, 10);
+                    
+                    if (timeSec >= START_DATE_FILTER) {
+                        const isBalanceType = deal.type === "BALANCE" || deal.type === 2 || deal.is_balance;
+                        const entryType = deal.entry !== undefined ? parseInt(deal.entry, 10) : 1; // 1: ENTRY_OUT, 2: ENTRY_INOUT
+                        
+                        // Lọc bỏ nạp/rút tiền và chỉ lấy giao dịch thoát vị thế (hoặc có ghi nhận PnL)
+                        if (!isBalanceType && (entryType === 1 || entryType === 2 || deal.deal_id || deal.order_id)) {
+                            const rawProfit = parseFloat(deal.profit || 0);
+                            const swap = parseFloat(deal.swap || 0);
+                            const comm = parseFloat(deal.commission || 0);
+                            const netProfit = rawProfit + swap + comm;
+
+                            totalNetProfit += netProfit;
+
+                            if (netProfit > 0) wins++;
+                            else if (netProfit < 0) losses++;
+
+                            const dateStr = formatLocalDate(timeSec);
+                            if (dateStr) {
+                                const shortDate = dateStr.slice(5); // MM-DD
+                                dailyProfits[shortDate] = (dailyProfits[shortDate] || 0) + netProfit;
+                                if (dateStr === todayStr) todayNetProfit += netProfit;
+                            }
                         }
                     }
                 });
@@ -539,7 +538,6 @@
 
         async function sendAction(actionType, identifier) {
             if (!identifier) { alert('Lỗi: Mã Ticket không hợp lệ!'); return; }
-
             try {
                 const payload = { action: actionType, ticket: String(identifier).trim(), timestamp: Date.now() };
                 const res = await fetch(`${FIREBASE_URL}/actions.json`, {
@@ -555,8 +553,7 @@
         }
 
         async function sendPendingOrder() {
-            const rawSym = document.getElementById('order-symbol').value;
-            const symbol = normalizeSymbol(rawSym);
+            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
             const type = document.getElementById('order-type').value;
             const volume = parseFloat(document.getElementById('order-volume').value);
             const price = parseFloat(document.getElementById('order-price').value);
