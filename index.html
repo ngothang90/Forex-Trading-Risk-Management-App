@@ -51,6 +51,17 @@
             </div>
         </div>
 
+        <!-- Banner Trạng thái từ MT5 -->
+        <div id="status-banner" class="hidden glass-card p-3 rounded-xl border-l-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span id="status-icon" class="text-lg"></span>
+                    <p id="status-message" class="text-xs font-bold"></p>
+                </div>
+                <span id="status-time" class="text-[10px] text-slate-400 font-medium"></span>
+            </div>
+        </div>
+
         <!-- Thẻ Tài Khoản -->
         <div class="grid grid-cols-3 gap-2.5">
             <div class="glass-card p-3 rounded-xl">
@@ -67,7 +78,7 @@
             </div>
         </div>
 
-        <!-- Khối Lượng Tối Đa Vào Thêm -->
+        <!-- Khối Lượng Tối Đa Cho Phép -->
         <div class="glass-card p-3.5 rounded-xl">
             <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                 <svg class="w-4 h-4 mr-1.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -101,11 +112,11 @@
             </div>
         </div>
 
-        <!-- Thống Kê Hiệu Suất -->
+        <!-- Thống Kê Hiệu Suất (Từ 01/01/2026) -->
         <div class="glass-card p-3.5 rounded-xl">
             <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                 <svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                Hiệu Suất Giao Dịch (Từ 01/08/2026)
+                Hiệu Suất Giao Dịch (Từ 01/01/2026)
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50">
@@ -121,7 +132,7 @@
                     <p id="stat-net-profit" class="text-base sm:text-lg font-bold text-white">+$0.00</p>
                 </div>
                 <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50">
-                    <span class="text-[11px] text-slate-400 block font-bold uppercase">LN Ròng Ngày</span>
+                    <span class="text-[11px] text-slate-400 block font-bold uppercase">LN Ròng Hôm Nay</span>
                     <p id="stat-daily-profit" class="text-base sm:text-lg font-bold text-white">+$0.00</p>
                 </div>
             </div>
@@ -221,11 +232,11 @@
             </button>
         </div>
 
-        <!-- Biểu Đồ Lợi Nhuận -->
+        <!-- Biểu Đồ Lợi Nhuận Tích Lũy -->
         <div class="glass-card p-3.5 rounded-xl">
             <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                 <svg class="w-4 h-4 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                Biểu Đồ Lợi Nhuận Theo Ngày
+                Biểu Đồ Lợi Nhuận Tích Lũy Theo Ngày (Từ 01/01/2026)
             </h2>
             <div class="relative w-full h-52 sm:h-64">
                 <canvas id="dailyProfitChart"></canvas>
@@ -235,7 +246,9 @@
 
     <script>
         const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const START_DATE_FILTER = Math.floor(new Date('2026-08-01T00:00:00').getTime() / 1000);
+        // Mốc thời gian chuẩn UTC 01/01/2026 00:00:00 (1767225600 giây)
+        const START_DATE_FILTER = Math.floor(new Date('2026-01-01T00:00:00Z').getTime() / 1000);
+        
         let profitChart = null;
         let livePrices = {};
         let calculatedMaxLots = {};
@@ -278,7 +291,6 @@
             return DEFAULT_PRICES[normSym] || 1;
         }
 
-        // Chuyển timestamp Unix sang chuỗi Ngày Địa Phương (YYYY-MM-DD)
         function formatLocalDate(timestampSec) {
             if (!timestampSec) return '';
             const d = new Date(timestampSec * 1000);
@@ -288,19 +300,58 @@
             return `${year}-${month}-${day}`;
         }
 
+        // Khởi tạo Biểu đồ Đường (Line Chart)
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
             profitChart = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Lợi nhuận ròng ($)', data: [], backgroundColor: [], borderColor: [], borderWidth: 1, borderRadius: 4 }] },
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: 'PnL Cộng Dồn ($)', 
+                        data: [], 
+                        borderColor: '#3b82f6',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.25,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#3b82f6',
+                        pointHoverRadius: 6
+                    }] 
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' } } },
-                        x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' } } }
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' }, 
+                            ticks: { 
+                                color: '#cbd5e1', 
+                                font: { size: 10, weight: 'bold' },
+                                callback: function(value) { return '$' + value; }
+                            } 
+                        },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' } } 
+                        }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` PnL tích lũy: $${context.raw}`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -361,12 +412,13 @@
 
         async function fetchAllData() {
             try {
-                const [accRes, posRes, ordRes, histRes, priceRes] = await Promise.all([
+                const [accRes, posRes, ordRes, histRes, priceRes, statusRes] = await Promise.all([
                     fetch(`${FIREBASE_URL}/account.json`),
                     fetch(`${FIREBASE_URL}/live_positions.json`),
                     fetch(`${FIREBASE_URL}/live_pending_orders.json`),
                     fetch(`${FIREBASE_URL}/closed_history.json`),
-                    fetch(`${FIREBASE_URL}/prices.json`)
+                    fetch(`${FIREBASE_URL}/prices.json`),
+                    fetch(`${FIREBASE_URL}/last_status.json`)
                 ]);
 
                 livePrices = await priceRes.json() || {};
@@ -374,12 +426,43 @@
                 const historyData = await histRes.json() || {};
                 const positionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
+                const lastStatus = await statusRes.json() || {};
                 
                 updateAccountAndStatsUI(accountData, historyData, positionsData);
                 updateTableUI('positions-table-body', positionsData, true);
                 updateTableUI('pending-table-body', pendingData, false);
+                updateStatusBanner(lastStatus);
             } catch (err) {
                 console.error("Lỗi kết nối Firebase:", err);
+            }
+        }
+
+        function updateStatusBanner(lastStatus) {
+            const banner = document.getElementById('status-banner');
+            if (!lastStatus || !lastStatus.message) {
+                banner.classList.add('hidden');
+                return;
+            }
+
+            banner.classList.remove('hidden');
+            const msgEl = document.getElementById('status-message');
+            const iconEl = document.getElementById('status-icon');
+            const timeEl = document.getElementById('status-time');
+
+            msgEl.innerText = lastStatus.message;
+            if (lastStatus.timestamp) {
+                const d = new Date(lastStatus.timestamp * 1000);
+                timeEl.innerText = d.toLocaleTimeString();
+            }
+
+            if (lastStatus.status === "ERROR") {
+                banner.className = "glass-card p-3 rounded-xl border-l-4 border-rose-500 bg-rose-950/30";
+                iconEl.innerText = "❌";
+                msgEl.className = "text-xs font-bold text-rose-300";
+            } else {
+                banner.className = "glass-card p-3 rounded-xl border-l-4 border-emerald-500 bg-emerald-950/30";
+                iconEl.innerText = "✅";
+                msgEl.className = "text-xs font-bold text-emerald-300";
             }
         }
 
@@ -388,17 +471,12 @@
             if (accountData && typeof accountData === 'object') {
                 balance = parseFloat(accountData.balance || accountData.Balance || 0);
                 equity = parseFloat(accountData.equity || accountData.Equity || balance);
-            } else if (typeof accountData === 'number') {
-                balance = accountData;
-                equity = accountData;
             }
 
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${equity.toFixed(2)}`;
 
             let leverage = 2000;
-            if (balance >= 2500) leverage = 8;
-            else if (balance >= 500) leverage = 25;
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
             let runningNotional = 0;
@@ -415,40 +493,50 @@
                 });
             }
 
+            // Cập nhật hiển thị Max Lot
             const symbols = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP"];
             symbols.forEach(sym => {
-                let currPrice = getCurrentPrice(sym);
-                let cSize = CONTRACT_SIZES[sym] || 100000;
-                let maxLot = 0;
-                if (currPrice > 0 && balance > 0) {
-                    let totalBuyingPower = balance * leverage;
-                    let availNotional = totalBuyingPower - runningNotional;
-                    if (availNotional > 0) maxLot = availNotional / (cSize * currPrice);
+                let maxLot = 100.0;
+                if (balance < 500) {
+                    maxLot = (sym === "XAUUSD") ? 0.02 : 0.06;
+                } else {
+                    let currPrice = getCurrentPrice(sym);
+                    let cSize = CONTRACT_SIZES[sym] || 100000;
+                    if (currPrice > 0 && balance > 0) {
+                        let totalBuyingPower = balance * leverage;
+                        let availNotional = totalBuyingPower - runningNotional;
+                        if (availNotional > 0) maxLot = availNotional / (cSize * currPrice);
+                        else maxLot = 0;
+                    }
                 }
                 calculatedMaxLots[sym] = Math.max(0, maxLot);
                 const el = document.getElementById(`max-lot-${sym}`);
                 if (el) el.innerText = `${calculatedMaxLots[sym].toFixed(2)} Lot`;
             });
 
-            // TÍNH TOÁN LỢI NHUẬN RÒNG CHÍNH XÁC (PROFIT + SWAP + COMMISSION)
+            // Tính toán hiệu suất từ 01/01/2026
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0;
-            let dailyProfits = {};
+            let dailyPnLMap = {};
             const todayStr = formatLocalDate(Math.floor(Date.now() / 1000));
 
             if (historyData) {
                 Object.values(historyData).forEach(deal => {
                     if (!deal || typeof deal !== 'object') return;
+                    
+                    // Lấy timestamp đóng lệnh
                     const timeSec = parseInt(deal.close_time || deal.time || deal.time_msc / 1000 || 0, 10);
                     
                     if (timeSec >= START_DATE_FILTER) {
-                        const isBalanceType = deal.type === "BALANCE" || deal.type === 2 || deal.is_balance;
-                        const entryType = deal.entry !== undefined ? parseInt(deal.entry, 10) : 1; // 1: ENTRY_OUT, 2: ENTRY_INOUT
+                        // Loại bỏ các giao dịch Nạp/Rút (Balance/Credit/Deposit/Withdrawal - type 2/6/BALANCE)
+                        const dealTypeStr = String(deal.type || '').toUpperCase();
+                        const isBalanceType = dealTypeStr.includes("BALANCE") || dealTypeStr.includes("CREDIT") || deal.type === 2 || deal.type === 6 || deal.is_balance || deal.cmd === 6;
                         
-                        // Lọc bỏ nạp/rút tiền và chỉ lấy giao dịch thoát vị thế (hoặc có ghi nhận PnL)
-                        if (!isBalanceType && (entryType === 1 || entryType === 2 || deal.deal_id || deal.order_id)) {
+                        if (!isBalanceType) {
                             const rawProfit = parseFloat(deal.profit || 0);
                             const swap = parseFloat(deal.swap || 0);
                             const comm = parseFloat(deal.commission || 0);
+                            
+                            // PnL ròng chuẩn xác bao gồm cả Phí Swap và Commission
                             const netProfit = rawProfit + swap + comm;
 
                             totalNetProfit += netProfit;
@@ -458,8 +546,7 @@
 
                             const dateStr = formatLocalDate(timeSec);
                             if (dateStr) {
-                                const shortDate = dateStr.slice(5); // MM-DD
-                                dailyProfits[shortDate] = (dailyProfits[shortDate] || 0) + netProfit;
+                                dailyPnLMap[dateStr] = (dailyPnLMap[dateStr] || 0) + netProfit;
                                 if (dateStr === todayStr) todayNetProfit += netProfit;
                             }
                         }
@@ -469,7 +556,9 @@
 
             document.getElementById('stat-wins').innerText = wins;
             document.getElementById('stat-losses').innerText = losses;
-            document.getElementById('stat-winrate').innerText = ((wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0).toFixed(1) + '%';
+            
+            const totalTrades = wins + losses;
+            document.getElementById('stat-winrate').innerText = (totalTrades > 0 ? (wins / totalTrades) * 100 : 0).toFixed(1) + '%';
             
             const netProfitEl = document.getElementById('stat-net-profit');
             netProfitEl.innerText = (totalNetProfit >= 0 ? '+' : '') + '$' + totalNetProfit.toFixed(2);
@@ -479,11 +568,20 @@
             dailyProfitEl.innerText = (todayNetProfit >= 0 ? '+' : '') + '$' + todayNetProfit.toFixed(2);
             dailyProfitEl.className = `text-base sm:text-lg font-bold ${todayNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            const sortedDates = Object.keys(dailyProfits).sort();
-            profitChart.data.labels = sortedDates;
-            profitChart.data.datasets[0].data = sortedDates.map(d => dailyProfits[d]);
-            profitChart.data.datasets[0].backgroundColor = sortedDates.map(d => dailyProfits[d] >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)');
-            profitChart.data.datasets[0].borderColor = sortedDates.map(d => dailyProfits[d] >= 0 ? '#10b981' : '#f43f5e');
+            // Sắp xếp ngày và tính đường Lợi Nhuận Cộng Dồn (Cumulative Curve)
+            const sortedDates = Object.keys(dailyPnLMap).sort();
+            let runningCumulativeProfit = 0;
+            const chartLabels = [];
+            const chartSeriesData = [];
+
+            sortedDates.forEach(date => {
+                runningCumulativeProfit += dailyPnLMap[date];
+                chartLabels.push(date.slice(5)); // Hiển thị định dạng MM-DD
+                chartSeriesData.push(Number(runningCumulativeProfit.toFixed(2)));
+            });
+
+            profitChart.data.labels = chartLabels;
+            profitChart.data.datasets[0].data = chartSeriesData;
             profitChart.update();
         }
 
@@ -546,7 +644,6 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    alert(`Đã gửi yêu cầu [${actionType}] cho Ticket #${identifier}`);
                     setTimeout(fetchAllData, 1000);
                 }
             } catch (e) { alert('Lỗi mạng khi kết nối Firebase.'); }
@@ -569,7 +666,7 @@
 
             const allowedMaxLot = calculatedMaxLots[symbol] || 0;
             if (volume > allowedMaxLot) {
-                alert(`VI PHẠM KỶ LUẬT: Khối lượng (${volume} Lot) vượt quá Max Lot cho phép (${allowedMaxLot.toFixed(2)} Lot) của ${symbol}!`);
+                alert(`VI PHẠM KỶ LUẬT: Khối lượng (${volume} Lot) vượt quá giới hạn tối đa (${allowedMaxLot.toFixed(2)} Lot) cho mã ${symbol}!`);
                 return;
             }
 
@@ -582,7 +679,6 @@
                     body: JSON.stringify(orderData)
                 });
                 if (res.ok) {
-                    alert('Đã gửi lệnh kỷ luật thành công!');
                     document.getElementById('order-price').value = '';
                     setTimeout(fetchAllData, 1000);
                 }
@@ -592,7 +688,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initChart();
             fetchAllData();
-            setInterval(fetchAllData, 3000);
+            setInterval(fetchAllData, 2000);
         });
     </script>
 </body>
