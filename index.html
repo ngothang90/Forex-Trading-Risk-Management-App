@@ -34,14 +34,23 @@
 <body class="font-sans antialiased min-h-screen pb-8">
     <div class="container mx-auto px-2.5 py-3 sm:px-4 sm:py-4 max-w-6xl space-y-3.5">
         
-        <!-- Header -->
+        <!-- Header & Avatar Giao Dịch An Toàn -->
         <div class="flex items-center justify-between glass-card p-3 sm:p-4 rounded-xl">
-            <div class="flex items-center space-x-2.5">
-                <div class="bg-blue-600 p-2 rounded-lg shadow-md shadow-blue-600/30">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <div class="flex items-center space-x-3">
+                <!-- Avatar Khiên Bảo Vệ Phát Sáng -->
+                <div class="relative flex items-center justify-center">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-xl blur-sm opacity-60 animate-pulse"></div>
+                    <div class="relative bg-slate-900 border border-emerald-500/50 p-2.5 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
                 </div>
                 <div>
-                    <h1 class="text-base sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-base sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">SAFE TRADER</span>
+                    </div>
                     <p class="text-[11px] text-slate-400 font-medium">Hệ Thống Quản Trị & Kỷ Luật</p>
                 </div>
             </div>
@@ -523,11 +532,9 @@
                 Object.values(historyData).forEach(deal => {
                     if (!deal || typeof deal !== 'object') return;
                     
-                    // Lấy timestamp đóng lệnh
                     const timeSec = parseInt(deal.close_time || deal.time || deal.time_msc / 1000 || 0, 10);
                     
                     if (timeSec >= START_DATE_FILTER) {
-                        // Loại bỏ các giao dịch Nạp/Rút (Balance/Credit/Deposit/Withdrawal - type 2/6/BALANCE)
                         const dealTypeStr = String(deal.type || '').toUpperCase();
                         const isBalanceType = dealTypeStr.includes("BALANCE") || dealTypeStr.includes("CREDIT") || deal.type === 2 || deal.type === 6 || deal.is_balance || deal.cmd === 6;
                         
@@ -536,7 +543,6 @@
                             const swap = parseFloat(deal.swap || 0);
                             const comm = parseFloat(deal.commission || 0);
                             
-                            // PnL ròng chuẩn xác bao gồm cả Phí Swap và Commission
                             const netProfit = rawProfit + swap + comm;
 
                             totalNetProfit += netProfit;
@@ -568,7 +574,6 @@
             dailyProfitEl.innerText = (todayNetProfit >= 0 ? '+' : '') + '$' + todayNetProfit.toFixed(2);
             dailyProfitEl.className = `text-base sm:text-lg font-bold ${todayNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            // Sắp xếp ngày và tính đường Lợi Nhuận Cộng Dồn (Cumulative Curve)
             const sortedDates = Object.keys(dailyPnLMap).sort();
             let runningCumulativeProfit = 0;
             const chartLabels = [];
@@ -576,7 +581,7 @@
 
             sortedDates.forEach(date => {
                 runningCumulativeProfit += dailyPnLMap[date];
-                chartLabels.push(date.slice(5)); // Hiển thị định dạng MM-DD
+                chartLabels.push(date.slice(5));
                 chartSeriesData.push(Number(runningCumulativeProfit.toFixed(2)));
             });
 
