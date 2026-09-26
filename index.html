@@ -37,7 +37,6 @@
         <!-- Header & Avatar Giao Dịch An Toàn -->
         <div class="flex items-center justify-between glass-card p-3 sm:p-4 rounded-xl">
             <div class="flex items-center space-x-3">
-                <!-- Avatar Khiên Bảo Vệ Phát Sáng -->
                 <div class="relative flex items-center justify-center">
                     <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-xl blur-sm opacity-60 animate-pulse"></div>
                     <div class="relative bg-slate-900 border border-emerald-500/50 p-2.5 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -87,11 +86,11 @@
             </div>
         </div>
 
-        <!-- Khối Lượng Tối Đa Cho Phép -->
+        <!-- Khối Lượng Tối Đa Cho Phép (Max Lot) -->
         <div class="glass-card p-3.5 rounded-xl">
             <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                 <svg class="w-4 h-4 mr-1.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Khối lượng lệnh tối đa vào thêm
+                Khối lượng lệnh tối đa vào thêm (Max Lot)
             </h2>
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-700/70 text-center">
@@ -121,12 +120,21 @@
             </div>
         </div>
 
-        <!-- Thống Kê Hiệu Suất (Từ 01/01/2026) -->
+        <!-- YÊU CẦU 5: Thống Kê Hiệu Suất Giao Dịch (Có Lọc Ngày) -->
         <div class="glass-card p-3.5 rounded-xl">
-            <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
-                <svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                Hiệu Suất Giao Dịch (Từ 01/01/2026)
-            </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Hiệu Suất Giao Dịch
+                </h2>
+                <!-- Bộ lọc ngày Hiệu suất -->
+                <div class="flex items-center space-x-1.5 text-xs">
+                    <span class="text-slate-400 font-medium">Từ:</span>
+                    <input type="date" id="stat-start-date" value="2026-01-01" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                    <span class="text-slate-400 font-medium">Đến:</span>
+                    <input type="date" id="stat-end-date" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                </div>
+            </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50">
                     <span class="text-[11px] text-slate-400 block font-bold uppercase">Thắng / Thua</span>
@@ -147,58 +155,8 @@
             </div>
         </div>
 
-        <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-            <div class="glass-card p-3.5 rounded-xl">
-                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
-                    <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Chạy
-                </h2>
-                <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-slate-900/90 text-slate-400 uppercase">
-                            <tr>
-                                <th class="p-2">Mã</th>
-                                <th class="p-2">Loại</th>
-                                <th class="p-2">Vol</th>
-                                <th class="p-2">Giá Vào</th>
-                                <th class="p-2">Lợi Nhuận</th>
-                                <th class="p-2 text-right">Xử Lý</th>
-                            </tr>
-                        </thead>
-                        <tbody id="positions-table-body" class="divide-y divide-slate-800">
-                            <tr><td colspan="6" class="text-center py-4 text-slate-500 font-medium">Không có vị thế đang chạy</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="glass-card p-3.5 rounded-xl">
-                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
-                    <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Lệnh Chờ Khớp
-                </h2>
-                <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-slate-900/90 text-slate-400 uppercase">
-                            <tr>
-                                <th class="p-2">Mã</th>
-                                <th class="p-2">Loại</th>
-                                <th class="p-2">Vol</th>
-                                <th class="p-2">Giá Đặt</th>
-                                <th class="p-2 text-right">Xử Lý</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pending-table-body" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="text-center py-4 text-slate-500 font-medium">Không có lệnh chờ</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Đặt Lệnh Kỷ Luật -->
-        <div class="glass-card p-3.5 rounded-xl">
+        <!-- YÊU CẦU 4: Đặt Lệnh Kỷ Luật (ĐƯỢC ĐẨY LÊN TRÊN VỊ THẾ ĐANG CHẠY) -->
+        <div class="glass-card p-3.5 rounded-xl border border-blue-500/30">
             <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                 <svg class="w-4 h-4 mr-1.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 Đặt lệnh kỷ luật
@@ -241,12 +199,71 @@
             </button>
         </div>
 
-        <!-- Biểu Đồ Lợi Nhuận Tích Lũy -->
+        <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+            <div class="glass-card p-3.5 rounded-xl">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Vị Thế Đang Chạy
+                </h2>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-900/90 text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-2">Mã</th>
+                                <th class="p-2">Loại</th>
+                                <th class="p-2">Vol</th>
+                                <th class="p-2">Giá Vào</th>
+                                <th class="p-2">Lợi Nhuận</th>
+                                <th class="p-2 text-right">Xử Lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-table-body" class="divide-y divide-slate-800">
+                            <tr><td colspan="6" class="text-center py-4 text-slate-500 font-medium">Không có vị thế đang chạy</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-xl">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lệnh Chờ Khớp (Tự hủy sau 2 ngày)
+                </h2>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-900/90 text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-2">Mã</th>
+                                <th class="p-2">Loại</th>
+                                <th class="p-2">Vol</th>
+                                <th class="p-2">Giá Đặt</th>
+                                <th class="p-2 text-right">Xử Lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table-body" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="text-center py-4 text-slate-500 font-medium">Không có lệnh chờ</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- YÊU CẦU 3: Biểu Đồ Lợi Nhuận Tích Lũy (Có Lọc Ngày) -->
         <div class="glass-card p-3.5 rounded-xl">
-            <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
-                <svg class="w-4 h-4 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                Biểu Đồ Lợi Nhuận Tích Lũy Theo Ngày (Từ 01/01/2026)
-            </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    Biểu Đồ Lợi Nhuận Tích Lũy Theo Ngày
+                </h2>
+                <!-- Bộ lọc ngày Biểu đồ -->
+                <div class="flex items-center space-x-1.5 text-xs">
+                    <span class="text-slate-400 font-medium">Từ:</span>
+                    <input type="date" id="chart-start-date" value="2026-01-01" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                    <span class="text-slate-400 font-medium">Đến:</span>
+                    <input type="date" id="chart-end-date" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                </div>
+            </div>
             <div class="relative w-full h-52 sm:h-64">
                 <canvas id="dailyProfitChart"></canvas>
             </div>
@@ -255,12 +272,14 @@
 
     <script>
         const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
-        // Mốc thời gian chuẩn UTC 01/01/2026 00:00:00 (1767225600 giây)
-        const START_DATE_FILTER = Math.floor(new Date('2026-01-01T00:00:00Z').getTime() / 1000);
         
         let profitChart = null;
         let livePrices = {};
         let calculatedMaxLots = {};
+        
+        let globalAccountData = {};
+        let globalHistoryData = {};
+        let globalPositionsData = {};
 
         const CONTRACT_SIZES = {
             "XAUUSD": 100, "BTCUSD": 1, "USOIL": 1000,
@@ -309,7 +328,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Khởi tạo Biểu đồ Đường (Line Chart)
         function initChart() {
             const ctx = document.getElementById('dailyProfitChart').getContext('2d');
             
@@ -431,19 +449,24 @@
                 ]);
 
                 livePrices = await priceRes.json() || {};
-                const accountData = await accRes.json() || {};
-                const historyData = await histRes.json() || {};
-                const positionsData = await posRes.json() || {};
+                globalAccountData = await accRes.json() || {};
+                globalHistoryData = await histRes.json() || {};
+                globalPositionsData = await posRes.json() || {};
                 const pendingData = await ordRes.json() || {};
                 const lastStatus = await statusRes.json() || {};
                 
-                updateAccountAndStatsUI(accountData, historyData, positionsData);
-                updateTableUI('positions-table-body', positionsData, true);
+                renderAllUI();
+                updateTableUI('positions-table-body', globalPositionsData, true);
                 updateTableUI('pending-table-body', pendingData, false);
                 updateStatusBanner(lastStatus);
             } catch (err) {
                 console.error("Lỗi kết nối Firebase:", err);
             }
+        }
+
+        function renderAllUI() {
+            updateAccountAndMaxLotUI(globalAccountData, globalPositionsData);
+            updateStatsAndChartUI(globalHistoryData);
         }
 
         function updateStatusBanner(lastStatus) {
@@ -475,7 +498,8 @@
             }
         }
 
-        function updateAccountAndStatsUI(accountData, historyData, positionsData) {
+        // YÊU CẦU 1: Tính Đòn bẩy động & Max Lot theo công thức
+        function updateAccountAndMaxLotUI(accountData, positionsData) {
             let balance = 0, equity = 0;
             if (accountData && typeof accountData === 'object') {
                 balance = parseFloat(accountData.balance || accountData.Balance || 0);
@@ -485,9 +509,15 @@
             document.getElementById('acc-balance').innerText = `$${balance.toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${equity.toFixed(2)}`;
 
+            // Đòn bẩy động theo số dư tài khoản
             let leverage = 2000;
+            if (balance >= 2500) leverage = 8;
+            else if (balance >= 500) leverage = 25;
+            else leverage = 2000;
+
             document.getElementById('acc-leverage').innerText = `1:${leverage}`;
 
+            // Tính tổng Notional đang chạy
             let runningNotional = 0;
             if (positionsData && typeof positionsData === 'object') {
                 Object.values(positionsData).forEach(p => {
@@ -502,28 +532,41 @@
                 });
             }
 
-            // Cập nhật hiển thị Max Lot
+            // Tính Max Lot theo đúng công thức
             const symbols = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP"];
             symbols.forEach(sym => {
-                let maxLot = 100.0;
-                if (balance < 500) {
-                    maxLot = (sym === "XAUUSD") ? 0.02 : 0.06;
-                } else {
-                    let currPrice = getCurrentPrice(sym);
-                    let cSize = CONTRACT_SIZES[sym] || 100000;
-                    if (currPrice > 0 && balance > 0) {
-                        let totalBuyingPower = balance * leverage;
-                        let availNotional = totalBuyingPower - runningNotional;
-                        if (availNotional > 0) maxLot = availNotional / (cSize * currPrice);
-                        else maxLot = 0;
+                let currPrice = getCurrentPrice(sym);
+                let cSize = CONTRACT_SIZES[sym] || 100000;
+                let maxLot = 0;
+                
+                if (currPrice > 0 && cSize > 0) {
+                    let totalBuyingPower = balance * leverage;
+                    let availNotional = totalBuyingPower - runningNotional;
+                    if (availNotional > 0) {
+                        maxLot = availNotional / (cSize * currPrice);
                     }
                 }
+                
                 calculatedMaxLots[sym] = Math.max(0, maxLot);
                 const el = document.getElementById(`max-lot-${sym}`);
                 if (el) el.innerText = `${calculatedMaxLots[sym].toFixed(2)} Lot`;
             });
+        }
 
-            // Tính toán hiệu suất từ 01/01/2026
+        // YÊU CẦU 3 & 5: Cập nhật Hiệu suất & Biểu đồ theo khoảng ngày lọc
+        function updateStatsAndChartUI(historyData) {
+            // Lấy khoảng lọc Hiệu Suất
+            const statStartStr = document.getElementById('stat-start-date').value || '1970-01-01';
+            const statEndStr = document.getElementById('stat-end-date').value || '2099-12-31';
+            const statStartSec = Math.floor(new Date(`${statStartStr}T00:00:00Z`).getTime() / 1000);
+            const statEndSec = Math.floor(new Date(`${statEndStr}T23:59:59Z`).getTime() / 1000);
+
+            // Lấy khoảng lọc Biểu Đồ
+            const chartStartStr = document.getElementById('chart-start-date').value || '1970-01-01';
+            const chartEndStr = document.getElementById('chart-end-date').value || '2099-12-31';
+            const chartStartSec = Math.floor(new Date(`${chartStartStr}T00:00:00Z`).getTime() / 1000);
+            const chartEndSec = Math.floor(new Date(`${chartEndStr}T23:59:59Z`).getTime() / 1000);
+
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0;
             let dailyPnLMap = {};
             const todayStr = formatLocalDate(Math.floor(Date.now() / 1000));
@@ -533,33 +576,37 @@
                     if (!deal || typeof deal !== 'object') return;
                     
                     const timeSec = parseInt(deal.close_time || deal.time || deal.time_msc / 1000 || 0, 10);
-                    
-                    if (timeSec >= START_DATE_FILTER) {
-                        const dealTypeStr = String(deal.type || '').toUpperCase();
-                        const isBalanceType = dealTypeStr.includes("BALANCE") || dealTypeStr.includes("CREDIT") || deal.type === 2 || deal.type === 6 || deal.is_balance || deal.cmd === 6;
-                        
-                        if (!isBalanceType) {
-                            const rawProfit = parseFloat(deal.profit || 0);
-                            const swap = parseFloat(deal.swap || 0);
-                            const comm = parseFloat(deal.commission || 0);
-                            
-                            const netProfit = rawProfit + swap + comm;
+                    const dealTypeStr = String(deal.type || '').toUpperCase();
+                    const isBalanceType = dealTypeStr.includes("BALANCE") || dealTypeStr.includes("CREDIT") || deal.type === 2 || deal.type === 6 || deal.is_balance || deal.cmd === 6;
 
+                    if (!isBalanceType) {
+                        const rawProfit = parseFloat(deal.profit || 0);
+                        const swap = parseFloat(deal.swap || 0);
+                        const comm = parseFloat(deal.commission || 0);
+                        const netProfit = rawProfit + swap + comm;
+
+                        // Tính cho Hiệu suất
+                        if (timeSec >= statStartSec && timeSec <= statEndSec) {
                             totalNetProfit += netProfit;
-
                             if (netProfit > 0) wins++;
                             else if (netProfit < 0) losses++;
 
                             const dateStr = formatLocalDate(timeSec);
+                            if (dateStr === todayStr) todayNetProfit += netProfit;
+                        }
+
+                        // Tính cho Biểu đồ
+                        if (timeSec >= chartStartSec && timeSec <= chartEndSec) {
+                            const dateStr = formatLocalDate(timeSec);
                             if (dateStr) {
                                 dailyPnLMap[dateStr] = (dailyPnLMap[dateStr] || 0) + netProfit;
-                                if (dateStr === todayStr) todayNetProfit += netProfit;
                             }
                         }
                     }
                 });
             }
 
+            // Ghi nhận UI Hiệu suất
             document.getElementById('stat-wins').innerText = wins;
             document.getElementById('stat-losses').innerText = losses;
             
@@ -574,6 +621,7 @@
             dailyProfitEl.innerText = (todayNetProfit >= 0 ? '+' : '') + '$' + todayNetProfit.toFixed(2);
             dailyProfitEl.className = `text-base sm:text-lg font-bold ${todayNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
+            // Ghi nhận UI Biểu đồ
             const sortedDates = Object.keys(dailyPnLMap).sort();
             let runningCumulativeProfit = 0;
             const chartLabels = [];
@@ -669,6 +717,7 @@
                 return;
             }
 
+            // Kiểm tra Max Lot trên Web trước khi gửi
             const allowedMaxLot = calculatedMaxLots[symbol] || 0;
             if (volume > allowedMaxLot) {
                 alert(`VI PHẠM KỶ LUẬT: Khối lượng (${volume} Lot) vượt quá giới hạn tối đa (${allowedMaxLot.toFixed(2)} Lot) cho mã ${symbol}!`);
@@ -691,6 +740,10 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('stat-end-date').value = today;
+            document.getElementById('chart-end-date').value = today;
+
             initChart();
             fetchAllData();
             setInterval(fetchAllData, 2000);
