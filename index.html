@@ -9,6 +9,9 @@
     <title>Gatekeeper Pro - Discipline Trading</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase Realtime SDK (WebSocket 0ms Latency) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; background-color: #080c14; color: #f1f5f9; font-size: 14px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -48,14 +51,14 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <h1 class="text-base sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">SAFE TRADER</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">REALTIME WS</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-medium">Hệ Thống Quản Trị & Kỷ Luật</p>
+                    <p class="text-[11px] text-slate-400 font-medium">Hệ Thống Quản Trị & Kỷ Luật Realtime</p>
                 </div>
             </div>
             <div class="flex items-center space-x-1.5 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 rounded-full">
                 <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-sm"></span>
-                <span class="text-[11px] font-bold text-emerald-300">MT5 Online</span>
+                <span class="text-[11px] font-bold text-emerald-300">MT5 Connected</span>
             </div>
         </div>
 
@@ -124,21 +127,30 @@
             </div>
         </div>
 
-        <!-- Thống Kê Hiệu Suất Giao Dịch -->
+        <!-- Thống Kê Hiệu Suất Giao Dịch & Chọn Nhanh Ngày -->
         <div class="glass-card p-3.5 rounded-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 mb-3">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     Hiệu Suất Giao Dịch
                 </h2>
-                <div class="flex items-center space-x-1.5 text-xs">
+                
+                <!-- Bộ Chọn Nhanh Khoảng Thời Gian (Quick Date Presets) -->
+                <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                    <div class="flex items-center space-x-1 mr-1">
+                        <button onclick="applyDatePreset('today')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold rounded border border-slate-700 transition">Hôm nay</button>
+                        <button onclick="applyDatePreset('7days')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold rounded border border-slate-700 transition">7 ngày</button>
+                        <button onclick="applyDatePreset('month')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold rounded border border-slate-700 transition">Tháng này</button>
+                        <button onclick="applyDatePreset('all')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold rounded border border-slate-700 transition">Tất cả</button>
+                    </div>
                     <span class="text-slate-400 font-medium">Từ:</span>
-                    <input type="date" id="stat-start-date" value="2026-01-01" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                    <input type="date" id="filter-start-date" value="2026-01-01" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
                     <span class="text-slate-400 font-medium">Đến:</span>
-                    <input type="date" id="stat-end-date" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                    <input type="date" id="filter-end-date" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
                 </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50">
                     <span class="text-[11px] text-slate-400 block font-bold uppercase">Thắng / Thua</span>
                     <p class="text-base sm:text-lg font-bold"><span id="stat-wins" class="text-emerald-400">0</span> <span class="text-slate-600">/</span> <span id="stat-losses" class="text-rose-400">0</span></p>
@@ -152,8 +164,13 @@
                     <p id="stat-net-profit" class="text-base sm:text-lg font-bold text-white">+$0.00</p>
                 </div>
                 <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50">
-                    <span class="text-[11px] text-slate-400 block font-bold uppercase">LN Ròng Hôm Nay</span>
+                    <span class="text-[11px] text-slate-400 block font-bold uppercase">LN Hôm Nay</span>
                     <p id="stat-daily-profit" class="text-base sm:text-lg font-bold text-white">+$0.00</p>
+                </div>
+                <!-- Thống kê Thời gian giữ lệnh trung bình -->
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 col-span-2 sm:col-span-1">
+                    <span class="text-[11px] text-slate-400 block font-bold uppercase">TG Giữ Lệnh TB</span>
+                    <p id="stat-avg-hold" class="text-base sm:text-lg font-bold text-purple-400">0m</p>
                 </div>
             </div>
         </div>
@@ -205,11 +222,19 @@
 
         <!-- Vị Thế Đang Chạy & Lệnh Chờ Khớp -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+            <!-- Vị Thế Đang Chạy (Có nút Chốt Hết Khẩn Cấp & Cắt 50%) -->
             <div class="glass-card p-3.5 rounded-xl">
-                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
-                    <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Chạy
-                </h2>
+                <div class="flex items-center justify-between mb-2.5">
+                    <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                        <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        Vị Thế Đang Chạy
+                    </h2>
+                    <!-- Nút Chốt Tất Cả Lệnh Khẩn Cấp -->
+                    <button onclick="closeAllPositions()" class="bg-rose-600/30 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/50 transition flex items-center shadow-sm">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        Đóng Tất Cả Lệnh
+                    </button>
+                </div>
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-left text-xs whitespace-nowrap">
                         <thead class="bg-slate-900/90 text-slate-400 uppercase">
@@ -229,6 +254,7 @@
                 </div>
             </div>
 
+            <!-- Lệnh Chờ Khớp -->
             <div class="glass-card p-3.5 rounded-xl">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -253,37 +279,56 @@
             </div>
         </div>
 
-        <!-- Biểu Đồ Lợi Nhuận Tích Lũy Theo Ngày (Đã tăng chiều cao gấp 1.5 lần) -->
-        <div class="glass-card p-3.5 rounded-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+        <!-- Biểu Đồ Lợi Nhuận Tích Lũy & Phân Tích PnL Theo Cặp Tiền -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+            <!-- Biểu đồ Line Lợi nhuận tích lũy (Chiếm 2 cột) -->
+            <div class="glass-card p-3.5 rounded-xl lg:col-span-2">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
                     Biểu Đồ Lợi Nhuận Tích Lũy Theo Ngày
                 </h2>
-                <div class="flex items-center space-x-1.5 text-xs">
-                    <span class="text-slate-400 font-medium">Từ:</span>
-                    <input type="date" id="chart-start-date" value="2026-01-01" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
-                    <span class="text-slate-400 font-medium">Đến:</span>
-                    <input type="date" id="chart-end-date" onchange="renderAllUI()" class="glass-input rounded px-2 py-1 text-[11px] outline-none">
+                <div class="relative w-full h-72 sm:h-80">
+                    <canvas id="dailyProfitChart"></canvas>
                 </div>
             </div>
-            <!-- Thay đổi h-52 sm:h-64 thành h-80 sm:h-96 -->
-            <div class="relative w-full h-80 sm:h-96">
-                <canvas id="dailyProfitChart"></canvas>
+
+            <!-- Biểu đồ Tròn Phân Tích PnL Theo Cặp Tiền (Symbol Breakdown) -->
+            <div class="glass-card p-3.5 rounded-xl">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                    Tỉ Lệ LN Theo Cặp Tiền
+                </h2>
+                <div class="relative w-full h-72 sm:h-80 flex items-center justify-center">
+                    <canvas id="symbolBreakdownChart"></canvas>
+                </div>
             </div>
         </div>
+
     </div>
 
     <script>
         const FIREBASE_URL = "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app";
         
+        // Khởi tạo Firebase SDK Realtime
+        firebase.initializeApp({ databaseURL: FIREBASE_URL });
+        const db = firebase.database();
+
         let profitChart = null;
+        let symbolChart = null;
+
         let livePrices = {};
         let calculatedMaxLots = {};
         
         let globalAccountData = {};
         let globalHistoryData = {};
         let globalPositionsData = {};
+
+        // Các biến phục vụ Smart DOM update & Audio alert
+        let currentPositionsSignature = "";
+        let isFirstLoad = true;
+        let prevPositionKeys = new Set();
+        let prevHistoryCount = 0;
+        let prevStatus = "";
 
         const CONTRACT_SIZES = {
             "XAUUSD": 100, "BTCUSD": 1, "USOIL": 1000,
@@ -294,6 +339,59 @@
             "XAUUSD": 2500.0, "BTCUSD": 60000.0, "USOIL": 75.0,
             "EURUSD": 1.0800, "GBPUSD": 1.2700, "EURGBP": 0.8500, "USDJPY": 150.00
         };
+
+        // --- BỘ PHÁT ÂM THANH CẢNH BÁO (Audio Alerts via Web Audio API) ---
+        function playAudioAlert(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                if (type === 'NEW_POSITION') {
+                    // Âm báo cắn lệnh mới (Tiếng bíp kép cao)
+                    [523.25, 659.25, 783.99].forEach((freq, i) => {
+                        let osc = ctx.createOscillator();
+                        let gain = ctx.createGain();
+                        osc.frequency.value = freq;
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        let now = ctx.currentTime + i * 0.08;
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                        osc.start(now);
+                        osc.stop(now + 0.15);
+                    });
+                } else if (type === 'CLOSED') {
+                    // Âm báo chốt lệnh / TP / SL (Tiếng chuông ngân)
+                    [783.99, 1046.50].forEach((freq, i) => {
+                        let osc = ctx.createOscillator();
+                        let gain = ctx.createGain();
+                        osc.frequency.value = freq;
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        let now = ctx.currentTime + i * 0.1;
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
+                    });
+                } else if (type === 'ERROR') {
+                    // Âm báo lỗi đứt kết nối MT5 (Tiếng còi trầm)
+                    let osc = ctx.createOscillator();
+                    let gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 180;
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    let now = ctx.currentTime;
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch (e) { console.error("Lỗi phát âm thanh:", e); }
+        }
 
         function normalizeSymbol(rawSym) {
             if (!rawSym) return "XAUUSD";
@@ -333,109 +431,150 @@
             return `${year}-${month}-${day}`;
         }
 
-        function initChart() {
-            const ctx = document.getElementById('dailyProfitChart').getContext('2d');
-            
-            const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+        function formatDuration(totalSeconds) {
+            if (!totalSeconds || totalSeconds <= 0 || isNaN(totalSeconds)) return "0m";
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = Math.floor(totalSeconds % 60);
+            if (h > 0) return `${h}h ${m}m`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
+        }
+
+        function initCharts() {
+            // Biểu đồ Line tích lũy
+            const ctxProfit = document.getElementById('dailyProfitChart').getContext('2d');
+            const gradient = ctxProfit.createLinearGradient(0, 0, 0, 300);
             gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
             gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
-            profitChart = new Chart(ctx, {
+            profitChart = new Chart(ctxProfit, {
                 type: 'line',
-                data: { 
-                    labels: [], 
-                    datasets: [{ 
-                        label: 'PnL Cộng Dồn ($)', 
-                        data: [], 
-                        borderColor: '#3b82f6',
-                        backgroundColor: gradient,
+                data: { labels: [], datasets: [{ label: 'PnL Cộng Dồn ($)', data: [], borderColor: '#3b82f6', backgroundColor: gradient, borderWidth: 2, fill: true, tension: 0.25, pointRadius: 4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' }, callback: v => '$' + v } },
+                        x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Biểu đồ Doughnut Symbol Breakdown
+            const ctxSymbol = document.getElementById('symbolBreakdownChart').getContext('2d');
+            symbolChart = new Chart(ctxSymbol, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#06b6d4', '#f43f5e'],
                         borderWidth: 2,
-                        fill: true,
-                        tension: 0.25,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#3b82f6',
-                        pointHoverRadius: 6
-                    }] 
+                        borderColor: '#0f172a'
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { 
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' }, 
-                            ticks: { 
-                                color: '#cbd5e1', 
-                                font: { size: 10, weight: 'bold' },
-                                callback: function(value) { return '$' + value; }
-                            } 
-                        },
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { color: '#cbd5e1', font: { size: 10, weight: 'bold' } } 
-                        }
-                    },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` PnL tích lũy: $${context.raw}`;
-                                }
-                            }
-                        }
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10, weight: 'bold' }, boxWidth: 12 } },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: $${ctx.raw.toFixed(2)}` } }
                     }
                 }
             });
         }
 
-        function onTypeChange() {
-            const type = document.getElementById('order-type').value;
-            const priceInput = document.getElementById('order-price');
-            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
+        // --- Nút chọn nhanh ngày (Quick Date Presets) ---
+        function applyDatePreset(preset) {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            let startStr = '2026-01-01';
 
-            if (type === "BUY" || type === "SELL") {
-                priceInput.value = getCurrentPrice(symbol);
-                priceInput.placeholder = "Giá thị trường hiện tại";
-            } else {
-                priceInput.placeholder = "Nhập giá đặt...";
+            if (preset === 'today') {
+                startStr = todayStr;
+            } else if (preset === '7days') {
+                const d = new Date();
+                d.setDate(d.getDate() - 7);
+                startStr = d.toISOString().split('T')[0];
+            } else if (preset === 'month') {
+                const d = new Date(now.getFullYear(), now.getMonth(), 1);
+                startStr = d.toISOString().split('T')[0];
+            } else if (preset === 'all') {
+                startStr = '2026-01-01';
             }
-            autoCalculateSLTP();
+
+            document.getElementById('filter-start-date').value = startStr;
+            document.getElementById('filter-end-date').value = todayStr;
+            renderAllUI();
         }
 
-        function autoCalculateSLTP() {
-            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
-            const type = document.getElementById('order-type').value;
-            let price = parseFloat(document.getElementById('order-price').value);
+        // --- THIẾT LẬP FIREBASE REALTIME LISTENERS (WebSocket 0ms Latency) ---
+        function setupFirebaseRealtimeListeners() {
+            db.ref('prices').on('value', snap => {
+                livePrices = snap.val() || {};
+                renderAllUI();
+            });
 
-            if (type === "BUY" || type === "SELL") {
-                price = getCurrentPrice(symbol);
-                document.getElementById('order-price').value = price;
-            }
+            db.ref('account').on('value', snap => {
+                globalAccountData = snap.val() || {};
+                renderAllUI();
+            });
 
-            if (isNaN(price)) {
-                document.getElementById('order-sl').value = '';
-                document.getElementById('order-tp').value = '';
-                return;
-            }
+            db.ref('live_positions').on('value', snap => {
+                const data = snap.val() || {};
+                globalPositionsData = data;
+                
+                // Phát âm thanh khi có vị thế mới cắn
+                const currentKeys = new Set(Object.keys(data));
+                if (!isFirstLoad) {
+                    for (let key of currentKeys) {
+                        if (!prevPositionKeys.has(key)) {
+                            playAudioAlert('NEW_POSITION');
+                            break;
+                        }
+                    }
+                }
+                prevPositionKeys = currentKeys;
 
-            let slOffset = 0.0030, tpOffset = 0.0060;
-            if (symbol === "XAUUSD") { slOffset = 10; tpOffset = 30; }
-            else if (symbol === "BTCUSD") { slOffset = 300; tpOffset = 600; }
-            else if (symbol === "USOIL") { slOffset = 0.80; tpOffset = 2.00; }
-            else if (symbol === "USDJPY") { slOffset = 0.30; tpOffset = 0.60; }
+                updatePositionsTableUI('positions-table-body', globalPositionsData);
+                renderAllUI();
+            });
 
-            let sl = 0, tp = 0;
-            if (type === "BUY" || type === "BUY_LIMIT") { 
-                sl = price - slOffset; 
-                tp = price + tpOffset; 
-            } else if (type === "SELL" || type === "SELL_LIMIT") { 
-                sl = price + slOffset; 
-                tp = price - tpOffset; 
-            }
+            db.ref('live_pending_orders').on('value', snap => {
+                const pendingData = snap.val() || {};
+                updatePendingTableUI('pending-table-body', pendingData);
+            });
 
-            let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "USOIL" || symbol === "USDJPY") ? 2 : 5;
-            document.getElementById('order-sl').value = sl.toFixed(decimals);
-            document.getElementById('order-tp').value = tp.toFixed(decimals);
+            db.ref('closed_history').on('value', snap => {
+                const data = snap.val() || {};
+                globalHistoryData = data;
+                
+                // Phát âm thanh khi có lệnh vừa đóng (Chốt lời/Lỗ)
+                const currCount = Object.keys(data).length;
+                if (!isFirstLoad && currCount > prevHistoryCount) {
+                    playAudioAlert('CLOSED');
+                }
+                prevHistoryCount = currCount;
+
+                renderAllUI();
+            });
+
+            db.ref('last_status').on('value', snap => {
+                const lastStatus = snap.val() || {};
+                if (!isFirstLoad && lastStatus.status === 'ERROR' && prevStatus !== 'ERROR') {
+                    playAudioAlert('ERROR');
+                }
+                prevStatus = lastStatus.status || '';
+                updateStatusBanner(lastStatus);
+            });
+
+            setTimeout(() => { isFirstLoad = false; }, 2000);
+        }
+
+        function renderAllUI() {
+            updateAccountAndMaxLotUI(globalAccountData, globalPositionsData);
+            updateStatsAndChartsUI(globalHistoryData);
         }
 
         function extractTicket(item) {
@@ -462,36 +601,101 @@
             });
         }
 
-        async function fetchAllData() {
-            try {
-                const [accRes, posRes, ordRes, histRes, priceRes, statusRes] = await Promise.all([
-                    fetch(`${FIREBASE_URL}/account.json`),
-                    fetch(`${FIREBASE_URL}/live_positions.json`),
-                    fetch(`${FIREBASE_URL}/live_pending_orders.json`),
-                    fetch(`${FIREBASE_URL}/closed_history.json`),
-                    fetch(`${FIREBASE_URL}/prices.json`),
-                    fetch(`${FIREBASE_URL}/last_status.json`)
-                ]);
-
-                livePrices = await priceRes.json() || {};
-                globalAccountData = await accRes.json() || {};
-                globalHistoryData = await histRes.json() || {};
-                globalPositionsData = await posRes.json() || {};
-                const pendingData = await ordRes.json() || {};
-                const lastStatus = await statusRes.json() || {};
-                
-                renderAllUI();
-                updateTableUI('positions-table-body', globalPositionsData, true);
-                updateTableUI('pending-table-body', pendingData, false);
-                updateStatusBanner(lastStatus);
-            } catch (err) {
-                console.error("Lỗi kết nối Firebase:", err);
+        // --- CẬP NHẬT BẢNG VỊ THẾ THÔNG MINH (Tránh giật lag DOM) ---
+        function updatePositionsTableUI(elementId, data) {
+            const tbody = document.getElementById(elementId);
+            if (!data || Object.keys(data).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-medium">Không có vị thế đang chạy</td></tr>`;
+                currentPositionsSignature = "";
+                return;
             }
+
+            let rawList = Object.entries(data).map(([key, val]) => {
+                if (typeof val === 'object' && val !== null) return { ...val, firebaseKey: key };
+                return { ticket: key, firebaseKey: key };
+            }).filter(x => x);
+
+            const sortedList = sortOrdersList(rawList);
+
+            // Kiểm tra chữ ký danh sách (Nếu ticket không đổi thì chỉ cập nhật riêng ô Lợi Nhuận)
+            const newSignature = sortedList.map(item => `${extractTicket(item)}_${item.symbol}_${item.type}_${item.volume||item.lots}`).join('|');
+
+            if (newSignature === currentPositionsSignature) {
+                // Cập nhật riêng cell PnL mà không dựng lại toàn bộ dòng -> Giữ nguyên trạng thái tô bôi / hover chuột
+                sortedList.forEach(item => {
+                    const ticket = extractTicket(item);
+                    const row = document.getElementById(`pos-row-${ticket}`);
+                    if (row) {
+                        const profitEl = row.querySelector('.pos-profit-cell');
+                        if (profitEl) {
+                            const pVal = parseFloat(item.profit) || 0;
+                            profitEl.innerText = `$${pVal.toFixed(2)}`;
+                            profitEl.className = `p-2 font-bold pos-profit-cell ${pVal >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+                        }
+                    }
+                });
+                return;
+            }
+
+            currentPositionsSignature = newSignature;
+            tbody.innerHTML = '';
+
+            sortedList.forEach(item => {
+                const identifier = extractTicket(item);
+                const isBuy = String(item.type || '').toUpperCase().includes('BUY');
+                const badgeClass = isBuy ? 'badge-buy' : 'badge-sell';
+                const pVal = parseFloat(item.profit) || 0;
+                const profitColor = pVal >= 0 ? 'text-emerald-400' : 'text-rose-400';
+
+                tbody.innerHTML += `
+                    <tr id="pos-row-${identifier}" class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
+                        <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
+                        <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
+                        <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
+                        <td class="p-2 font-bold pos-profit-cell ${profitColor}">$${pVal.toFixed(2)}</td>
+                        <td class="p-2 text-right space-x-1">
+                            <!-- Nút Cắt 50% Khối Lượng -->
+                            <button onclick="sendAction('CLOSE_PARTIAL', '${identifier}', 0.5)" class="bg-amber-500/20 hover:bg-amber-600 text-amber-300 hover:text-white px-1.5 py-1 rounded text-[10px] font-bold border border-amber-500/40 transition">Cắt 50%</button>
+                            <!-- Nút Đóng Toàn Bộ Lệnh -->
+                            <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[10px] font-bold border border-rose-500/40 transition">Đóng</button>
+                        </td>
+                    </tr>`;
+            });
         }
 
-        function renderAllUI() {
-            updateAccountAndMaxLotUI(globalAccountData, globalPositionsData);
-            updateStatsAndChartUI(globalHistoryData);
+        function updatePendingTableUI(elementId, data) {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
+            
+            if (!data || Object.keys(data).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-500 font-medium">Không có lệnh chờ</td></tr>`;
+                return;
+            }
+
+            let rawList = Object.entries(data).map(([key, val]) => {
+                if (typeof val === 'object' && val !== null) return { ...val, firebaseKey: key };
+                return { ticket: key, firebaseKey: key };
+            }).filter(x => x);
+
+            const sortedList = sortOrdersList(rawList);
+
+            sortedList.forEach(item => {
+                const identifier = extractTicket(item);
+                const isBuy = String(item.type || '').toUpperCase().includes('BUY');
+                const badgeClass = isBuy ? 'badge-buy' : 'badge-sell';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
+                        <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
+                        <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
+                        <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
+                        <td class="p-2 text-right">
+                            <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/40 transition">Hủy</button>
+                        </td>
+                    </tr>`;
+            });
         }
 
         function updateStatusBanner(lastStatus) {
@@ -574,19 +778,18 @@
             });
         }
 
-        function updateStatsAndChartUI(historyData) {
-            const statStartStr = document.getElementById('stat-start-date').value || '1970-01-01';
-            const statEndStr = document.getElementById('stat-end-date').value || '2099-12-31';
-            const statStartSec = Math.floor(new Date(`${statStartStr}T00:00:00Z`).getTime() / 1000);
-            const statEndSec = Math.floor(new Date(`${statEndStr}T23:59:59Z`).getTime() / 1000);
-
-            const chartStartStr = document.getElementById('chart-start-date').value || '1970-01-01';
-            const chartEndStr = document.getElementById('chart-end-date').value || '2099-12-31';
-            const chartStartSec = Math.floor(new Date(`${chartStartStr}T00:00:00Z`).getTime() / 1000);
-            const chartEndSec = Math.floor(new Date(`${chartEndStr}T23:59:59Z`).getTime() / 1000);
+        // --- CẬP NHẬT BÁO CÁO HIỆU SUẤT & 2 BIỂU ĐỒ (Line + Doughnut) ---
+        function updateStatsAndChartsUI(historyData) {
+            const startStr = document.getElementById('filter-start-date').value || '1970-01-01';
+            const endStr = document.getElementById('filter-end-date').value || '2099-12-31';
+            const startSec = Math.floor(new Date(`${startStr}T00:00:00Z`).getTime() / 1000);
+            const endSec = Math.floor(new Date(`${endStr}T23:59:59Z`).getTime() / 1000);
 
             let totalNetProfit = 0, todayNetProfit = 0, wins = 0, losses = 0;
             let dailyPnLMap = {};
+            let symbolPnLMap = {};
+            let totalHoldSec = 0, holdTradeCount = 0;
+
             const todayStr = formatLocalDate(Math.floor(Date.now() / 1000));
 
             if (historyData) {
@@ -594,34 +797,41 @@
                     if (!deal || typeof deal !== 'object') return;
                     
                     const timeSec = parseInt(deal.close_time || deal.time || deal.time_msc / 1000 || 0, 10);
+                    const openTimeSec = parseInt(deal.open_time || 0, 10);
+
                     const dealTypeStr = String(deal.type || '').toUpperCase();
                     const isBalanceType = dealTypeStr.includes("BALANCE") || dealTypeStr.includes("CREDIT") || deal.type === 2 || deal.type === 6 || deal.is_balance || deal.cmd === 6;
 
-                    if (!isBalanceType) {
+                    if (!isBalanceType && timeSec >= startSec && timeSec <= endSec) {
                         const rawProfit = parseFloat(deal.profit || 0);
                         const swap = parseFloat(deal.swap || 0);
                         const comm = parseFloat(deal.commission || 0);
                         const netProfit = rawProfit + swap + comm;
 
-                        if (timeSec >= statStartSec && timeSec <= statEndSec) {
-                            totalNetProfit += netProfit;
-                            if (netProfit > 0) wins++;
-                            else if (netProfit < 0) losses++;
+                        totalNetProfit += netProfit;
+                        if (netProfit > 0) wins++;
+                        else if (netProfit < 0) losses++;
 
-                            const dateStr = formatLocalDate(timeSec);
-                            if (dateStr === todayStr) todayNetProfit += netProfit;
-                        }
+                        const dateStr = formatLocalDate(timeSec);
+                        if (dateStr === todayStr) todayNetProfit += netProfit;
 
-                        if (timeSec >= chartStartSec && timeSec <= chartEndSec) {
-                            const dateStr = formatLocalDate(timeSec);
-                            if (dateStr) {
-                                dailyPnLMap[dateStr] = (dailyPnLMap[dateStr] || 0) + netProfit;
-                            }
+                        // Tích lũy PnL theo ngày
+                        if (dateStr) dailyPnLMap[dateStr] = (dailyPnLMap[dateStr] || 0) + netProfit;
+
+                        // Tích lũy PnL theo cặp tiền
+                        const sym = normalizeSymbol(deal.symbol);
+                        symbolPnLMap[sym] = (symbolPnLMap[sym] || 0) + netProfit;
+
+                        // Thống kê thời gian giữ lệnh
+                        if (openTimeSec > 0 && timeSec > openTimeSec) {
+                            totalHoldSec += (timeSec - openTimeSec);
+                            holdTradeCount++;
                         }
                     }
                 });
             }
 
+            // Hiển thị chỉ số
             document.getElementById('stat-wins').innerText = wins;
             document.getElementById('stat-losses').innerText = losses;
             
@@ -636,6 +846,11 @@
             dailyProfitEl.innerText = (todayNetProfit >= 0 ? '+' : '') + '$' + todayNetProfit.toFixed(2);
             dailyProfitEl.className = `text-base sm:text-lg font-bold ${todayNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
+            // Cập nhật Thời gian giữ lệnh trung bình
+            const avgHoldSec = holdTradeCount > 0 ? Math.round(totalHoldSec / holdTradeCount) : 0;
+            document.getElementById('stat-avg-hold').innerText = formatDuration(avgHoldSec);
+
+            // Cập nhật Biểu đồ Line
             const sortedDates = Object.keys(dailyPnLMap).sort();
             let runningCumulativeProfit = 0;
             const chartLabels = [];
@@ -650,69 +865,41 @@
             profitChart.data.labels = chartLabels;
             profitChart.data.datasets[0].data = chartSeriesData;
             profitChart.update();
+
+            // Cập nhật Biểu đồ Doughnut (Symbol Breakdown)
+            const symLabels = Object.keys(symbolPnLMap);
+            const symData = symLabels.map(s => Number(symbolPnLMap[s].toFixed(2)));
+
+            symbolChart.data.labels = symLabels;
+            symbolChart.data.datasets[0].data = symData;
+            symbolChart.update();
         }
 
-        function updateTableUI(elementId, data, isPosition) {
-            const tbody = document.getElementById(elementId);
-            tbody.innerHTML = '';
-            
-            if (!data || Object.keys(data).length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isPosition ? 6 : 5}" class="text-center py-4 text-slate-500 font-medium">Không có dữ liệu</td></tr>`;
+        // --- Nút Đóng Tất Cả Lệnh Khẩn Cấp ---
+        async function closeAllPositions() {
+            if (!globalPositionsData || Object.keys(globalPositionsData).length === 0) {
+                alert("Không có vị thế nào đang chạy!");
                 return;
             }
-
-            let rawList = Object.entries(data).map(([key, val]) => {
-                if (typeof val === 'object' && val !== null) return { ...val, firebaseKey: key };
-                return { ticket: key, firebaseKey: key };
-            }).filter(x => x);
-
-            const sortedList = sortOrdersList(rawList);
-
-            sortedList.forEach(item => {
-                const identifier = extractTicket(item);
-                const isBuy = String(item.type || '').toUpperCase().includes('BUY');
-                const badgeClass = isBuy ? 'badge-buy' : 'badge-sell';
-
-                if (isPosition) {
-                    const profitColor = (parseFloat(item.profit) || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
-                            <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
-                            <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
-                            <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
-                            <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
-                            <td class="p-2 font-bold ${profitColor}">$${(parseFloat(item.profit) || 0).toFixed(2)}</td>
-                            <td class="p-2 text-right">
-                                <button onclick="sendAction('CLOSE_POSITION', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/40 transition">Đóng</button>
-                            </td>
-                        </tr>`;
-                } else {
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
-                            <td class="p-2 font-bold text-slate-100">${item.symbol || 'N/A'}</td>
-                            <td class="p-2"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeClass}">${item.type || 'N/A'}</span></td>
-                            <td class="p-2 font-semibold text-slate-200">${item.volume || item.lots || '0.00'}</td>
-                            <td class="p-2 font-semibold text-slate-200">${item.price || '0.00'}</td>
-                            <td class="p-2 text-right">
-                                <button onclick="sendAction('CANCEL_PENDING', '${identifier}')" class="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold border border-rose-500/40 transition">Hủy</button>
-                            </td>
-                        </tr>`;
-                }
-            });
+            if (confirm("⚠️ XÁC NHẬN KHẨN CẤP: Bạn có chắc chắn muốn ĐÓNG TẤT CẢ các vị thế đang chạy không?")) {
+                await sendAction('CLOSE_ALL', 'ALL');
+            }
         }
 
-        async function sendAction(actionType, identifier) {
+        async function sendAction(actionType, identifier, ratio = 1.0) {
             if (!identifier) { alert('Lỗi: Mã Ticket không hợp lệ!'); return; }
             try {
-                const payload = { action: actionType, ticket: String(identifier).trim(), timestamp: Date.now() };
-                const res = await fetch(`${FIREBASE_URL}/actions.json`, {
+                const payload = { 
+                    action: actionType, 
+                    ticket: String(identifier).trim(), 
+                    ratio: ratio, 
+                    timestamp: Date.now() 
+                };
+                await fetch(`${FIREBASE_URL}/actions.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (res.ok) {
-                    setTimeout(fetchAllData, 1000);
-                }
             } catch (e) { alert('Lỗi mạng khi kết nối Firebase.'); }
         }
 
@@ -749,21 +936,68 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
                 });
-                if (res.ok) {
-                    if (type !== "BUY" && type !== "SELL") document.getElementById('order-price').value = '';
-                    setTimeout(fetchAllData, 1000);
+                if (res.ok && (type !== "BUY" && type !== "SELL")) {
+                    document.getElementById('order-price').value = '';
                 }
             } catch (e) { alert('Lỗi mạng khi gửi lệnh.'); }
         }
 
+        function onTypeChange() {
+            const type = document.getElementById('order-type').value;
+            const priceInput = document.getElementById('order-price');
+            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
+
+            if (type === "BUY" || type === "SELL") {
+                priceInput.value = getCurrentPrice(symbol);
+                priceInput.placeholder = "Giá thị trường hiện tại";
+            } else {
+                priceInput.placeholder = "Nhập giá đặt...";
+            }
+            autoCalculateSLTP();
+        }
+
+        function autoCalculateSLTP() {
+            const symbol = normalizeSymbol(document.getElementById('order-symbol').value);
+            const type = document.getElementById('order-type').value;
+            let price = parseFloat(document.getElementById('order-price').value);
+
+            if (type === "BUY" || type === "SELL") {
+                price = getCurrentPrice(symbol);
+                document.getElementById('order-price').value = price;
+            }
+
+            if (isNaN(price)) {
+                document.getElementById('order-sl').value = '';
+                document.getElementById('order-tp').value = '';
+                return;
+            }
+
+            let slOffset = 0.0030, tpOffset = 0.0060;
+            if (symbol === "XAUUSD") { slOffset = 10; tpOffset = 30; }
+            else if (symbol === "BTCUSD") { slOffset = 300; tpOffset = 600; }
+            else if (symbol === "USOIL") { slOffset = 0.80; tpOffset = 2.00; }
+            else if (symbol === "USDJPY") { slOffset = 0.30; tpOffset = 0.60; }
+
+            let sl = 0, tp = 0;
+            if (type === "BUY" || type === "BUY_LIMIT") { 
+                sl = price - slOffset; 
+                tp = price + tpOffset; 
+            } else if (type === "SELL" || type === "SELL_LIMIT") { 
+                sl = price + slOffset; 
+                tp = price - tpOffset; 
+            }
+
+            let decimals = (symbol === "XAUUSD" || symbol === "BTCUSD" || symbol === "USOIL" || symbol === "USDJPY") ? 2 : 5;
+            document.getElementById('order-sl').value = sl.toFixed(decimals);
+            document.getElementById('order-tp').value = tp.toFixed(decimals);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('stat-end-date').value = today;
-            document.getElementById('chart-end-date').value = today;
+            document.getElementById('filter-end-date').value = today;
 
-            initChart();
-            fetchAllData();
-            setInterval(fetchAllData, 2000);
+            initCharts();
+            setupFirebaseRealtimeListeners();
         });
     </script>
 </body>
