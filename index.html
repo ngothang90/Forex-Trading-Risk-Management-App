@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper">
-    <title>Gatekeeper Pro - Discipline Trading</title>
+    <title>Gatekeeper Pro - Auto-Fibo Discipline Trading</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Firebase Realtime SDK (WebSocket 0ms Latency) -->
@@ -32,6 +32,7 @@
         }
         .badge-buy { background: linear-gradient(135deg, #10b981, #059669); color: white; }
         .badge-sell { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; }
+        .golden-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.35); border-color: rgba(245, 158, 11, 0.6); }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-8">
@@ -51,7 +52,7 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <h1 class="text-base sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">v3.50</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">v4.00</span>
                     </div>
                     <p class="text-[11px] text-slate-400 font-medium">Khung giờ GD: 07:00 - 19:00 (Giờ VN)</p>
                 </div>
@@ -89,6 +90,53 @@
             <div class="glass-card p-3 rounded-xl">
                 <span class="text-[11px] text-slate-400 block mb-0.5 uppercase font-bold">Đòn Bẩy Web</span>
                 <p id="acc-leverage" class="text-lg sm:text-2xl font-black text-purple-400">1:2000</p>
+            </div>
+        </div>
+
+        <!-- Fibonacci Watchlist & Trực quan hóa Biểu Đồ Fibo -->
+        <div class="glass-card p-3.5 rounded-xl border border-amber-500/30">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+                <h2 class="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Watchlist Auto-Fibonacci Golden Zone & Smart Confluence
+                </h2>
+                <div class="flex items-center space-x-2">
+                    <label class="text-[11px] text-slate-300 font-bold">Xem Biểu Đồ Fibo:</label>
+                    <select id="fibo-chart-symbol" onchange="drawFiboCanvas()" class="glass-input rounded px-2 py-1 text-xs font-bold text-amber-400 outline-none">
+                        <option value="XAUUSD">XAUUSD</option>
+                        <option value="BTCUSD">BTCUSD</option>
+                        <option value="USOIL">USOIL</option>
+                        <option value="EURUSD">EURUSD</option>
+                        <option value="GBPUSD">GBPUSD</option>
+                        <option value="EURGBP">EURGBP</option>
+                        <option value="USDJPY">USDJPY</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bảng Danh Sách Watchlist Fibo -->
+            <div class="overflow-x-auto no-scrollbar mb-4">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase">
+                        <tr>
+                            <th class="p-2">Cặp Tiền</th>
+                            <th class="p-2">Xu Hướng</th>
+                            <th class="p-2">Swing High / Low</th>
+                            <th class="p-2">Vùng Golden (50-61.8%)</th>
+                            <th class="p-2">Trạng Thái Vùng</th>
+                            <th class="p-2">Nến Đảo Chiều</th>
+                            <th class="p-2">Hợp Lưu EMA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fibo-watchlist-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="7" class="text-center py-4 text-slate-500 font-medium">Đang tải tín hiệu Fibonacci từ VPS...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Khung Trực Quan Hóa Mức Fibo Canvas -->
+            <div class="relative w-full h-48 bg-slate-950/80 rounded-lg border border-slate-800 p-2 overflow-hidden">
+                <canvas id="fiboCanvas" class="w-full h-full block"></canvas>
             </div>
         </div>
 
@@ -138,7 +186,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 mb-3">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất Giao Dịch (Tính từ 01/10/2026)
+                    Hiệu Suất Giao Dịch & Trading Journal
                 </h2>
                 
                 <div class="flex flex-wrap items-center gap-1.5 text-xs">
@@ -288,7 +336,7 @@
             </div>
         </div>
 
-        <!-- Biểu Đồ Lợi Nhuận Tích Lũy & Biểu Đồ Cột PnL Theo Cặp Tiền (Bao gồm âm/lỗ) -->
+        <!-- Biểu Đồ Lợi Nhuận Tích Lũy & Biểu Đồ Cột PnL Theo Cặp Tiền -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
             <div class="glass-card p-3.5 rounded-xl lg:col-span-2">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
@@ -300,7 +348,6 @@
                 </div>
             </div>
 
-            <!-- Chuyển đổi sang Biểu đồ Cột Ngang hiển thị chuẩn cả Lãi lẫn Lỗ -->
             <div class="glass-card p-3.5 rounded-xl">
                 <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
                     <svg class="w-4 h-4 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
@@ -329,6 +376,7 @@
         let globalAccountData = {};
         let globalHistoryData = {};
         let globalPositionsData = {};
+        let globalFiboSignals = {};
 
         let currentPositionsSignature = "";
         let isFirstLoad = true;
@@ -345,6 +393,18 @@
             "XAUUSD": 2500.0, "BTCUSD": 60000.0, "USOIL": 75.0,
             "EURUSD": 1.0800, "GBPUSD": 1.2700, "EURGBP": 0.8500, "USDJPY": 150.00
         };
+
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }
+
+        function triggerPWANotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/2534/2534204.png" });
+            }
+        }
 
         function playAudioAlert(type) {
             try {
@@ -478,7 +538,6 @@
                 }
             });
 
-            // Khởi tạo Biểu đồ Cột Ngang cho PnL Theo Cặp Tiền (Hiển thị Lãi & Lỗ)
             const ctxSymbol = document.getElementById('symbolBreakdownChart').getContext('2d');
             symbolChart = new Chart(ctxSymbol, {
                 type: 'bar',
@@ -506,27 +565,130 @@
             });
         }
 
-        function applyDatePreset(preset) {
-            const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
-            let startStr = '2026-10-01';
+        function drawFiboCanvas() {
+            const canvas = document.getElementById('fiboCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
 
-            if (preset === 'today') {
-                startStr = todayStr;
-            } else if (preset === '7days') {
-                const d = new Date();
-                d.setDate(d.getDate() - 7);
-                startStr = d.toISOString().split('T')[0];
-            } else if (preset === 'month') {
-                const d = new Date(now.getFullYear(), now.getMonth(), 1);
-                startStr = d.toISOString().split('T')[0];
-            } else if (preset === 'all') {
-                startStr = '2026-10-01';
+            const selectedSym = document.getElementById('fibo-chart-symbol').value || 'XAUUSD';
+            const signal = globalFiboSignals[selectedSym];
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!signal) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = '12px sans-serif';
+                ctx.fillText(`Chờ dữ liệu Fibonacci từ MT5 cho cặp ${selectedSym}...`, 20, canvas.height / 2);
+                return;
             }
 
-            document.getElementById('filter-start-date').value = startStr;
-            document.getElementById('filter-end-date').value = todayStr;
-            renderAllUI();
+            const sh = parseFloat(signal.swing_high);
+            const sl = parseFloat(signal.swing_low);
+            const currP = getCurrentPrice(selectedSym);
+
+            const maxP = Math.max(sh, sl, currP);
+            const minP = Math.min(sh, sl, currP);
+            const range = maxP - minP || 1;
+
+            function getY(p) {
+                const padding = 20;
+                return padding + (canvas.height - padding * 2) * (1 - (p - minP) / range);
+            }
+
+            // Vẽ Vùng Golden Zone (50% - 61.8%)
+            const y50 = getY(parseFloat(signal.fibo_50));
+            const y618 = getY(parseFloat(signal.fibo_618));
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.18)';
+            ctx.fillRect(60, Math.min(y50, y618), canvas.width - 120, Math.abs(y618 - y50));
+
+            // Các đường Fibonacci
+            const levels = [
+                { name: '0.0%', val: parseFloat(signal.fibo_0), color: '#ef4444' },
+                { name: '23.6%', val: parseFloat(signal.fibo_236), color: '#94a3b8' },
+                { name: '38.2%', val: parseFloat(signal.fibo_382), color: '#94a3b8' },
+                { name: '50.0%', val: parseFloat(signal.fibo_50), color: '#f59e0b' },
+                { name: '61.8%', val: parseFloat(signal.fibo_618), color: '#f59e0b' },
+                { name: '78.6%', val: parseFloat(signal.fibo_786), color: '#94a3b8' },
+                { name: '100.0%', val: parseFloat(signal.fibo_100), color: '#10b981' }
+            ];
+
+            levels.forEach(lvl => {
+                const y = getY(lvl.val);
+                ctx.strokeStyle = lvl.color;
+                ctx.lineWidth = (lvl.name.includes('50') || lvl.name.includes('61')) ? 2 : 1;
+                ctx.setLineDash((lvl.name.includes('50') || lvl.name.includes('61')) ? [] : [4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(60, y);
+                ctx.lineTo(canvas.width - 60, y);
+                ctx.stroke();
+
+                ctx.fillStyle = lvl.color;
+                ctx.font = '10px sans-serif';
+                ctx.fillText(`${lvl.name}`, 10, y + 3);
+                ctx.fillText(`${lvl.val.toFixed(2)}`, canvas.width - 55, y + 3);
+            });
+
+            // Vẽ Đường Giá Hiện Tại
+            const yCurr = getY(currP);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(60, yCurr);
+            ctx.lineTo(canvas.width - 60, yCurr);
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, yCurr, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateFiboWatchlistUI(signals) {
+            const tbody = document.getElementById('fibo-watchlist-body');
+            if (!signals || Object.keys(signals).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500 font-medium">Đang tải tín hiệu Fibonacci...</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            Object.entries(signals).forEach(([sym, sig]) => {
+                const isUp = sig.trend === "UP";
+                const trendBadge = isUp ? '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">TĂNG ⬆️</span>' : '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30">GIẢM ⬇️</span>';
+                
+                const gzMin = Math.min(parseFloat(sig.fibo_50), parseFloat(sig.fibo_618));
+                const gzMax = Math.max(parseFloat(sig.fibo_50), parseFloat(sig.fibo_618));
+                const gzText = `${gzMin.toFixed(2)} - ${gzMax.toFixed(2)}`;
+
+                const inGZ = sig.in_golden_zone;
+                const gzStatus = inGZ ? '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-500/30 text-amber-300 border border-amber-400 animate-pulse">🎯 Trong Vùng Fibo</span>' : '<span class="text-slate-500 text-[11px]">Đang theo dõi</span>';
+
+                const patternBadge = (sig.pattern && sig.pattern !== "None") ? `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30">${sig.pattern}</span>` : '<span class="text-slate-600">-</span>';
+                
+                const emaBadge = sig.ema_detail ? `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">${sig.ema_detail}</span>` : '<span class="text-slate-600">-</span>';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition">
+                        <td class="p-2 font-bold text-amber-400">${sym}</td>
+                        <td class="p-2">${trendBadge}</td>
+                        <td class="p-2 font-semibold text-slate-300">${parseFloat(sig.swing_high).toFixed(2)} / ${parseFloat(sig.swing_low).toFixed(2)}</td>
+                        <td class="p-2 font-bold text-amber-300">${gzText}</td>
+                        <td class="p-2">${gzStatus}</td>
+                        <td class="p-2">${patternBadge}</td>
+                        <td class="p-2">${emaBadge}</td>
+                    </tr>
+                `;
+
+                if (inGZ && sig.pattern !== "None" && !isFirstLoad) {
+                    triggerPWANotification(`🔔 TÍN HIỆU FIBO 61.8% - ${sym}`, `Mô hình: ${sig.pattern} tại ${sig.ema_detail || 'Golden Zone'}`);
+                }
+            });
+
+            drawFiboCanvas();
         }
 
         function setupFirebaseRealtimeListeners() {
@@ -538,6 +700,11 @@
             db.ref('account').on('value', snap => {
                 globalAccountData = snap.val() || {};
                 renderAllUI();
+            });
+
+            db.ref('fibo_signals').on('value', snap => {
+                globalFiboSignals = snap.val() || {};
+                updateFiboWatchlistUI(globalFiboSignals);
             });
 
             db.ref('live_positions').on('value', snap => {
@@ -589,6 +756,7 @@
             setTimeout(() => { isFirstLoad = false; }, 2000);
             setInterval(checkVietnamTradingHours, 10000);
             checkVietnamTradingHours();
+            requestNotificationPermission();
         }
 
         function renderAllUI() {
@@ -789,7 +957,6 @@
                     }
                 }
                 
-                // Áp dụng giới hạn Max Lot cứng cho TK dưới 500$
                 if (balance < 500) {
                     if (sym === "XAUUSD") maxLot = Math.min(maxLot, 0.01);
                     else if (sym === "BTCUSD") maxLot = Math.min(maxLot, 0.03);
@@ -867,7 +1034,6 @@
             const avgHoldSec = holdTradeCount > 0 ? Math.floor(totalHoldSec / holdTradeCount) : 0;
             document.getElementById('stat-avg-hold').innerText = formatDuration(avgHoldSec);
 
-            // Cập nhật Biểu đồ Đường Lợi nhuận tích lũy
             const sortedDates = Object.keys(dailyPnLMap).sort();
             let cumSum = 0;
             const cumData = sortedDates.map(d => { cumSum += dailyPnLMap[d]; return cumSum.toFixed(2); });
@@ -878,7 +1044,6 @@
                 profitChart.update();
             }
 
-            // Cập nhật Biểu đồ Cột Ngang Lời/Lỗ Theo Cặp Tiền (Hiển thị Lãi & Lỗ)
             const symLabels = Object.keys(symbolPnLMap);
             const symValues = symLabels.map(s => symbolPnLMap[s]);
             const symColors = symValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
@@ -891,9 +1056,32 @@
             }
         }
 
+        function applyDatePreset(preset) {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            let startStr = '2026-10-01';
+
+            if (preset === 'today') {
+                startStr = todayStr;
+            } else if (preset === '7days') {
+                const d = new Date();
+                d.setDate(d.getDate() - 7);
+                startStr = d.toISOString().split('T')[0];
+            } else if (preset === 'month') {
+                const d = new Date(now.getFullYear(), now.getMonth(), 1);
+                startStr = d.toISOString().split('T')[0];
+            } else if (preset === 'all') {
+                startStr = '2026-10-01';
+            }
+
+            document.getElementById('filter-start-date').value = startStr;
+            document.getElementById('filter-end-date').value = todayStr;
+            renderAllUI();
+        }
+
         function sendPendingOrder() {
             if (!checkVietnamTradingHours()) {
-                alert("❌ Ngoài khung giờ cho phép giao dịch! Bạn chỉ được đặt lệnh từ 07:00 đến 19:00 giờ Việt Nam.");
+                alert("Ngoài giờ giao dịch cho phép! Chỉ được đặt lệnh từ 07:00 đến 19:00 (Giờ Việt Nam).");
                 return;
             }
 
@@ -903,50 +1091,34 @@
             const volume = parseFloat(document.getElementById('order-volume').value || 0);
             const price = parseFloat(document.getElementById('order-price').value || 0);
 
-            if (volume <= 0) {
-                alert("Vui lòng nhập khối lượng lệnh hợp lệ!");
+            if (!symbol || !type || volume <= 0) {
+                alert("Vui lòng điền đầy đủ thông tin lệnh hợp lệ!");
                 return;
             }
 
-            if ((type === "BUY_LIMIT" || type === "SELL_LIMIT") && price <= 0) {
-                alert("Vui lòng nhập giá cho lệnh Limit!");
-                return;
-            }
-
-            const requestData = {
+            const req = {
                 symbol: symbol,
                 type: type,
                 term: term,
                 volume: volume,
                 price: price,
-                timestamp: Math.floor(Date.now() / 1000)
+                timestamp: Date.now()
             };
 
-            db.ref('pending_requests').push(requestData, (error) => {
-                if (error) {
-                    alert("Lỗi kết nối Firebase!");
-                } else {
-                    alert(`✅ Đã gửi lệnh ${type} ${symbol} (${term}) thành công!`);
-                }
+            db.ref('pending_requests').push(req).then(() => {
+                alert("Đã gửi yêu cầu đặt lệnh kỷ luật lên hệ thống MT5!");
             });
         }
 
-        function sendAction(actionType, ticket, ratio = 1.0) {
-            const actionData = {
-                action: actionType,
-                ticket: ticket,
-                ratio: ratio,
-                timestamp: Math.floor(Date.now() / 1000)
-            };
-            db.ref('actions').push(actionData);
+        function sendAction(action, ticket, ratio = 1.0) {
+            db.ref('actions').push({ action: action, ticket: ticket, ratio: ratio, timestamp: Date.now() });
         }
 
         function closeAllPositions() {
-            if (confirm("Bạn có chắc chắn muốn ĐÓNG TẤT CẢ các vị thế đang chạy?")) {
+            if (confirm("Bạn có chắc chắn muốn đóng tất cả vị thế đang chạy?")) {
                 if (globalPositionsData) {
                     Object.keys(globalPositionsData).forEach(key => {
-                        const item = globalPositionsData[key];
-                        const ticket = extractTicket(item);
+                        const ticket = extractTicket(globalPositionsData[key]);
                         if (ticket) sendAction('CLOSE_POSITION', ticket);
                     });
                 }
@@ -956,8 +1128,6 @@
         window.onload = function() {
             initCharts();
             setupFirebaseRealtimeListeners();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('filter-end-date').value = todayStr;
         };
     </script>
 </body>
