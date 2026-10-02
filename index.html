@@ -13,6 +13,8 @@
     <!-- Firebase Realtime SDK (v10.12.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { -webkit-tap-highlight-color: transparent; background-color: #080c14; color: #f1f5f9; font-size: 14px; }
@@ -54,7 +56,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v5.2</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.1</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN)</p>
                 </div>
@@ -147,7 +149,6 @@
                 </div>
             </div>
 
-            <!-- Bảng Watchlist Fibo Cập Nhật Cột Nến Đảo Chiều & Hợp Lưu EMA -->
             <div class="overflow-x-auto no-scrollbar mb-3">
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
@@ -167,8 +168,7 @@
                 </table>
             </div>
 
-            <!-- Canvas Trực Quan Hóa Mức Fibo + Đường EMA + Nến Đảo Chiều -->
-            <div class="relative w-full h-85 sm:h-96 bg-slate-950/90 rounded-xl border border-slate-800 p-2 overflow-hidden shadow-inner">
+            <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-xl border border-slate-800 p-2 overflow-hidden shadow-inner flex items-center justify-center">
                 <canvas id="fiboCanvas" class="w-full h-full block"></canvas>
             </div>
         </div>
@@ -281,7 +281,7 @@
             </div>
         </div>
 
-        <!-- VỊ THẾ ĐANG MỞ -->
+        <!-- VỊ THẾ Đang MỞ -->
         <div class="glass-card p-3 rounded-xl border border-emerald-500/30">
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
@@ -364,7 +364,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2.5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                 <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
                     <span class="text-[10px] text-slate-400 block font-bold uppercase">Thắng / Thua</span>
                     <p class="text-sm sm:text-base font-bold"><span id="stat-wins" class="text-emerald-400">0</span> <span class="text-slate-600">/</span> <span id="stat-losses" class="text-rose-400">0</span></p>
@@ -380,6 +380,16 @@
                 <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
                     <span class="text-[10px] text-slate-400 block font-bold uppercase">LN Hôm Nay</span>
                     <p id="stat-daily-profit" class="text-sm sm:text-base font-bold text-white">+$0.00</p>
+                </div>
+            </div>
+
+            <!-- PHẦN 4: BIỂU ĐỒ THỐNG KÊ (ĐÃ BỎ BIỂU ĐỒ TỈ LỆ THẮNG THUA, GIỮ LẠI BIỂU ĐỒ EQUITY) -->
+            <div class="mb-3">
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tăng Trưởng Lợi Nhuận Tích Lũy ($)</span>
+                    <div class="w-full h-44">
+                        <canvas id="equityChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -420,6 +430,8 @@
         let g_pendingOrders = {};
         let g_history = {};
         let g_activeStratTab = 'smc';
+
+        let equityChartInstance = null;
 
         // Lắng nghe Realtime từ Firebase
         db.ref('account').on('value', snap => { g_account = snap.val() || {}; renderAccount(); });
@@ -601,7 +613,6 @@
             }
         }
 
-        // Bổ sung Render Nến Đảo Chiều & Hợp Lưu EMA vào Bảng Fibonacci Watchlist
         function renderFiboWatchlist() {
             const body = document.getElementById('fibo-watchlist-body');
             const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
@@ -609,7 +620,13 @@
             let html = "";
             syms.forEach(s => {
                 const data = g_fiboSignals[s];
-                if(!data) return;
+                if(!data) {
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td colspan="6" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu từ VPS...</td>
+                    </tr>`;
+                    return;
+                }
 
                 const trendBadge = data.trend === "UP" 
                     ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">TĂNG</span>`
@@ -619,7 +636,6 @@
                     ? `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold animate-pulse">Golden Zone</span>`
                     : `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Ngoài Vùng</span>`;
 
-                // Badge Nến Đảo Chiều
                 let candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Chưa Có</span>`;
                 const revPattern = data.reversal_candle || "NONE";
                 if(revPattern === "BULL_PINBAR") {
@@ -632,7 +648,6 @@
                     candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">🔥 Engulfing Giảm</span>`;
                 }
 
-                // Badge Hợp Lưu EMA
                 let emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Không</span>`;
                 if(data.ema_confluence && data.ema_confluence !== "NONE") {
                     emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">⚡ ${data.ema_confluence}</span>`;
@@ -648,37 +663,41 @@
                     <td class="p-1.5">${emaBadge}</td>
                     <td class="p-1.5">${inGZBadge}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fibo_618}, ${data.fibo_786}, ${data.fibo_0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
+                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fibo_618}, ${data.fibo_786 || 0}, ${data.fibo_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
                     </td>
                 </tr>`;
             });
-            body.innerHTML = html || `<tr><td colspan="7" class="text-center py-3 text-slate-500">Đang cập nhật...</td></tr>`;
+            body.innerHTML = html;
         }
 
-        // Vẽ Canvas Fibonacci + Nến Đảo Chiều + Đường Hợp Lưu EMA 20/50/200
         function drawFiboCanvas() {
             const sym = document.getElementById('fibo-chart-symbol').value;
             const canvas = document.getElementById('fiboCanvas');
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
 
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth || 600;
+            canvas.height = parent.clientHeight || 320;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const data = g_fiboSignals[sym];
-            if(!data || !data.swing_high) {
-                ctx.fillStyle = "#64748b";
-                ctx.font = "12px sans-serif";
-                ctx.fillText(`Chưa có dữ liệu Fibonacci cho ${sym}`, 20, 30);
+            if(!data || !data.swing_high || data.swing_high === 0) {
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "bold 13px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`Đang kết nối & tải dữ liệu Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
                 return;
             }
 
-            // Vẽ Đường Lưới Nền Grid
-            ctx.strokeStyle = "rgba(51, 65, 85, 0.3)";
+            ctx.textAlign = "left";
+
+            // Vẽ Grid
+            ctx.strokeStyle = "rgba(51, 65, 85, 0.25)";
             ctx.lineWidth = 1;
-            for(let x = 0; x < canvas.width; x += 40) {
+            for(let x = 0; x < canvas.width; x += 50) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
             }
 
@@ -692,8 +711,8 @@
                 { name: "100.0%", val: data.fibo_100, color: "#94a3b8" }
             ];
 
-            const maxVal = Math.max(data.swing_high, data.swing_low) * 1.0015;
-            const minVal = Math.min(data.swing_high, data.swing_low) * 0.9985;
+            const maxVal = Math.max(data.swing_high, data.swing_low) * 1.002;
+            const minVal = Math.min(data.swing_high, data.swing_low) * 0.998;
             const range = maxVal - minVal;
 
             function getY(val) {
@@ -701,45 +720,46 @@
                 return canvas.height - ((val - minVal) / range) * (canvas.height - 40) - 20;
             }
 
-            // Tô Vùng Golden Zone 50% - 61.8% Dạ Quang
+            // Tô Vùng Golden Zone 50% - 61.8%
             const y50 = getY(data.fibo_50);
             const y618 = getY(data.fibo_618);
             const gzTop = Math.min(y50, y618);
             const gzHeight = Math.abs(y618 - y50);
 
             const grad = ctx.createLinearGradient(0, gzTop, 0, gzTop + gzHeight);
-            grad.addColorStop(0, "rgba(245, 158, 11, 0.25)");
+            grad.addColorStop(0, "rgba(245, 158, 11, 0.3)");
             grad.addColorStop(1, "rgba(245, 158, 11, 0.08)");
             ctx.fillStyle = grad;
             ctx.fillRect(0, gzTop, canvas.width, gzHeight);
 
-            // Nhãn Golden Zone
             ctx.fillStyle = "#f59e0b";
             ctx.font = "bold 11px sans-serif";
-            ctx.fillText("GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 80, gzTop + gzHeight / 2 + 4);
+            ctx.fillText("VÙNG VÀNG GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 100, gzTop + gzHeight / 2 + 4);
 
-            // Vẽ Các Mức Fibonacci
+            // Vẽ Các Đường Fibo
             levels.forEach(lvl => {
-                const y = getY(lvl.val);
-                ctx.strokeStyle = lvl.color;
-                ctx.lineWidth = (lvl.name.includes("50") || lvl.name.includes("61.8")) ? 2 : 1;
-                ctx.setLineDash(lvl.name.includes("Golden") ? [] : [4, 4]);
+                if(lvl.val !== undefined && lvl.val !== null) {
+                    const y = getY(lvl.val);
+                    ctx.strokeStyle = lvl.color;
+                    ctx.lineWidth = (lvl.name.includes("50") || lvl.name.includes("61.8")) ? 2 : 1;
+                    ctx.setLineDash((lvl.name.includes("50") || lvl.name.includes("61.8")) ? [] : [4, 4]);
 
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
 
-                ctx.fillStyle = lvl.color;
-                ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`${lvl.name}: ${lvl.val.toFixed(4)}`, 10, y - 4);
+                    ctx.fillStyle = lvl.color;
+                    ctx.font = "bold 10px sans-serif";
+                    ctx.fillText(`${lvl.name}: ${lvl.val.toFixed(4)}`, 10, y - 4);
+                }
             });
 
-            // VẼ CÁC ĐƯỜNG EMA HỢP LƯU (EMA 20, 50, 200)
+            // Vẽ EMA 20, 50, 200
             const emaList = [
-                { name: "EMA 20", val: data.ema20, color: "#22d3ee" },   // Cyan
-                { name: "EMA 50", val: data.ema50, color: "#c084fc" },   // Magenta / Purple
-                { name: "EMA 200", val: data.ema200, color: "#facc15" }  // Yellow / Amber
+                { name: "EMA 20", val: data.ema20, color: "#22d3ee" },
+                { name: "EMA 50", val: data.ema50, color: "#c084fc" },
+                { name: "EMA 200", val: data.ema200, color: "#facc15" }
             ];
 
             emaList.forEach(ema => {
@@ -756,21 +776,20 @@
 
                     ctx.fillStyle = ema.color;
                     ctx.font = "bold 9px sans-serif";
-                    ctx.fillText(`${ema.name}: ${ema.val.toFixed(4)}`, canvas.width - 200, emaY - 3);
+                    ctx.fillText(`${ema.name}: ${ema.val.toFixed(4)}`, canvas.width - 210, emaY - 3);
                 }
             });
 
-            // VẼ BẢNG CẢNH BÁO NẾN ĐẢO CHIỀU & HỢP LƯU NẾU CÓ
+            // Cảnh Báo Nến Đảo Chiều
             if(data.reversal_candle && data.reversal_candle !== "NONE") {
-                const badgeText = `Mô hình: ${data.reversal_candle}`;
                 ctx.fillStyle = data.reversal_candle.includes("BULL") ? "rgba(16, 185, 129, 0.9)" : "rgba(244, 63, 94, 0.9)";
-                ctx.fillRect(15, 15, 160, 22);
+                ctx.fillRect(15, 15, 170, 22);
                 ctx.fillStyle = "#ffffff";
                 ctx.font = "bold 10px sans-serif";
-                ctx.fillText(badgeText, 22, 30);
+                ctx.fillText(`Mô hình: ${data.reversal_candle}`, 22, 30);
             }
 
-            // Vẽ Đường Giá Hiện Tại
+            // Vẽ Đường Giá HT
             if(g_prices[sym]) {
                 const currP = (data.trend === "UP") ? g_prices[sym].bid : g_prices[sym].ask;
                 const curY = getY(currP);
@@ -783,33 +802,28 @@
                 ctx.lineTo(canvas.width, curY);
                 ctx.stroke();
 
-                // Tag Giá Hiện Tại
                 ctx.fillStyle = "#10b981";
                 ctx.fillRect(canvas.width - 120, curY - 10, 115, 20);
                 ctx.fillStyle = "#000000";
                 ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Giá HT: ${currP.toFixed(4)}`, canvas.width - 115, curY + 3);
+                ctx.fillText(`Giá HT: ${currP.toFixed(4)}`, canvas.width - 115, curY + 4);
             }
         }
 
-        // Tự Động Tính SL/TP Khi Vào Lệnh Bằng Tay
         function calculateDefaultSLTP(symbol, orderType, term, entryPrice) {
-            let slPips = 0, tpPips = 0;
             let slDist = 0, tpDist = 0;
-
             const isBuy = orderType.includes("BUY");
 
             if(symbol === "XAUUSD") {
-                slDist = 10.0; // 10 giá
+                slDist = 10.0;
                 tpDist = (term === "SHORT") ? 30.0 : (term === "MEDIUM" ? 45.0 : 60.0);
             } else if(symbol === "BTCUSD") {
-                slDist = 300.0; // 300 giá
+                slDist = 300.0;
                 tpDist = (term === "SHORT") ? 600.0 : (term === "MEDIUM" ? 900.0 : 1200.0);
             } else if(symbol === "USOIL" || symbol.includes("OIL")) {
-                slDist = 0.6; // 0.6 giá
+                slDist = 0.6;
                 tpDist = (term === "SHORT") ? 1.5 : (term === "MEDIUM" ? 2.25 : 3.0);
             } else {
-                // Forex
                 const isJPY = symbol.includes("JPY");
                 const pipUnit = isJPY ? 0.01 : 0.0001;
                 slDist = 30 * pipUnit;
@@ -1064,22 +1078,34 @@
                 }
             });
 
-            filtered.sort((a, b) => b.close_time - a.close_time);
+            filtered.sort((a, b) => a.close_time - b.close_time);
 
             let wins = 0, losses = 0, netProfit = 0, dailyProfit = 0;
             const todayStr = new Date().toISOString().split('T')[0];
 
+            let equityCurve = [];
+            let cumulativeProfit = 0;
+            let timeLabels = [];
+
             filtered.forEach(item => {
                 const p = item.profit || 0;
                 netProfit += p;
+                cumulativeProfit += p;
+
                 if(p > 0) wins++;
                 else if(p < 0) losses++;
 
-                const itemDateStr = new Date(item.close_time * 1000).toISOString().split('T')[0];
+                const dt = new Date(item.close_time * 1000);
+                const itemDateStr = dt.toISOString().split('T')[0];
                 if(itemDateStr === todayStr) {
                     dailyProfit += p;
                 }
+
+                timeLabels.push(dt.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
+                equityCurve.push(cumulativeProfit);
             });
+
+            filtered.sort((a, b) => b.close_time - a.close_time);
 
             const totalTrades = wins + losses;
             const winrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
@@ -1096,6 +1122,8 @@
             dailyEl.innerText = `${dailyProfit >= 0 ? '+' : ''}$${dailyProfit.toFixed(2)}`;
             dailyEl.className = `text-sm sm:text-base font-bold ${dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
+            renderPerformanceCharts(timeLabels, equityCurve);
+
             if(filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh đã đóng.</td></tr>`;
                 return;
@@ -1108,13 +1136,15 @@
                 const dateStr = new Date(item.close_time * 1000).toLocaleString('vi-VN');
 
                 let typeBadgeStr = "BUY";
-                if(typeof item.type === 'string') {
-                    typeBadgeStr = item.type;
+                if(typeof item.entry_type === 'string' && item.entry_type.length > 0) {
+                    typeBadgeStr = item.entry_type;
+                } else if(item.type_str) {
+                    typeBadgeStr = item.type_str;
                 } else {
                     typeBadgeStr = (item.type === 0 || item.type === "BUY") ? "BUY" : "SELL";
                 }
 
-                const badgeClass = typeBadgeStr === "BUY" ? "badge-buy" : "badge-sell";
+                const badgeClass = typeBadgeStr.includes("BUY") ? "badge-buy" : "badge-sell";
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-mono text-slate-400">#${item.deal || item.order_id}</td>
@@ -1125,6 +1155,40 @@
                 </tr>`;
             });
             body.innerHTML = html;
+        }
+
+        // Vẽ Biểu đồ Chart.js (Chỉ giữ lại Equity Chart)
+        function renderPerformanceCharts(labels, equityData) {
+            const ctxEquity = document.getElementById('equityChart').getContext('2d');
+            if(equityChartInstance) equityChartInstance.destroy();
+
+            equityChartInstance = new Chart(ctxEquity, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['00:00'],
+                    datasets: [{
+                        label: 'Lợi Nhuận ($)',
+                        data: equityData.length > 0 ? equityData : [0],
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: { color: '#94a3b8', font: { size: 9 } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
 
         function applyDatePreset(preset) {
