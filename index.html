@@ -56,7 +56,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.1</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.16</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN)</p>
                 </div>
@@ -260,15 +260,15 @@
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Giá đặt (Limit)</label>
-                    <input type="number" id="order-price" placeholder="Giá HT" step="0.0001" disabled class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold opacity-50 outline-none">
+                    <input type="number" id="order-price" placeholder="Giá HT" step="0.01" disabled class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold opacity-50 outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cắt Lỗ (SL)</label>
-                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.0001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.01" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Chốt Lời (TP)</label>
-                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.0001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.01" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
             </div>
 
@@ -295,7 +295,6 @@
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
                         <tr>
-                            <th class="p-1.5">Ticket</th>
                             <th class="p-1.5">Cặp Tiền</th>
                             <th class="p-1.5">Loại</th>
                             <th class="p-1.5">Khối Lượng</th>
@@ -305,7 +304,7 @@
                         </tr>
                     </thead>
                     <tbody id="live-positions-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>
+                        <tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -325,7 +324,6 @@
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
                         <tr>
-                            <th class="p-1.5">Ticket</th>
                             <th class="p-1.5">Cặp Tiền</th>
                             <th class="p-1.5">Loại Lệnh</th>
                             <th class="p-1.5">Khối Lượng</th>
@@ -336,7 +334,7 @@
                         </tr>
                     </thead>
                     <tbody id="live-pending-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>
+                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -383,12 +381,18 @@
                 </div>
             </div>
 
-            <!-- PHẦN 4: BIỂU ĐỒ THỐNG KÊ (ĐÃ BỎ BIỂU ĐỒ TỈ LỆ THẮNG THUA, GIỮ LẠI BIỂU ĐỒ EQUITY) -->
-            <div class="mb-3">
+            <!-- 2 Biểu đồ thống kê -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
                 <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tăng Trưởng Lợi Nhuận Tích Lũy ($)</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">1. Tăng Trưởng Lợi Nhuận Tích Lũy Tổng ($)</span>
                     <div class="w-full h-44">
                         <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">2. Lời Lỗ Của Từng Cặp Tiền ($)</span>
+                    <div class="w-full h-44">
+                        <canvas id="symbolProfitChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -398,7 +402,6 @@
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
                         <tr>
-                            <th class="p-1.5">Ticket</th>
                             <th class="p-1.5">Cặp Tiền</th>
                             <th class="p-1.5">Loại Lệnh</th>
                             <th class="p-1.5">Thời Gian Đóng</th>
@@ -406,7 +409,7 @@
                         </tr>
                     </thead>
                     <tbody id="closed-history-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh.</td></tr>
+                        <tr><td colspan="4" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -414,7 +417,7 @@
 
     </div>
 
-    <!-- LOGIC JAVASCRIPT & FIREBASE -->
+    <!-- SCRIPT LOGIC JAVASCRIPT & FIREBASE -->
     <script>
         const firebaseConfig = {
             databaseURL: "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -432,8 +435,8 @@
         let g_activeStratTab = 'smc';
 
         let equityChartInstance = null;
+        let symbolChartInstance = null;
 
-        // Lắng nghe Realtime từ Firebase
         db.ref('account').on('value', snap => { g_account = snap.val() || {}; renderAccount(); });
         db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
         db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; renderFiboWatchlist(); drawFiboCanvas(); });
@@ -537,9 +540,9 @@
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-cyan-300">${data.smc_entry ? data.smc_entry.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.smc_sl ? data.smc_sl.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.smc_tp ? data.smc_tp.toFixed(4) : '--'}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${data.smc_entry ? data.smc_entry.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${data.smc_sl ? data.smc_sl.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${data.smc_tp ? data.smc_tp.toFixed(2) : '--'}</td>
                         <td class="p-1.5 text-right">
                             ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl},${data.smc_tp})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry</button>` : '--'}
                         </td>
@@ -547,7 +550,7 @@
                 });
                 body.innerHTML = html;
             } else if(g_activeStratTab === 'wyckoff') {
-                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Mô Hình Wyckoff VSA</th><th class="p-1.5">Entry (LPS/LPSY)</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Mô Hình Wyckoff VSA</th><th class="p-1.5">Entry</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
@@ -559,9 +562,9 @@
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-cyan-300">${data.wyckoff_entry ? data.wyckoff_entry.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.wyckoff_sl ? data.wyckoff_sl.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.wyckoff_tp ? data.wyckoff_tp.toFixed(4) : '--'}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${data.wyckoff_entry ? data.wyckoff_entry.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${data.wyckoff_sl ? data.wyckoff_sl.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${data.wyckoff_tp ? data.wyckoff_tp.toFixed(2) : '--'}</td>
                         <td class="p-1.5 text-right">
                             ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry}, ${data.wyckoff_sl},${data.wyckoff_tp})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry</button>` : '--'}
                         </td>
@@ -581,8 +584,8 @@
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-amber-400 font-bold">${data.vwap ? data.vwap.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-slate-300">${data.vah ? data.vah.toFixed(4) : '--'} - ${data.val ? data.val.toFixed(4) : '--'}</td>
+                        <td class="p-1.5 font-mono text-amber-400 font-bold">${data.vwap ? data.vwap.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-slate-300">${data.vah ? data.vah.toFixed(2) : '--'} - ${data.val ? data.val.toFixed(2) : '--'}</td>
                         <td class="p-1.5 text-right">
                             ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT',${data.vwap}, 0, 0)" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP</button>` : '--'}
                         </td>
@@ -602,8 +605,8 @@
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.donchian_high ? data.donchian_high.toFixed(4) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.donchian_low ? data.donchian_low.toFixed(4) : '--'}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${data.donchian_high ? data.donchian_high.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${data.donchian_low ? data.donchian_low.toFixed(2) : '--'}</td>
                         <td class="p-1.5 text-right">
                             ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${data.turtle_unit_lot || 0.01})" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit</button>` : '--'}
                         </td>
@@ -639,21 +642,24 @@
                 let candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Chưa Có</span>`;
                 const revPattern = data.reversal_candle || "NONE";
                 if(revPattern === "BULL_PINBAR") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">🔨 Pinbar Tăng</span>`;
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">Pinbar Tăng</span>`;
                 } else if(revPattern === "BEAR_PINBAR") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">🔨 Pinbar Giảm</span>`;
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">Pinbar Giảm</span>`;
                 } else if(revPattern === "BULL_ENGULFING") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">🔥 Engulfing Tăng</span>`;
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">Engulfing Tăng</span>`;
                 } else if(revPattern === "BEAR_ENGULFING") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">🔥 Engulfing Giảm</span>`;
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">Engulfing Giảm</span>`;
                 }
 
                 let emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Không</span>`;
                 if(data.ema_confluence && data.ema_confluence !== "NONE") {
-                    emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">⚡ ${data.ema_confluence}</span>`;
+                    emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">${data.ema_confluence}</span>`;
                 }
 
-                const gzRange = `${(data.fibo_618 || 0).toFixed(4)} - ${(data.fibo_50 || 0).toFixed(4)}`;
+                // Chuẩn hóa hiển thị khoảng giá min - max cho Golden Zone
+                const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
+                const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
+                const gzRange = `${gzMin.toFixed(2)} - ${gzMax.toFixed(2)}`;
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-bold text-white">${s}</td>
@@ -663,7 +669,7 @@
                     <td class="p-1.5">${emaBadge}</td>
                     <td class="p-1.5">${inGZBadge}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fibo_618}, ${data.fibo_786 || 0}, ${data.fibo_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
+                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618}, ${data.fib_786 || 0}, ${data.fib_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
                     </td>
                 </tr>`;
             });
@@ -688,13 +694,12 @@
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "bold 13px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`Đang kết nối & tải dữ liệu Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
+                ctx.fillText(`Dang tai du lieu Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
                 return;
             }
 
             ctx.textAlign = "left";
 
-            // Vẽ Grid
             ctx.strokeStyle = "rgba(51, 65, 85, 0.25)";
             ctx.lineWidth = 1;
             for(let x = 0; x < canvas.width; x += 50) {
@@ -702,13 +707,13 @@
             }
 
             const levels = [
-                { name: "0.0%", val: data.fibo_0, color: "#94a3b8" },
-                { name: "23.6%", val: data.fibo_236, color: "#38bdf8" },
-                { name: "38.2%", val: data.fibo_382, color: "#818cf8" },
-                { name: "50.0%", val: data.fibo_50, color: "#f59e0b" },
-                { name: "61.8% (Golden)", val: data.fibo_618, color: "#f59e0b" },
-                { name: "78.6%", val: data.fibo_786, color: "#f43f5e" },
-                { name: "100.0%", val: data.fibo_100, color: "#94a3b8" }
+                { name: "0.0%", val: data.fib_0, color: "#94a3b8" },
+                { name: "23.6%", val: data.fib_236, color: "#38bdf8" },
+                { name: "38.2%", val: data.fib_382, color: "#818cf8" },
+                { name: "50.0%", val: data.fib_50, color: "#f59e0b" },
+                { name: "61.8% (Golden)", val: data.fib_618, color: "#f59e0b" },
+                { name: "78.6%", val: data.fib_786, color: "#f43f5e" },
+                { name: "100.0%", val: data.fib_100, color: "#94a3b8" }
             ];
 
             const maxVal = Math.max(data.swing_high, data.swing_low) * 1.002;
@@ -720,23 +725,22 @@
                 return canvas.height - ((val - minVal) / range) * (canvas.height - 40) - 20;
             }
 
-            // Tô Vùng Golden Zone 50% - 61.8%
-            const y50 = getY(data.fibo_50);
-            const y618 = getY(data.fibo_618);
+            // Vẽ vùng Golden Zone (50% - 61.8%) được chuẩn hóa chính xác tọa độ min/max
+            const y50 = getY(data.fib_50);
+            const y618 = getY(data.fib_618);
             const gzTop = Math.min(y50, y618);
             const gzHeight = Math.abs(y618 - y50);
 
             const grad = ctx.createLinearGradient(0, gzTop, 0, gzTop + gzHeight);
-            grad.addColorStop(0, "rgba(245, 158, 11, 0.3)");
-            grad.addColorStop(1, "rgba(245, 158, 11, 0.08)");
+            grad.addColorStop(0, "rgba(245, 158, 11, 0.35)");
+            grad.addColorStop(1, "rgba(245, 158, 11, 0.1)");
             ctx.fillStyle = grad;
             ctx.fillRect(0, gzTop, canvas.width, gzHeight);
 
             ctx.fillStyle = "#f59e0b";
             ctx.font = "bold 11px sans-serif";
-            ctx.fillText("VÙNG VÀNG GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 100, gzTop + gzHeight / 2 + 4);
+            ctx.fillText("GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 90, gzTop + gzHeight / 2 + 4);
 
-            // Vẽ Các Đường Fibo
             levels.forEach(lvl => {
                 if(lvl.val !== undefined && lvl.val !== null) {
                     const y = getY(lvl.val);
@@ -751,13 +755,11 @@
 
                     ctx.fillStyle = lvl.color;
                     ctx.font = "bold 10px sans-serif";
-                    ctx.fillText(`${lvl.name}: ${lvl.val.toFixed(4)}`, 10, y - 4);
+                    ctx.fillText(`${lvl.name}: ${lvl.val.toFixed(2)}`, 10, y - 4);
                 }
             });
 
-            // Vẽ EMA 20, 50, 200
             const emaList = [
-                { name: "EMA 20", val: data.ema20, color: "#22d3ee" },
                 { name: "EMA 50", val: data.ema50, color: "#c084fc" },
                 { name: "EMA 200", val: data.ema200, color: "#facc15" }
             ];
@@ -776,20 +778,18 @@
 
                     ctx.fillStyle = ema.color;
                     ctx.font = "bold 9px sans-serif";
-                    ctx.fillText(`${ema.name}: ${ema.val.toFixed(4)}`, canvas.width - 210, emaY - 3);
+                    ctx.fillText(`${ema.name}: ${ema.val.toFixed(2)}`, canvas.width - 150, emaY - 3);
                 }
             });
 
-            // Cảnh Báo Nến Đảo Chiều
             if(data.reversal_candle && data.reversal_candle !== "NONE") {
                 ctx.fillStyle = data.reversal_candle.includes("BULL") ? "rgba(16, 185, 129, 0.9)" : "rgba(244, 63, 94, 0.9)";
-                ctx.fillRect(15, 15, 170, 22);
+                ctx.fillRect(15, 15, 150, 22);
                 ctx.fillStyle = "#ffffff";
                 ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Mô hình: ${data.reversal_candle}`, 22, 30);
+                ctx.fillText(`Pattern: ${data.reversal_candle}`, 22, 30);
             }
 
-            // Vẽ Đường Giá HT
             if(g_prices[sym]) {
                 const currP = (data.trend === "UP") ? g_prices[sym].bid : g_prices[sym].ask;
                 const curY = getY(currP);
@@ -806,7 +806,7 @@
                 ctx.fillRect(canvas.width - 120, curY - 10, 115, 20);
                 ctx.fillStyle = "#000000";
                 ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Giá HT: ${currP.toFixed(4)}`, canvas.width - 115, curY + 4);
+                ctx.fillText(`Price: ${currP.toFixed(2)}`, canvas.width - 115, curY + 4);
             }
         }
 
@@ -869,13 +869,13 @@
 
             if(!slInput.value || slInput.dataset.auto === "true") {
                 if(computed.sl > 0) {
-                    slInput.value = computed.sl.toFixed(4);
+                    slInput.value = computed.sl.toFixed(2);
                     slInput.dataset.auto = "true";
                 }
             }
             if(!tpInput.value || tpInput.dataset.auto === "true") {
                 if(computed.tp > 0) {
-                    tpInput.value = computed.tp.toFixed(4);
+                    tpInput.value = computed.tp.toFixed(2);
                     tpInput.dataset.auto = "true";
                 }
             }
@@ -889,14 +889,14 @@
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
 
-            if(price > 0) document.getElementById('order-price').value = price;
+            if(price > 0) document.getElementById('order-price').value = price.toFixed(2);
             
             if(sl > 0) {
-                slInput.value = sl; slInput.dataset.auto = "false";
+                slInput.value = sl.toFixed(2); slInput.dataset.auto = "false";
             } else { slInput.value = ""; slInput.dataset.auto = "true"; }
 
             if(tp > 0) {
-                tpInput.value = tp; tpInput.dataset.auto = "false";
+                tpInput.value = tp.toFixed(2); tpInput.dataset.auto = "false";
             } else { tpInput.value = ""; tpInput.dataset.auto = "true"; }
 
             if(volume > 0) document.getElementById('order-volume').value = volume;
@@ -933,7 +933,7 @@
             const sym = document.getElementById('order-symbol').value;
             const el = document.getElementById('live-symbol-price');
             if(g_prices[sym]) {
-                el.innerText = `ASK: ${g_prices[sym].ask.toFixed(4)} | BID: ${g_prices[sym].bid.toFixed(4)}`;
+                el.innerText = `ASK: ${g_prices[sym].ask.toFixed(2)} | BID: ${g_prices[sym].bid.toFixed(2)}`;
             } else {
                 el.innerText = "ASK: -- | BID: --";
             }
@@ -971,10 +971,10 @@
 
             db.ref('pending_requests').push(reqData, (err) => {
                 if(!err) {
-                    alert(`Đã gửi lệnh ${type} ${symbol} (${volume} Lot) lên MT5!`);
+                    alert(`Da gui lenh ${type} ${symbol} (${volume} Lot) len MT5!`);
                     clearOrderForm();
                 } else {
-                    alert("Lỗi gửi lệnh: " + err.message);
+                    alert("Loi gui lenh: " + err.message);
                 }
             });
         }
@@ -987,7 +987,7 @@
             countEl.innerText = `${keys.length} vị thế`;
 
             if(keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>`;
                 return;
             }
 
@@ -1002,14 +1002,13 @@
                 const pSign = p.profit >= 0 ? "+" : "";
 
                 html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-mono text-slate-400">#${p.ticket}</td>
                     <td class="p-1.5 font-bold text-white">${p.symbol}</td>
                     <td class="p-1.5">${badge}</td>
                     <td class="p-1.5 font-mono text-slate-200">${p.volume.toFixed(2)} Lot</td>
-                    <td class="p-1.5 font-mono text-cyan-300">${p.price.toFixed(4)}</td>
+                    <td class="p-1.5 font-mono text-cyan-300">${p.price.toFixed(2)}</td>
                     <td class="p-1.5 font-mono font-bold ${pColor}">${pSign}$${p.profit.toFixed(2)}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px]">Đóng Vị Thế</button>
+                        <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px]">Đóng</button>
                     </td>
                 </tr>`;
             });
@@ -1024,7 +1023,7 @@
             countEl.innerText = `${keys.length} lệnh chờ`;
 
             if(keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>`;
                 return;
             }
 
@@ -1036,15 +1035,14 @@
                     : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">${o.type}</span>`;
 
                 html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-mono text-slate-400">#${o.ticket}</td>
                     <td class="p-1.5 font-bold text-white">${o.symbol}</td>
                     <td class="p-1.5">${badge}</td>
                     <td class="p-1.5 font-mono text-slate-200">${o.volume.toFixed(2)} Lot</td>
-                    <td class="p-1.5 font-mono text-cyan-300">${o.price.toFixed(4)}</td>
-                    <td class="p-1.5 font-mono text-rose-400">${o.sl ? o.sl.toFixed(4) : '--'}</td>
-                    <td class="p-1.5 font-mono text-emerald-400">${o.tp ? o.tp.toFixed(4) : '--'}</td>
+                    <td class="p-1.5 font-mono text-cyan-300">${o.price.toFixed(2)}</td>
+                    <td class="p-1.5 font-mono text-rose-400">${o.sl ? o.sl.toFixed(2) : '--'}</td>
+                    <td class="p-1.5 font-mono text-emerald-400">${o.tp ? o.tp.toFixed(2) : '--'}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="sendAction('CANCEL_PENDING', ${o.ticket})" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded text-[9px]">Hủy Lệnh</button>
+                        <button onclick="sendAction('CANCEL_PENDING', ${o.ticket})" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded text-[9px]">Hủy</button>
                     </td>
                 </tr>`;
             });
@@ -1087,6 +1085,8 @@
             let cumulativeProfit = 0;
             let timeLabels = [];
 
+            let symbolProfits = { "XAUUSD": 0, "BTCUSD": 0, "USOIL": 0, "EURUSD": 0, "GBPUSD": 0, "EURGBP": 0, "USDJPY": 0 };
+
             filtered.forEach(item => {
                 const p = item.profit || 0;
                 netProfit += p;
@@ -1099,6 +1099,10 @@
                 const itemDateStr = dt.toISOString().split('T')[0];
                 if(itemDateStr === todayStr) {
                     dailyProfit += p;
+                }
+
+                if(symbolProfits[item.symbol] !== undefined) {
+                    symbolProfits[item.symbol] += p;
                 }
 
                 timeLabels.push(dt.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
@@ -1122,10 +1126,10 @@
             dailyEl.innerText = `${dailyProfit >= 0 ? '+' : ''}$${dailyProfit.toFixed(2)}`;
             dailyEl.className = `text-sm sm:text-base font-bold ${dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            renderPerformanceCharts(timeLabels, equityCurve);
+            renderPerformanceCharts(timeLabels, equityCurve, symbolProfits);
 
             if(filtered.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh đã đóng.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh đã đóng.</td></tr>`;
                 return;
             }
 
@@ -1135,30 +1139,20 @@
                 const pSign = item.profit >= 0 ? "+" : "";
                 const dateStr = new Date(item.close_time * 1000).toLocaleString('vi-VN');
 
-                let typeBadgeStr = "BUY";
-                if(typeof item.entry_type === 'string' && item.entry_type.length > 0) {
-                    typeBadgeStr = item.entry_type;
-                } else if(item.type_str) {
-                    typeBadgeStr = item.type_str;
-                } else {
-                    typeBadgeStr = (item.type === 0 || item.type === "BUY") ? "BUY" : "SELL";
-                }
-
+                let typeBadgeStr = item.type || "BUY";
                 const badgeClass = typeBadgeStr.includes("BUY") ? "badge-buy" : "badge-sell";
 
                 html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-mono text-slate-400">#${item.deal || item.order_id}</td>
                     <td class="p-1.5 font-bold text-white">${item.symbol}</td>
                     <td class="p-1.5"><span class="text-[9px] px-1.5 py-0.5 rounded ${badgeClass} font-bold">${typeBadgeStr}</span></td>
                     <td class="p-1.5 text-slate-400">${dateStr}</td>
-                    <td class="p-1.5 font-mono font-bold text-right ${pColor}">${pSign}$${(item.profit||0).toFixed(2)}</td>
+                    <td class="p-1.5 font-mono font-bold text-right ${pColor}">${pSign}${(item.profit||0).toFixed(2)}</td>
                 </tr>`;
             });
             body.innerHTML = html;
         }
 
-        // Vẽ Biểu đồ Chart.js (Chỉ giữ lại Equity Chart)
-        function renderPerformanceCharts(labels, equityData) {
+        function renderPerformanceCharts(labels, equityData, symbolProfits) {
             const ctxEquity = document.getElementById('equityChart').getContext('2d');
             if(equityChartInstance) equityChartInstance.destroy();
 
@@ -1167,7 +1161,7 @@
                 data: {
                     labels: labels.length > 0 ? labels : ['00:00'],
                     datasets: [{
-                        label: 'Lợi Nhuận ($)',
+                        label: 'Lợi Nhuận Tích Lũy ($)',
                         data: equityData.length > 0 ? equityData : [0],
                         borderColor: '#38bdf8',
                         backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -1189,6 +1183,38 @@
                     plugins: { legend: { display: false } }
                 }
             });
+
+            const ctxSymbol = document.getElementById('symbolProfitChart').getContext('2d');
+            if(symbolChartInstance) symbolChartInstance.destroy();
+
+            const symLabels = Object.keys(symbolProfits);
+            const symValues = Object.values(symbolProfits);
+            const bgColors = symValues.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)');
+
+            symbolChartInstance = new Chart(ctxSymbol, {
+                type: 'bar',
+                data: {
+                    labels: symLabels,
+                    datasets: [{
+                        label: 'Lợi Nhuận Theo Cặp ($)',
+                        data: symValues,
+                        backgroundColor: bgColors,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: { color: '#94a3b8', font: { size: 9 } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
 
         function applyDatePreset(preset) {
@@ -1200,7 +1226,7 @@
 
             if(preset === 'today') {
                 startDateInput.value = today.toISOString().split('T')[0];
-            } else if(preset === '7days') {
+            } else if(preset === `7days`) {
                 const d = new Date(); d.setDate(d.getDate() - 7);
                 startDateInput.value = d.toISOString().split('T')[0];
             } else if(preset === 'month') {
