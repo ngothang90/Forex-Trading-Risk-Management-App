@@ -495,7 +495,7 @@
                 msg.className = "text-xs font-bold text-emerald-300";
             } else {
                 banner.classList.add('border-rose-500', 'bg-rose-950/40');
-                icon.innerText = "⚠️";
+                icon.innerText = "⚠️️";
                 msg.innerText = statusData.message;
                 msg.className = "text-xs font-bold text-rose-300";
             }
@@ -656,10 +656,9 @@
                     emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">${data.ema_confluence}</span>`;
                 }
 
-                // Chuẩn hóa hiển thị khoảng giá min - max cho Golden Zone
                 const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
                 const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
-                const gzRange = `${gzMin.toFixed(2)} - ${gzMax.toFixed(2)}`;
+                const gzRange = (gzMin > 0 && gzMax > 0) ? `${gzMin.toFixed(2)} - ${gzMax.toFixed(2)}` : "Đang tính...";
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-bold text-white">${s}</td>
@@ -669,7 +668,7 @@
                     <td class="p-1.5">${emaBadge}</td>
                     <td class="p-1.5">${inGZBadge}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618}, ${data.fib_786 || 0}, ${data.fib_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
+                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
                     </td>
                 </tr>`;
             });
@@ -690,7 +689,8 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const data = g_fiboSignals[sym];
-            if(!data || !data.swing_high || data.swing_high === 0) {
+            // Đã sửa điều kiện kiểm tra dữ liệu để đảm bảo vẽ chuẩn xác ngay cả khi swing_high/low gần 0 hoặc số thực
+            if(!data || data.swing_high === undefined || data.swing_low === undefined || data.swing_high === data.swing_low) {
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "bold 13px sans-serif";
                 ctx.textAlign = "center";
@@ -721,11 +721,10 @@
             const range = maxVal - minVal;
 
             function getY(val) {
-                if(range === 0) return canvas.height / 2;
+                if(range <= 0) return canvas.height / 2;
                 return canvas.height - ((val - minVal) / range) * (canvas.height - 40) - 20;
             }
 
-            // Vẽ vùng Golden Zone (50% - 61.8%) được chuẩn hóa chính xác tọa độ min/max
             const y50 = getY(data.fib_50);
             const y618 = getY(data.fib_618);
             const gzTop = Math.min(y50, y618);
@@ -742,7 +741,7 @@
             ctx.fillText("GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 90, gzTop + gzHeight / 2 + 4);
 
             levels.forEach(lvl => {
-                if(lvl.val !== undefined && lvl.val !== null) {
+                if(lvl.val !== undefined && lvl.val !== null && !isNaN(lvl.val)) {
                     const y = getY(lvl.val);
                     ctx.strokeStyle = lvl.color;
                     ctx.lineWidth = (lvl.name.includes("50") || lvl.name.includes("61.8")) ? 2 : 1;
