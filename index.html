@@ -56,9 +56,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.18</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.19</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN)</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Giới hạn Tổng Lệnh & Chờ $\le$ 2x Max Lot</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -449,12 +449,11 @@
 
         document.getElementById('filter-end-date').value = new Date().toISOString().split('T')[0];
 
-        // --- Hỗ trợ số chữ số thập phân theo Pip ---
         function getSymbolDecimals(symbol) {
             if (!symbol) return 2;
             if (symbol.includes("JPY")) return 2;
             if (symbol === "BTCUSD" || symbol === "XAUUSD" || symbol === "USOIL") return 2;
-            return 4; // EURUSD, GBPUSD, EURGBP
+            return 4;
         }
 
         function fmtPrice(symbol, price) {
@@ -462,7 +461,6 @@
             return price.toFixed(getSymbolDecimals(symbol));
         }
 
-        // --- Tính khối lượng cho tín hiệu (Max Lot / 2, Min 0.01) ---
         function getSignalVolume(symbol) {
             let maxVol = (g_prices[symbol] && g_prices[symbol].max_vol) ? g_prices[symbol].max_vol : 0.01;
             let vol = maxVol / 2.0;
@@ -498,7 +496,7 @@
             if((g_account.balance || 0) < 500) {
                 capNote.innerText = "(TK < $500: Áp dụng Lot an toàn)";
             } else {
-                capNote.innerText = "(Tự động tính theo Đòn bẩy & Dynamic Notional)";
+                capNote.innerText = "(Tổng lệnh chạy + chờ tối đa 2x Max Lot)";
             }
         }
 
