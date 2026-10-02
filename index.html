@@ -56,7 +56,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.16</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.18</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN)</p>
                 </div>
@@ -260,15 +260,15 @@
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Giá đặt (Limit)</label>
-                    <input type="number" id="order-price" placeholder="Giá HT" step="0.01" disabled class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold opacity-50 outline-none">
+                    <input type="number" id="order-price" placeholder="Giá HT" step="0.00001" disabled class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold opacity-50 outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cắt Lỗ (SL)</label>
-                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.01" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.00001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Chốt Lời (TP)</label>
-                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.01" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.00001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
             </div>
 
@@ -286,9 +286,12 @@
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Mở
+                    Vị Thế Đang Mở (Có nút Đóng tất cả & Cắt 50% từng lệnh)
                 </span>
-                <span id="live-pos-count" class="text-xs font-bold text-slate-400">0 vị thế</span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
+                    <span id="live-pos-count" class="text-xs font-bold text-slate-400">0 vị thế</span>
+                </div>
             </h2>
 
             <div class="overflow-x-auto no-scrollbar">
@@ -381,7 +384,6 @@
                 </div>
             </div>
 
-            <!-- 2 Biểu đồ thống kê -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
                 <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
                     <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">1. Tăng Trưởng Lợi Nhuận Tích Lũy Tổng ($)</span>
@@ -397,7 +399,6 @@
                 </div>
             </div>
 
-            <!-- Bảng Lịch Sử Lệnh Đã Đóng -->
             <div class="overflow-x-auto no-scrollbar">
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
@@ -448,6 +449,27 @@
 
         document.getElementById('filter-end-date').value = new Date().toISOString().split('T')[0];
 
+        // --- Hỗ trợ số chữ số thập phân theo Pip ---
+        function getSymbolDecimals(symbol) {
+            if (!symbol) return 2;
+            if (symbol.includes("JPY")) return 2;
+            if (symbol === "BTCUSD" || symbol === "XAUUSD" || symbol === "USOIL") return 2;
+            return 4; // EURUSD, GBPUSD, EURGBP
+        }
+
+        function fmtPrice(symbol, price) {
+            if (price === undefined || price === null || isNaN(price)) return '--';
+            return price.toFixed(getSymbolDecimals(symbol));
+        }
+
+        // --- Tính khối lượng cho tín hiệu (Max Lot / 2, Min 0.01) ---
+        function getSignalVolume(symbol) {
+            let maxVol = (g_prices[symbol] && g_prices[symbol].max_vol) ? g_prices[symbol].max_vol : 0.01;
+            let vol = maxVol / 2.0;
+            if (vol < 0.01) vol = 0.01;
+            return Math.floor(vol / 0.01) * 0.01;
+        }
+
         function checkVietnamTradingHours() {
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -495,7 +517,7 @@
                 msg.className = "text-xs font-bold text-emerald-300";
             } else {
                 banner.classList.add('border-rose-500', 'bg-rose-950/40');
-                icon.innerText = "⚠️️";
+                icon.innerText = "⚠";
                 msg.innerText = statusData.message;
                 msg.className = "text-xs font-bold text-rose-300";
             }
@@ -537,14 +559,15 @@
                     if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (CHoCH + Sweep)</span>`;
                     else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (CHoCH + Sweep)</span>`;
 
+                    let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-cyan-300">${data.smc_entry ? data.smc_entry.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.smc_sl ? data.smc_sl.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.smc_tp ? data.smc_tp.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.smc_entry)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl},${data.smc_tp})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry</button>` : '--'}
+                            ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl}, ${data.smc_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -559,14 +582,15 @@
                     if(sig.includes("SPRING")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">SPRING (LPS Retest)</span>`;
                     else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (LPSY Retest)</span>`;
 
+                    let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-cyan-300">${data.wyckoff_entry ? data.wyckoff_entry.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.wyckoff_sl ? data.wyckoff_sl.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.wyckoff_tp ? data.wyckoff_tp.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.wyckoff_entry)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry}, ${data.wyckoff_sl},${data.wyckoff_tp})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry</button>` : '--'}
+                            ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry}, ${data.wyckoff_sl}, ${data.wyckoff_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -581,13 +605,14 @@
                     if(sig.includes("IMBALANCE_BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Breakout VAH</span>`;
                     else if(sig.includes("IMBALANCE_BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Breakout VAL</span>`;
 
+                    let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-amber-400 font-bold">${data.vwap ? data.vwap.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-slate-300">${data.vah ? data.vah.toFixed(2) : '--'} - ${data.val ? data.val.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-amber-400 font-bold">${fmtPrice(s, data.vwap)}</td>
+                        <td class="p-1.5 font-mono text-slate-300">${fmtPrice(s, data.vah)} - ${fmtPrice(s, data.val)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT',${data.vwap}, 0, 0)" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP</button>` : '--'}
+                            ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT', ${data.vwap}, 0, 0, ${autoVol})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -602,13 +627,14 @@
                     if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY Break 20N</span>`;
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL Break 20N</span>`;
 
+                    let autoVol = Math.max(0.01, getSignalVolume(s));
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 font-mono text-emerald-400">${data.donchian_high ? data.donchian_high.toFixed(2) : '--'}</td>
-                        <td class="p-1.5 font-mono text-rose-400">${data.donchian_low ? data.donchian_low.toFixed(2) : '--'}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.donchian_high)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.donchian_low)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${data.turtle_unit_lot || 0.01})" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit</button>` : '--'}
+                            ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${autoVol})" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -658,7 +684,8 @@
 
                 const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
                 const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
-                const gzRange = (gzMin > 0 && gzMax > 0) ? `${gzMin.toFixed(2)} - ${gzMax.toFixed(2)}` : "Đang tính...";
+                const gzRange = (gzMin > 0 && gzMax > 0) ? `${fmtPrice(s, gzMin)} - ${fmtPrice(s, gzMax)}` : "Đang tính...";
+                let autoVol = getSignalVolume(s);
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-bold text-white">${s}</td>
@@ -668,7 +695,7 @@
                     <td class="p-1.5">${emaBadge}</td>
                     <td class="p-1.5">${inGZBadge}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8%</button>
+                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0}, ${autoVol})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8% (${autoVol} Lot)</button>
                     </td>
                 </tr>`;
             });
@@ -689,7 +716,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const data = g_fiboSignals[sym];
-            // Đã sửa điều kiện kiểm tra dữ liệu để đảm bảo vẽ chuẩn xác ngay cả khi swing_high/low gần 0 hoặc số thực
             if(!data || data.swing_high === undefined || data.swing_low === undefined || data.swing_high === data.swing_low) {
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "bold 13px sans-serif";
@@ -754,7 +780,7 @@
 
                     ctx.fillStyle = lvl.color;
                     ctx.font = "bold 10px sans-serif";
-                    ctx.fillText(`${lvl.name}: ${lvl.val.toFixed(2)}`, 10, y - 4);
+                    ctx.fillText(`${lvl.name}: ${fmtPrice(sym, lvl.val)}`, 10, y - 4);
                 }
             });
 
@@ -777,7 +803,7 @@
 
                     ctx.fillStyle = ema.color;
                     ctx.font = "bold 9px sans-serif";
-                    ctx.fillText(`${ema.name}: ${ema.val.toFixed(2)}`, canvas.width - 150, emaY - 3);
+                    ctx.fillText(`${ema.name}: ${fmtPrice(sym, ema.val)}`, canvas.width - 150, emaY - 3);
                 }
             });
 
@@ -802,10 +828,10 @@
                 ctx.stroke();
 
                 ctx.fillStyle = "#10b981";
-                ctx.fillRect(canvas.width - 120, curY - 10, 115, 20);
+                ctx.fillRect(canvas.width - 130, curY - 10, 125, 20);
                 ctx.fillStyle = "#000000";
                 ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Price: ${currP.toFixed(2)}`, canvas.width - 115, curY + 4);
+                ctx.fillText(`Price: ${fmtPrice(sym, currP)}`, canvas.width - 125, curY + 4);
             }
         }
 
@@ -861,20 +887,20 @@
             const computed = calculateDefaultSLTP(symbol, type, term, entryP);
 
             const hintEl = document.getElementById('sl-tp-rule-hint');
-            hintEl.innerText = `Quy tắc [${term}]: SL khoảng ${computed.slDist.toFixed(2)} | TP khoảng ${computed.tpDist.toFixed(2)}`;
+            hintEl.innerText = `Quy tắc [${term}]: SL khoảng ${computed.slDist.toFixed(getSymbolDecimals(symbol))} | TP khoảng ${computed.tpDist.toFixed(getSymbolDecimals(symbol))}`;
 
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
 
             if(!slInput.value || slInput.dataset.auto === "true") {
                 if(computed.sl > 0) {
-                    slInput.value = computed.sl.toFixed(2);
+                    slInput.value = computed.sl.toFixed(getSymbolDecimals(symbol));
                     slInput.dataset.auto = "true";
                 }
             }
             if(!tpInput.value || tpInput.dataset.auto === "true") {
                 if(computed.tp > 0) {
-                    tpInput.value = computed.tp.toFixed(2);
+                    tpInput.value = computed.tp.toFixed(getSymbolDecimals(symbol));
                     tpInput.dataset.auto = "true";
                 }
             }
@@ -887,18 +913,23 @@
 
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
+            let decimals = getSymbolDecimals(symbol);
 
-            if(price > 0) document.getElementById('order-price').value = price.toFixed(2);
+            if(price > 0) document.getElementById('order-price').value = price.toFixed(decimals);
             
             if(sl > 0) {
-                slInput.value = sl.toFixed(2); slInput.dataset.auto = "false";
+                slInput.value = sl.toFixed(decimals); slInput.dataset.auto = "false";
             } else { slInput.value = ""; slInput.dataset.auto = "true"; }
 
             if(tp > 0) {
-                tpInput.value = tp.toFixed(2); tpInput.dataset.auto = "false";
+                tpInput.value = tp.toFixed(decimals); tpInput.dataset.auto = "false";
             } else { tpInput.value = ""; tpInput.dataset.auto = "true"; }
 
-            if(volume > 0) document.getElementById('order-volume').value = volume;
+            if(volume > 0) {
+                document.getElementById('order-volume').value = volume;
+            } else {
+                document.getElementById('order-volume').value = getSignalVolume(symbol);
+            }
 
             autoFillManualSLTP();
             updateLivePriceDisplay();
@@ -932,7 +963,7 @@
             const sym = document.getElementById('order-symbol').value;
             const el = document.getElementById('live-symbol-price');
             if(g_prices[sym]) {
-                el.innerText = `ASK: ${g_prices[sym].ask.toFixed(2)} | BID: ${g_prices[sym].bid.toFixed(2)}`;
+                el.innerText = `ASK: ${fmtPrice(sym, g_prices[sym].ask)} | BID: ${fmtPrice(sym, g_prices[sym].bid)}`;
             } else {
                 el.innerText = "ASK: -- | BID: --";
             }
@@ -1004,9 +1035,10 @@
                     <td class="p-1.5 font-bold text-white">${p.symbol}</td>
                     <td class="p-1.5">${badge}</td>
                     <td class="p-1.5 font-mono text-slate-200">${p.volume.toFixed(2)} Lot</td>
-                    <td class="p-1.5 font-mono text-cyan-300">${p.price.toFixed(2)}</td>
+                    <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(p.symbol, p.price)}</td>
                     <td class="p-1.5 font-mono font-bold ${pColor}">${pSign}$${p.profit.toFixed(2)}</td>
-                    <td class="p-1.5 text-right">
+                    <td class="p-1.5 text-right space-x-1">
+                        <button onclick="sendAction('PARTIAL_CLOSE_50', ${p.ticket})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Cắt 50%</button>
                         <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px]">Đóng</button>
                     </td>
                 </tr>`;
@@ -1037,9 +1069,9 @@
                     <td class="p-1.5 font-bold text-white">${o.symbol}</td>
                     <td class="p-1.5">${badge}</td>
                     <td class="p-1.5 font-mono text-slate-200">${o.volume.toFixed(2)} Lot</td>
-                    <td class="p-1.5 font-mono text-cyan-300">${o.price.toFixed(2)}</td>
-                    <td class="p-1.5 font-mono text-rose-400">${o.sl ? o.sl.toFixed(2) : '--'}</td>
-                    <td class="p-1.5 font-mono text-emerald-400">${o.tp ? o.tp.toFixed(2) : '--'}</td>
+                    <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(o.symbol, o.price)}</td>
+                    <td class="p-1.5 font-mono text-rose-400">${o.sl ? fmtPrice(o.symbol, o.sl) : '--'}</td>
+                    <td class="p-1.5 font-mono text-emerald-400">${o.tp ? fmtPrice(o.symbol, o.tp) : '--'}</td>
                     <td class="p-1.5 text-right">
                         <button onclick="sendAction('CANCEL_PENDING', ${o.ticket})" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded text-[9px]">Hủy</button>
                     </td>
@@ -1049,7 +1081,11 @@
         }
 
         function sendAction(actionType, ticket) {
-            if(!confirm(`Xác nhận thực hiện ${actionType} cho Ticket #${ticket}?`)) return;
+            let msg = `Xác nhận thực hiện ${actionType} cho Ticket #${ticket}?`;
+            if(actionType === 'CLOSE_ALL') msg = "Xác nhận ĐÓNG TẤT CẢ các vị thế đang mở?";
+            if(actionType === 'PARTIAL_CLOSE_50') msg = `Xác nhận CẮT 50% khối lượng cho lệnh #${ticket}?`;
+            
+            if(!confirm(msg)) return;
             db.ref('actions').push({
                 action: actionType,
                 ticket: ticket,
