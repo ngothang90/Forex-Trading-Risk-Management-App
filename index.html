@@ -56,9 +56,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.21</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.22</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Hủy chờ $\ge$ 19:00 | Giới hạn Tổng Lệnh & Chờ $\le$ 2x Max Lot</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa lời/lỗ $\pm$20% | Tổng Volume $\le$ Max Lot</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -175,12 +175,12 @@
             </div>
         </div>
 
-        <!-- HẠN MỨC KHỐI LƯỢNG (MAX LOT) -->
+        <!-- MAX VOLUME (Đã đổi tên) -->
         <div class="glass-card p-3 rounded-xl">
             <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Hạn Mức Khối Lượng (Max Lot)
+                    Max volume
                 </span>
                 <span id="balance-cap-note" class="text-[9px] text-amber-400 font-normal"></span>
             </h2>
@@ -288,7 +288,7 @@
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Mở (Có nút Đóng tất cả & Cắt 50% từng lệnh)
+                    Vị Thế Đang Mở
                 </span>
                 <div class="flex items-center space-x-2">
                     <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
@@ -315,12 +315,12 @@
             </div>
         </div>
 
-        <!-- LỆNH CHỜ ĐANG ĐẶT -->
+        <!-- MAX VOLUME LỆNH CHỜ (Đã đổi tên) -->
         <div class="glass-card p-3 rounded-xl border border-sky-500/30">
             <h2 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Lệnh Chờ Đang Đặt (Tự hủy sau 19:00 VN)
+                    Max volume Lệnh chờ (Tự hủy sau 19:00)
                 </span>
                 <span id="live-pending-count" class="text-xs font-bold text-slate-400">0 lệnh chờ</span>
             </h2>
@@ -345,26 +345,13 @@
             </div>
         </div>
 
-        <!-- HIỆU SUẤT & NHẬT KÝ GD -->
+        <!-- BIỂU ĐỒ HIỆU SUẤT -->
         <div class="glass-card p-3 rounded-xl">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
                 <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất & Nhật Ký GD
+                    Hiệu Suất Tổng Quan
                 </h2>
-                
-                <div class="flex flex-wrap items-center gap-1 text-xs">
-                    <div class="flex items-center space-x-1 mr-1">
-                        <button onclick="applyDatePreset('today')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-700 transition">Hôm nay</button>
-                        <button onclick="applyDatePreset('7days')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-700 transition">7 ngày</button>
-                        <button onclick="applyDatePreset('month')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-700 transition">Tháng này</button>
-                        <button onclick="applyDatePreset('all')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-700 transition">Tất cả</button>
-                    </div>
-                    <span class="text-slate-400 font-medium text-[10px]">Từ:</span>
-                    <input type="date" id="filter-start-date" value="2026-10-01" onchange="renderHistoryAndStats()" class="glass-input rounded px-1.5 py-0.5 text-[10px] outline-none">
-                    <span class="text-slate-400 font-medium text-[10px]">Đến:</span>
-                    <input type="date" id="filter-end-date" onchange="renderHistoryAndStats()" class="glass-input rounded px-1.5 py-0.5 text-[10px] outline-none">
-                </div>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
@@ -386,7 +373,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
                     <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">1. Tăng Trưởng Lợi Nhuận Tích Lũy Tổng ($)</span>
                     <div class="w-full h-44">
@@ -399,22 +386,6 @@
                         <canvas id="symbolProfitChart"></canvas>
                     </div>
                 </div>
-            </div>
-
-            <div class="overflow-x-auto no-scrollbar">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="p-1.5">Cặp Tiền</th>
-                            <th class="p-1.5">Loại Lệnh</th>
-                            <th class="p-1.5">Thời Gian Đóng</th>
-                            <th class="p-1.5 text-right">Lợi Nhuận ($)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="closed-history-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="4" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh.</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -448,8 +419,6 @@
         db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
         db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderHistoryAndStats(); });
         db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
-
-        document.getElementById('filter-end-date').value = new Date().toISOString().split('T')[0];
 
         function getSymbolDecimals(symbol) {
             if (!symbol) return 2;
@@ -498,7 +467,7 @@
             if((g_account.balance || 0) < 500) {
                 capNote.innerText = "(TK < $500: Áp dụng Lot an toàn)";
             } else {
-                capNote.innerText = "(Tổng lệnh chạy + chờ tối đa 2x Max Lot)";
+                capNote.innerText = "(Tổng lệnh chạy + chờ tối đa Max Lot)";
             }
         }
 
@@ -777,7 +746,6 @@
             }
 
             ctx.textAlign = "left";
-
             ctx.strokeStyle = "rgba(51, 65, 85, 0.25)";
             ctx.lineWidth = 1;
             for(let x = 0; x < canvas.width; x += 50) {
@@ -1151,21 +1119,11 @@
         }
 
         function renderHistoryAndStats() {
-            const body = document.getElementById('closed-history-body');
-            const startDateStr = document.getElementById('filter-start-date').value;
-            const endDateStr = document.getElementById('filter-end-date').value;
-
-            const startTs = startDateStr ? new Date(startDateStr).getTime() / 1000 : 0;
-            const endTs = endDateStr ? (new Date(endDateStr).getTime() + 86400000) / 1000 : Infinity;
-
             const keys = Object.keys(g_history);
             let filtered = [];
 
             keys.forEach(k => {
-                const item = g_history[k];
-                if(item.close_time >= startTs && item.close_time <= endTs) {
-                    filtered.push(item);
-                }
+                filtered.push(g_history[k]);
             });
 
             filtered.sort((a, b) => a.close_time - b.close_time);
@@ -1176,7 +1134,6 @@
             let equityCurve = [];
             let cumulativeProfit = 0;
             let timeLabels = [];
-
             let symbolProfits = { "XAUUSD": 0, "BTCUSD": 0, "USOIL": 0, "EURUSD": 0, "GBPUSD": 0, "EURGBP": 0, "USDJPY": 0 };
 
             filtered.forEach(item => {
@@ -1201,8 +1158,6 @@
                 equityCurve.push(cumulativeProfit);
             });
 
-            filtered.sort((a, b) => b.close_time - a.close_time);
-
             const totalTrades = wins + losses;
             const winrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
 
@@ -1219,29 +1174,6 @@
             dailyEl.className = `text-sm sm:text-base font-bold ${dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
             renderPerformanceCharts(timeLabels, equityCurve, symbolProfits);
-
-            if(filtered.length === 0) {
-                body.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-500 font-medium text-[11px]">Chưa có lịch sử lệnh đã đóng.</td></tr>`;
-                return;
-            }
-
-            let html = "";
-            filtered.forEach(item => {
-                const pColor = item.profit >= 0 ? "text-emerald-400" : "text-rose-400";
-                const pSign = item.profit >= 0 ? "+" : "";
-                const dateStr = new Date(item.close_time * 1000).toLocaleString('vi-VN');
-
-                let typeBadgeStr = item.type || "BUY";
-                const badgeClass = typeBadgeStr.includes("BUY") ? "badge-buy" : "badge-sell";
-
-                html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-bold text-white">${item.symbol}</td>
-                    <td class="p-1.5"><span class="text-[9px] px-1.5 py-0.5 rounded ${badgeClass} font-bold">${typeBadgeStr}</span></td>
-                    <td class="p-1.5 text-slate-400">${dateStr}</td>
-                    <td class="p-1.5 font-mono font-bold text-right ${pColor}">${pSign}${(item.profit||0).toFixed(2)}</td>
-                </tr>`;
-            });
-            body.innerHTML = html;
         }
 
         function renderPerformanceCharts(labels, equityData, symbolProfits) {
@@ -1307,27 +1239,6 @@
                     plugins: { legend: { display: false } }
                 }
             });
-        }
-
-        function applyDatePreset(preset) {
-            const today = new Date();
-            const endDateInput = document.getElementById('filter-end-date');
-            const startDateInput = document.getElementById('filter-start-date');
-
-            endDateInput.value = today.toISOString().split('T')[0];
-
-            if(preset === 'today') {
-                startDateInput.value = today.toISOString().split('T')[0];
-            } else if(preset === `7days`) {
-                const d = new Date(); d.setDate(d.getDate() - 7);
-                startDateInput.value = d.toISOString().split('T')[0];
-            } else if(preset === 'month') {
-                const d = new Date(today.getFullYear(), today.getMonth(), 1);
-                startDateInput.value = d.toISOString().split('T')[0];
-            } else if(preset === 'all') {
-                startDateInput.value = "2026-10-01";
-            }
-            renderHistoryAndStats();
         }
 
         window.addEventListener('resize', () => { drawFiboCanvas(); });
