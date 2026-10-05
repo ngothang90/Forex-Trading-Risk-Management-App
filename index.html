@@ -56,9 +56,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.19</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.21</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Giới hạn Tổng Lệnh & Chờ $\le$ 2x Max Lot</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Hủy chờ $\ge$ 19:00 | Giới hạn Tổng Lệnh & Chờ $\le$ 2x Max Lot</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -108,8 +108,10 @@
                     <svg class="w-3.5 h-3.5 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     Tín Hiệu Multi-Strategy
                 </h2>
-                <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+                <div class="flex flex-wrap items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
                     <button onclick="switchStratTab('smc')" id="tab-smc" class="tab-btn active text-[10px] px-2 py-0.5 rounded transition">SMC</button>
+                    <button onclick="switchStratTab('momentum')" id="tab-momentum" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Mom. Pullback</button>
+                    <button onclick="switchStratTab('breakout')" id="tab-breakout" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Breakout Retest</button>
                     <button onclick="switchStratTab('wyckoff')" id="tab-wyckoff" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Wyckoff</button>
                     <button onclick="switchStratTab('amt')" id="tab-amt" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">AMT/VWAP</button>
                     <button onclick="switchStratTab('turtle')" id="tab-turtle" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Turtle</button>
@@ -122,7 +124,7 @@
                         <tr id="multi-strat-table-head"></tr>
                     </thead>
                     <tbody id="multi-strat-table-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang quét tín hiệu từ VPS...</td></tr>
+                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang quét tín hiệu từ VPS...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -264,11 +266,11 @@
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cắt Lỗ (SL)</label>
-                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.00001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.00001" oninput="markManualInput('sl')" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Chốt Lời (TP)</label>
-                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.00001" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.00001" oninput="markManualInput('tp')" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
                 </div>
             </div>
 
@@ -318,7 +320,7 @@
             <h2 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Lệnh Chờ Đang Đặt
+                    Lệnh Chờ Đang Đặt (Tự hủy sau 19:00 VN)
                 </span>
                 <span id="live-pending-count" class="text-xs font-bold text-slate-400">0 lệnh chờ</span>
             </h2>
@@ -566,6 +568,58 @@
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
                             ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl}, ${data.smc_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'momentum') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái Trend</th><th class="p-1.5">Score (min 7)</th><th class="p-1.5">Entry Hồi Về</th><th class="p-1.5">SL / TP (RR 1:2)</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.mom_signal || "WAITING";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Pullback</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY MOMENTUM</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL MOMENTUM</span>`;
+
+                    let score = data.mom_score || 0;
+                    let scoreColor = score >= 7 ? "text-emerald-400 font-bold" : "text-slate-400";
+                    let autoVol = getSignalVolume(s);
+
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 ${scoreColor}">${score}/10</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
+                        <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
+                        <td class="p-1.5 text-right">
+                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry}, ${data.mom_sl}, ${data.mom_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'breakout') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu Break/Retest</th><th class="p-1.5">Score (min 7)</th><th class="p-1.5">Vùng Retest</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.bo_signal || "WAITING";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Retest</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY RETEST S→R</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL RETEST R→S</span>`;
+
+                    let score = data.bo_score || 0;
+                    let scoreColor = score >= 7 ? "text-emerald-400 font-bold" : "text-slate-400";
+                    let autoVol = getSignalVolume(s);
+
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 ${scoreColor}">${score}/10</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
+                        <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
+                        <td class="p-1.5 text-right">
+                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry}, ${data.bo_sl}, ${data.bo_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -864,8 +918,15 @@
             return { sl: sl, tp: tp, slDist: slDist, tpDist: tpDist };
         }
 
+        function markManualInput(field) {
+            const inputEl = document.getElementById(`order-${field}`);
+            inputEl.dataset.manual = "true";
+        }
+
         function onOrderSymbolOrTermChange() {
             togglePriceInput();
+            document.getElementById('order-sl').dataset.manual = "false";
+            document.getElementById('order-tp').dataset.manual = "false";
             autoFillManualSLTP();
             updateLivePriceDisplay();
         }
@@ -890,16 +951,14 @@
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
 
-            if(!slInput.value || slInput.dataset.auto === "true") {
+            if(slInput.dataset.manual !== "true") {
                 if(computed.sl > 0) {
                     slInput.value = computed.sl.toFixed(getSymbolDecimals(symbol));
-                    slInput.dataset.auto = "true";
                 }
             }
-            if(!tpInput.value || tpInput.dataset.auto === "true") {
+            if(tpInput.dataset.manual !== "true") {
                 if(computed.tp > 0) {
                     tpInput.value = computed.tp.toFixed(getSymbolDecimals(symbol));
-                    tpInput.dataset.auto = "true";
                 }
             }
         }
@@ -916,12 +975,12 @@
             if(price > 0) document.getElementById('order-price').value = price.toFixed(decimals);
             
             if(sl > 0) {
-                slInput.value = sl.toFixed(decimals); slInput.dataset.auto = "false";
-            } else { slInput.value = ""; slInput.dataset.auto = "true"; }
+                slInput.value = sl.toFixed(decimals); slInput.dataset.manual = "true";
+            } else { slInput.value = ""; slInput.dataset.manual = "false"; }
 
             if(tp > 0) {
-                tpInput.value = tp.toFixed(decimals); tpInput.dataset.auto = "false";
-            } else { tpInput.value = ""; tpInput.dataset.auto = "true"; }
+                tpInput.value = tp.toFixed(decimals); tpInput.dataset.manual = "true";
+            } else { tpInput.value = ""; tpInput.dataset.manual = "false"; }
 
             if(volume > 0) {
                 document.getElementById('order-volume').value = volume;
@@ -951,8 +1010,8 @@
             document.getElementById('order-price').value = "";
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
-            slInput.value = ""; slInput.dataset.auto = "true";
-            tpInput.value = ""; tpInput.dataset.auto = "true";
+            slInput.value = ""; slInput.dataset.manual = "false";
+            tpInput.value = ""; tpInput.dataset.manual = "false";
             document.getElementById('order-volume').value = "0.01";
             autoFillManualSLTP();
         }
