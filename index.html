@@ -56,9 +56,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.22</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.24</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa lời/lỗ $\pm$20% | Tổng Volume $\le$ Max Lot</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa Lãi/Lỗ Ngày $\pm$20% | Volume $\le$ Max Lot</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -175,12 +175,12 @@
             </div>
         </div>
 
-        <!-- MAX VOLUME (Đã đổi tên) -->
+        <!-- MAX VOLUME -->
         <div class="glass-card p-3 rounded-xl">
             <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Max volume
+                    Max Volume Giới Hạn Cặp Tiền
                 </span>
                 <span id="balance-cap-note" class="text-[9px] text-amber-400 font-normal"></span>
             </h2>
@@ -288,7 +288,7 @@
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Mở
+                    Vị Thế Đang Mở (Không quá Max Volume)
                 </span>
                 <div class="flex items-center space-x-2">
                     <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
@@ -315,12 +315,12 @@
             </div>
         </div>
 
-        <!-- MAX VOLUME LỆNH CHỜ (Đã đổi tên) -->
+        <!-- LỆNH CHỜ -->
         <div class="glass-card p-3 rounded-xl border border-sky-500/30">
             <h2 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Max volume Lệnh chờ (Tự hủy sau 19:00)
+                    Lệnh Chờ (Tự hủy sau 19:00 VN)
                 </span>
                 <span id="live-pending-count" class="text-xs font-bold text-slate-400">0 lệnh chờ</span>
             </h2>
@@ -345,12 +345,12 @@
             </div>
         </div>
 
-        <!-- BIỂU ĐỒ HIỆU SUẤT -->
+        <!-- THỐNG KÊ HIỆU SUẤT & CHIẾN LƯỢC -->
         <div class="glass-card p-3 rounded-xl">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
                 <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất Tổng Quan
+                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược
                 </h2>
             </div>
 
@@ -368,9 +368,26 @@
                     <p id="stat-net-profit" class="text-sm sm:text-base font-bold text-white">+$0.00</p>
                 </div>
                 <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
-                    <span class="text-[10px] text-slate-400 block font-bold uppercase">LN Hôm Nay</span>
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">LN Hôm Nay ($\pm$20% Khóa)</span>
                     <p id="stat-daily-profit" class="text-sm sm:text-base font-bold text-white">+$0.00</p>
                 </div>
+            </div>
+
+            <!-- Bảng Thống Kê 8 Chiến Lược -->
+            <div class="mb-3 overflow-x-auto no-scrollbar">
+                <table class="w-full text-left text-xs whitespace-nowrap bg-slate-900/90 rounded-xl overflow-hidden border border-slate-800">
+                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-2">Chiến Lược</th>
+                            <th class="p-2 text-center">Số Lệnh</th>
+                            <th class="p-2 text-right">Lợi Nhuận ($)</th>
+                            <th class="p-2 text-right">Hiệu Suất</th>
+                        </tr>
+                    </thead>
+                    <tbody id="strategy-stats-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="4" class="text-center py-2 text-slate-500">Đang tổng hợp dữ liệu chiến lược...</td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -406,6 +423,7 @@
         let g_positions = {};
         let g_pendingOrders = {};
         let g_history = {};
+        let g_strategyStats = {};
         let g_activeStratTab = 'smc';
 
         let equityChartInstance = null;
@@ -418,6 +436,7 @@
         db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); });
         db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
         db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderHistoryAndStats(); });
+        db.ref('strategy_stats').on('value', snap => { g_strategyStats = snap.val() || {}; renderStrategyStatsTable(); });
         db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
 
         function getSymbolDecimals(symbol) {
@@ -465,9 +484,9 @@
             
             const capNote = document.getElementById('balance-cap-note');
             if((g_account.balance || 0) < 500) {
-                capNote.innerText = "(TK < $500: Áp dụng Lot an toàn)";
+                capNote.innerText = "(TK < $500: Áp dụng Lot an toàn & Khóa lời/lỗ ±20%)";
             } else {
-                capNote.innerText = "(Tổng lệnh chạy + chờ tối đa Max Lot)";
+                capNote.innerText = "(Tổng lệnh chạy tối đa Max Lot & Cắt tự động ±20% ngày)";
             }
         }
 
@@ -525,8 +544,8 @@
                     const data = g_multiSignals[s] || {};
                     const sig = data.smc_signal || "NONE";
                     let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Tín Hiệu</span>`;
-                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (CHoCH + Sweep)</span>`;
-                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (CHoCH + Sweep)</span>`;
+                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (SMC)</span>`;
+                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (SMC)</span>`;
 
                     let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
@@ -536,13 +555,13 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl}, ${data.smc_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry (${autoVol} Lot)</button>` : '--'}
+                            ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry}, ${data.smc_sl}, ${data.smc_tp}, ${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
                 body.innerHTML = html;
             } else if(g_activeStratTab === 'momentum') {
-                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái Trend</th><th class="p-1.5">Score (min 7)</th><th class="p-1.5">Entry Hồi Về</th><th class="p-1.5">SL / TP (RR 1:2)</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái Trend</th><th class="p-1.5">Score</th><th class="p-1.5">Entry Hồi Về</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
@@ -552,56 +571,54 @@
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL MOMENTUM</span>`;
 
                     let score = data.mom_score || 0;
-                    let scoreColor = score >= 7 ? "text-emerald-400 font-bold" : "text-slate-400";
                     let autoVol = getSignalVolume(s);
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 ${scoreColor}">${score}/10</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/10</td>
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry}, ${data.mom_sl}, ${data.mom_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry}, ${data.mom_sl}, ${data.mom_tp}, ${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
                 body.innerHTML = html;
             } else if(g_activeStratTab === 'breakout') {
-                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu Break/Retest</th><th class="p-1.5">Score (min 7)</th><th class="p-1.5">Vùng Retest</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu Break/Retest</th><th class="p-1.5">Score</th><th class="p-1.5">Vùng Retest</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
                     const sig = data.bo_signal || "WAITING";
                     let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Retest</span>`;
-                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY RETEST S→R</span>`;
-                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL RETEST R→S</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY RETEST</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL RETEST</span>`;
 
                     let score = data.bo_score || 0;
-                    let scoreColor = score >= 7 ? "text-emerald-400 font-bold" : "text-slate-400";
                     let autoVol = getSignalVolume(s);
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 ${scoreColor}">${score}/10</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/10</td>
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry}, ${data.bo_sl}, ${data.bo_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry}, ${data.bo_sl}, ${data.bo_tp}, ${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
                 body.innerHTML = html;
             } else if(g_activeStratTab === 'wyckoff') {
-                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Mô Hình Wyckoff VSA</th><th class="p-1.5">Entry</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Mô Hình Wyckoff</th><th class="p-1.5">Entry</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
                     const sig = data.wyckoff_signal || "NONE";
                     let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Tích Lũy / Phân Phối</span>`;
-                    if(sig.includes("SPRING")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">SPRING (LPS Retest)</span>`;
-                    else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (LPSY Retest)</span>`;
+                    if(sig.includes("SPRING")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">SPRING (Wyckoff)</span>`;
+                    else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (Wyckoff)</span>`;
 
                     let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
@@ -611,20 +628,20 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry}, ${data.wyckoff_sl}, ${data.wyckoff_tp}, ${autoVol})" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Lấy Entry (${autoVol} Lot)</button>` : '--'}
+                            ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry}, ${data.wyckoff_sl}, ${data.wyckoff_tp}, ${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
                 body.innerHTML = html;
             } else if(g_activeStratTab === 'amt') {
-                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái Đấu Giá</th><th class="p-1.5">VWAP M30</th><th class="p-1.5">Value Area (VAH-VAL)</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái AMT</th><th class="p-1.5">VWAP M30</th><th class="p-1.5">Value Area (VAH-VAL)</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
                     const sig = data.amt_signal || "BALANCED";
                     let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-300 font-bold">BALANCED</span>`;
-                    if(sig.includes("IMBALANCE_BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Breakout VAH</span>`;
-                    else if(sig.includes("IMBALANCE_BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Breakout VAL</span>`;
+                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Break VAH</span>`;
+                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Break VAL</span>`;
 
                     let autoVol = getSignalVolume(s);
                     html += `<tr class="hover:bg-slate-800/40">
@@ -633,7 +650,7 @@
                         <td class="p-1.5 font-mono text-amber-400 font-bold">${fmtPrice(s, data.vwap)}</td>
                         <td class="p-1.5 font-mono text-slate-300">${fmtPrice(s, data.vah)} - ${fmtPrice(s, data.val)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT', ${data.vwap}, 0, 0, ${autoVol})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP (${autoVol} Lot)</button>` : '--'}
+                            ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT', ${data.vwap}, 0, 0, ${autoVol}, 'AMT/VWAP')" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -645,8 +662,8 @@
                     const data = g_multiSignals[s] || {};
                     const sig = data.turtle_signal || "NONE";
                     let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Kênh 20N</span>`;
-                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY Break 20N</span>`;
-                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL Break 20N</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (Turtle)</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (Turtle)</span>`;
 
                     let autoVol = Math.max(0.01, getSignalVolume(s));
                     html += `<tr class="hover:bg-slate-800/40">
@@ -655,7 +672,7 @@
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.donchian_high)}</td>
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.donchian_low)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${autoVol})" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit (${autoVol} Lot)</button>` : '--'}
+                            ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${autoVol}, 'Turtle')" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -671,10 +688,7 @@
             syms.forEach(s => {
                 const data = g_fiboSignals[s];
                 if(!data) {
-                    html += `<tr class="hover:bg-slate-800/40">
-                        <td class="p-1.5 font-bold text-white">${s}</td>
-                        <td colspan="6" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu từ VPS...</td>
-                    </tr>`;
+                    html += `<tr class="hover:bg-slate-800/40"><td class="p-1.5 font-bold text-white">${s}</td><td colspan="6" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu từ VPS...</td></tr>`;
                     return;
                 }
 
@@ -688,14 +702,10 @@
 
                 let candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Chưa Có</span>`;
                 const revPattern = data.reversal_candle || "NONE";
-                if(revPattern === "BULL_PINBAR") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">Pinbar Tăng</span>`;
-                } else if(revPattern === "BEAR_PINBAR") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">Pinbar Giảm</span>`;
-                } else if(revPattern === "BULL_ENGULFING") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">Engulfing Tăng</span>`;
-                } else if(revPattern === "BEAR_ENGULFING") {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">Engulfing Giảm</span>`;
+                if(revPattern.includes("BULL")) {
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">${revPattern}</span>`;
+                } else if(revPattern.includes("BEAR")) {
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">${revPattern}</span>`;
                 }
 
                 let emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Không</span>`;
@@ -716,7 +726,7 @@
                     <td class="p-1.5">${emaBadge}</td>
                     <td class="p-1.5">${inGZBadge}</td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0}, ${autoVol})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào 61.8% (${autoVol} Lot)</button>
+                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0}, ${autoVol}, 'Fibonacci')" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào Fibo (${autoVol} Lot)</button>
                     </td>
                 </tr>`;
             });
@@ -741,7 +751,7 @@
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "bold 13px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`Dang tai du lieu Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
+                ctx.fillText(`Đang tải biểu đồ Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
                 return;
             }
 
@@ -754,7 +764,6 @@
 
             const levels = [
                 { name: "0.0%", val: data.fib_0, color: "#94a3b8" },
-                { name: "23.6%", val: data.fib_236, color: "#38bdf8" },
                 { name: "38.2%", val: data.fib_382, color: "#818cf8" },
                 { name: "50.0%", val: data.fib_50, color: "#f59e0b" },
                 { name: "61.8% (Golden)", val: data.fib_618, color: "#f59e0b" },
@@ -803,37 +812,6 @@
                     ctx.fillText(`${lvl.name}: ${fmtPrice(sym, lvl.val)}`, 10, y - 4);
                 }
             });
-
-            const emaList = [
-                { name: "EMA 50", val: data.ema50, color: "#c084fc" },
-                { name: "EMA 200", val: data.ema200, color: "#facc15" }
-            ];
-
-            emaList.forEach(ema => {
-                if(ema.val && ema.val > 0) {
-                    const emaY = getY(ema.val);
-                    ctx.strokeStyle = ema.color;
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([2, 2]);
-
-                    ctx.beginPath();
-                    ctx.moveTo(0, emaY);
-                    ctx.lineTo(canvas.width - 130, emaY);
-                    ctx.stroke();
-
-                    ctx.fillStyle = ema.color;
-                    ctx.font = "bold 9px sans-serif";
-                    ctx.fillText(`${ema.name}: ${fmtPrice(sym, ema.val)}`, canvas.width - 150, emaY - 3);
-                }
-            });
-
-            if(data.reversal_candle && data.reversal_candle !== "NONE") {
-                ctx.fillStyle = data.reversal_candle.includes("BULL") ? "rgba(16, 185, 129, 0.9)" : "rgba(244, 63, 94, 0.9)";
-                ctx.fillRect(15, 15, 150, 22);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Pattern: ${data.reversal_candle}`, 22, 30);
-            }
 
             if(g_prices[sym]) {
                 const currP = (data.trend === "UP") ? g_prices[sym].bid : g_prices[sym].ask;
@@ -912,29 +890,28 @@
             }
 
             const computed = calculateDefaultSLTP(symbol, type, term, entryP);
-
             const hintEl = document.getElementById('sl-tp-rule-hint');
-            hintEl.innerText = `Quy tắc [${term}]: SL khoảng ${computed.slDist.toFixed(getSymbolDecimals(symbol))} | TP khoảng ${computed.tpDist.toFixed(getSymbolDecimals(symbol))}`;
+            hintEl.innerText = `Quy tắc [${term}]: SL ~${computed.slDist.toFixed(getSymbolDecimals(symbol))} | TP ~${computed.tpDist.toFixed(getSymbolDecimals(symbol))}`;
 
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
 
-            if(slInput.dataset.manual !== "true") {
-                if(computed.sl > 0) {
-                    slInput.value = computed.sl.toFixed(getSymbolDecimals(symbol));
-                }
+            if(slInput.dataset.manual !== "true" && computed.sl > 0) {
+                slInput.value = computed.sl.toFixed(getSymbolDecimals(symbol));
             }
-            if(tpInput.dataset.manual !== "true") {
-                if(computed.tp > 0) {
-                    tpInput.value = computed.tp.toFixed(getSymbolDecimals(symbol));
-                }
+            if(tpInput.dataset.manual !== "true" && computed.tp > 0) {
+                tpInput.value = computed.tp.toFixed(getSymbolDecimals(symbol));
             }
         }
 
-        function fillOrderForm(symbol, type, price = 0, sl = 0, tp = 0, volume = 0) {
+        let g_selectedStrategyTag = "Web Manual";
+
+        function fillOrderForm(symbol, type, price = 0, sl = 0, tp = 0, volume = 0, strategyName = "Web Manual") {
             document.getElementById('order-symbol').value = symbol;
             document.getElementById('order-type').value = type;
             togglePriceInput();
+
+            g_selectedStrategyTag = strategyName;
 
             const slInput = document.getElementById('order-sl');
             const tpInput = document.getElementById('order-tp');
@@ -981,6 +958,7 @@
             slInput.value = ""; slInput.dataset.manual = "false";
             tpInput.value = ""; tpInput.dataset.manual = "false";
             document.getElementById('order-volume').value = "0.01";
+            g_selectedStrategyTag = "Web Manual";
             autoFillManualSLTP();
         }
 
@@ -1021,15 +999,16 @@
                 price: price,
                 sl: sl,
                 tp: tp,
+                strategy: g_selectedStrategyTag,
                 timestamp: Date.now()
             };
 
             db.ref('pending_requests').push(reqData, (err) => {
                 if(!err) {
-                    alert(`Da gui lenh ${type} ${symbol} (${volume} Lot) len MT5!`);
+                    alert(`Đã gửi lệnh ${type} ${symbol} (${volume} Lot - ${g_selectedStrategyTag}) lên MT5!`);
                     clearOrderForm();
                 } else {
-                    alert("Loi gui lenh: " + err.message);
+                    alert("Lỗi gửi lệnh: " + err.message);
                 }
             });
         }
@@ -1118,14 +1097,46 @@
             });
         }
 
+        function renderStrategyStatsTable() {
+            const body = document.getElementById('strategy-stats-body');
+            const strategies = ["SMC", "Mom. Pullback", "Breakout Retest", "Wyckoff", "AMT/VWAP", "Turtle", "Fibonacci", "Other"];
+
+            let html = "";
+            let totalStratProfit = 0;
+            let totalStratTrades = 0;
+
+            strategies.forEach(stratKey => {
+                const data = g_strategyStats[stratKey] || { profit: 0, trades: 0 };
+                const p = data.profit || 0;
+                const t = data.trades || 0;
+                totalStratProfit += p;
+                totalStratTrades += t;
+
+                const pColor = p >= 0 ? "text-emerald-400" : "text-rose-400";
+                const pSign = p >= 0 ? "+" : "";
+
+                html += `<tr class="hover:bg-slate-800/40">
+                    <td class="p-2 font-bold text-white flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>${stratKey}
+                    </td>
+                    <td class="p-2 text-center font-mono text-slate-300">${t} lệnh</td>
+                    <td class="p-2 text-right font-mono font-bold ${pColor}">${pSign}$${p.toFixed(2)}</td>
+                    <td class="p-2 text-right">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] ${p >= 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'} font-bold">
+                            ${p >= 0 ? 'Hiệu Quả' : 'Cần Lưu Ý'}
+                        </span>
+                    </td>
+                </tr>`;
+            });
+
+            body.innerHTML = html;
+        }
+
         function renderHistoryAndStats() {
             const keys = Object.keys(g_history);
             let filtered = [];
 
-            keys.forEach(k => {
-                filtered.push(g_history[k]);
-            });
-
+            keys.forEach(k => { filtered.push(g_history[k]); });
             filtered.sort((a, b) => a.close_time - b.close_time);
 
             let wins = 0, losses = 0, netProfit = 0, dailyProfit = 0;
@@ -1199,10 +1210,7 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { display: false },
-                        y: { 
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                            ticks: { color: '#94a3b8', font: { size: 9 } }
-                        }
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
                     },
                     plugins: { legend: { display: false } }
                 }
@@ -1231,10 +1239,7 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
-                        y: { 
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                            ticks: { color: '#94a3b8', font: { size: 9 } }
-                        }
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
                     },
                     plugins: { legend: { display: false } }
                 }
