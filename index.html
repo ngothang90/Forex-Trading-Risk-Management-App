@@ -436,7 +436,7 @@
         db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
         db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; renderFiboWatchlist(); drawFiboCanvas(); });
         db.ref('multi_strategy_signals').on('value', snap => { g_multiSignals = snap.val() || {}; renderMultiStrategy(); });
-        db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); });
+        db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); renderStrategyStatsTable(); });
         db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
         db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderHistoryAndStats(); });
         db.ref('strategy_stats').on('value', snap => { g_strategyStats = snap.val() || {}; renderStrategyStatsTable(); });
@@ -1104,31 +1104,46 @@
             });
         }
 
+        function normalizeStrat(strat) {
+            const u = String(strat || "").toUpperCase();
+            if(u.includes("SMC")) return "SMC";
+            if(u.includes("MOMENTUM") || u.includes("PULLBACK") || u.includes("MOM.")) return "Mom. Pullback";
+            if(u.includes("BREAKOUT") || u.includes("RETEST")) return "Breakout Retest";
+            if(u.includes("WYCKOFF")) return "Wyckoff";
+            if(u.includes("AMT") || u.includes("VWAP")) return "AMT/VWAP";
+            if(u.includes("TURTLE") || u.includes("DONCHIAN")) return "Turtle";
+            if(u.includes("FIBO") || u.includes("FIBONACCI")) return "Fibonacci";
+            if(u.includes("MANUAL") || u === "") return "Web Manual";
+            return "Other";
+        }
+
         function renderStrategyStatsTable() {
             const body = document.getElementById('strategy-stats-body');
             const strategies = ["SMC", "Mom. Pullback", "Breakout Retest", "Wyckoff", "AMT/VWAP", "Turtle", "Fibonacci", "Web Manual", "Other"];
 
-            // Luôn tính trực tiếp từ closed_history để số liệu luôn khớp lịch sử thực tế.
             const stats = {};
             strategies.forEach(s => { stats[s] = { profit: 0, trades: 0, wins: 0, losses: 0 }; });
 
+            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History)
             Object.keys(g_history || {}).forEach(k => {
                 const item = g_history[k] || {};
                 const p = Number(item.profit) || 0;
-                let strat = item.strategy || item.comment || "";
-                const u = String(strat).toUpperCase();
-
-                if(u.includes("SMC")) strat = "SMC";
-                else if(u.includes("MOMENTUM") || u.includes("PULLBACK") || u.includes("MOM.")) strat = "Mom. Pullback";
-                else if(u.includes("BREAKOUT") || u.includes("RETEST")) strat = "Breakout Retest";
-                else if(u.includes("WYCKOFF")) strat = "Wyckoff";
-                else if(u.includes("AMT") || u.includes("VWAP")) strat = "AMT/VWAP";
-                else if(u.includes("TURTLE") || u.includes("DONCHIAN")) strat = "Turtle";
-                else if(u.includes("FIBO") || u.includes("FIBONACCI")) strat = "Fibonacci";
-                else if(u.includes("MANUAL") || u === "") strat = "Web Manual";
-                else if(!stats[strat]) strat = "Other";
-
+                let strat = normalizeStrat(item.strategy || item.comment);
                 if(!stats[strat]) strat = "Other";
+
+                stats[strat].profit += p;
+                stats[strat].trades += 1;
+                if(p > 0) stats[strat].wins += 1;
+                else if(p < 0) stats[strat].losses += 1;
+            });
+
+            // 2. Tổng hợp từ Vị thế đang mở (Open Positions) để hiển thị ngay lợi nhuận & số lệnh theo chiến lược
+            Object.keys(g_positions || {}).forEach(k => {
+                const item = g_positions[k] || {};
+                const p = Number(item.profit) || 0;
+                let strat = normalizeStrat(item.strategy);
+                if(!stats[strat]) strat = "Other";
+
                 stats[strat].profit += p;
                 stats[strat].trades += 1;
                 if(p > 0) stats[strat].wins += 1;
@@ -1159,7 +1174,7 @@
             let filtered = [];
 
             keys.forEach(k => { filtered.push(g_history[k]); });
-            filtered.sort((a, b) => a.close_time - b.close_time);
+            filtered.sort((a, b) => (a.close_time || 0) - (b.close_time || 0));
 
             let wins = 0, losses = 0, netProfit = 0, dailyProfit = 0;
             const todayStr = new Date().toISOString().split('T')[0];
@@ -1169,7 +1184,31 @@
             let timeLabels = [];
             let symbolProfits = { "XAUUSD": 0, "BTCUSD": 0, "USOIL": 0, "EURUSD": 0, "GBPUSD": 0, "EURGBP": 0, "USDJPY": 0 };
 
-            // Bảng chiến lược được tính trực tiếp từ closed_history để luôn chính xác.\n            renderStrategyStatsTable();
+            filtered.forEach(item => {
+                const p = Number(item.profit) || 0;
+                netProfit += p;
+                cumulativeProfit += p;
+                equityCurve.push(cumulativeProfit);
+
+                const cTime = item.close_time ? new Date(item.close_time * 1000) : new Date();
+                const timeStr = cTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                timeLabels.push(timeStr);
+
+                const dateStr = cTime.toISOString().split('T')[0];
+                if(dateStr === todayStr) {
+                    dailyProfit += p;
+                }
+
+                if(p > 0) wins++;
+                else if(p < 0) losses++;
+
+                const sym = item.symbol || "";
+                if(symbolProfits[sym] !== undefined) {
+                    symbolProfits[sym] += p;
+                }
+            });
+
+            renderStrategyStatsTable();
 
             const totalTrades = wins + losses;
             const winrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
