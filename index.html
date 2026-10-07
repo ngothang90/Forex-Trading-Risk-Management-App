@@ -1108,35 +1108,49 @@
             const body = document.getElementById('strategy-stats-body');
             const strategies = ["SMC", "Mom. Pullback", "Breakout Retest", "Wyckoff", "AMT/VWAP", "Turtle", "Fibonacci", "Web Manual", "Other"];
 
+            // Luôn tính trực tiếp từ closed_history để số liệu luôn khớp lịch sử thực tế.
+            const stats = {};
+            strategies.forEach(s => { stats[s] = { profit: 0, trades: 0, wins: 0, losses: 0 }; });
+
+            Object.keys(g_history || {}).forEach(k => {
+                const item = g_history[k] || {};
+                const p = Number(item.profit) || 0;
+                let strat = item.strategy || item.comment || "";
+                const u = String(strat).toUpperCase();
+
+                if(u.includes("SMC")) strat = "SMC";
+                else if(u.includes("MOMENTUM") || u.includes("PULLBACK") || u.includes("MOM.")) strat = "Mom. Pullback";
+                else if(u.includes("BREAKOUT") || u.includes("RETEST")) strat = "Breakout Retest";
+                else if(u.includes("WYCKOFF")) strat = "Wyckoff";
+                else if(u.includes("AMT") || u.includes("VWAP")) strat = "AMT/VWAP";
+                else if(u.includes("TURTLE") || u.includes("DONCHIAN")) strat = "Turtle";
+                else if(u.includes("FIBO") || u.includes("FIBONACCI")) strat = "Fibonacci";
+                else if(u.includes("MANUAL") || u === "") strat = "Web Manual";
+                else if(!stats[strat]) strat = "Other";
+
+                if(!stats[strat]) strat = "Other";
+                stats[strat].profit += p;
+                stats[strat].trades += 1;
+                if(p > 0) stats[strat].wins += 1;
+                else if(p < 0) stats[strat].losses += 1;
+            });
+
             let html = "";
-
             strategies.forEach(stratKey => {
-                const data = g_strategyStats[stratKey] || { profit: 0, trades: 0, wins: 0, losses: 0 };
-                const p = data.profit || 0;
-                const t = data.trades || 0;
-                const w = data.wins || 0;
-                const l = data.losses || 0;
-                
-                let winrate = t > 0 ? ((w / t) * 100).toFixed(1) : "0.0";
-
+                const data = stats[stratKey];
+                const p = data.profit, t = data.trades, w = data.wins, l = data.losses;
+                const winrate = t > 0 ? ((w / t) * 100).toFixed(1) : "0.0";
                 const pColor = p >= 0 ? "text-emerald-400" : "text-rose-400";
                 const pSign = p >= 0 ? "+" : "";
 
                 html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-2 font-bold text-white flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>${stratKey}
-                    </td>
+                    <td class="p-2 font-bold text-white flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>${stratKey}</td>
                     <td class="p-2 text-center font-mono"><span class="text-emerald-400 font-bold">${w}W</span> / <span class="text-rose-400 font-bold">${l}L</span></td>
                     <td class="p-2 text-center font-mono text-slate-300">${t} lệnh</td>
                     <td class="p-2 text-right font-mono font-bold ${pColor}">${pSign}$${p.toFixed(2)}</td>
-                    <td class="p-2 text-right">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] ${parseFloat(winrate) >= 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'} font-bold">
-                            ${winrate}%
-                        </span>
-                    </td>
+                    <td class="p-2 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] ${parseFloat(winrate) >= 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'} font-bold">${winrate}%</span></td>
                 </tr>`;
             });
-
             body.innerHTML = html;
         }
 
@@ -1155,73 +1169,7 @@
             let timeLabels = [];
             let symbolProfits = { "XAUUSD": 0, "BTCUSD": 0, "USOIL": 0, "EURUSD": 0, "GBPUSD": 0, "EURGBP": 0, "USDJPY": 0 };
 
-            // Phân loại động theo Lịch sử nếu Node strategy_stats chưa có
-            let dynamicStratStats = {
-                "SMC": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Mom. Pullback": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Breakout Retest": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Wyckoff": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "AMT/VWAP": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Turtle": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Fibonacci": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Web Manual": { profit: 0, trades: 0, wins: 0, losses: 0 },
-                "Other": { profit: 0, trades: 0, wins: 0, losses: 0 }
-            };
-
-            filtered.forEach(item => {
-                const p = item.profit || 0;
-                netProfit += p;
-                cumulativeProfit += p;
-
-                if(p > 0) wins++;
-                else if(p < 0) losses++;
-
-                const dt = new Date(item.close_time * 1000);
-                const itemDateStr = dt.toISOString().split('T')[0];
-                if(itemDateStr === todayStr) {
-                    dailyProfit += p;
-                }
-
-                if(symbolProfits[item.symbol] !== undefined) {
-                    symbolProfits[item.symbol] += p;
-                }
-
-                // Xử lý gom nhóm Chiến lược
-                let stratTag = item.strategy || "Web Manual";
-                if(item.comment) {
-                    if(item.comment.includes("SMC")) stratTag = "SMC";
-                    else if(item.comment.includes("Mom")) stratTag = "Mom. Pullback";
-                    else if(item.comment.includes("Breakout")) stratTag = "Breakout Retest";
-                    else if(item.comment.includes("Wyckoff")) stratTag = "Wyckoff";
-                    else if(item.comment.includes("AMT")) stratTag = "AMT/VWAP";
-                    else if(item.comment.includes("Turtle")) stratTag = "Turtle";
-                    else if(item.comment.includes("Fibonacci")) stratTag = "Fibonacci";
-                }
-
-                if(!dynamicStratStats[stratTag]) stratTag = "Other";
-                dynamicStratStats[stratTag].profit += p;
-                dynamicStratStats[stratTag].trades += 1;
-                if(p > 0) dynamicStratStats[stratTag].wins += 1;
-                else if(p < 0) dynamicStratStats[stratTag].losses += 1;
-
-                timeLabels.push(dt.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
-                equityCurve.push(cumulativeProfit);
-            });
-
-            // Nếu Firebase chưa truyền strategy_stats thì dùng thống kê tính được
-            if(Object.keys(g_strategyStats).length === 0) {
-                g_strategyStats = dynamicStratStats;
-            } else {
-                // Merge thêm các dữ liệu tính toán thắng thua
-                Object.keys(dynamicStratStats).forEach(st => {
-                    if(g_strategyStats[st]) {
-                        g_strategyStats[st].wins = dynamicStratStats[st].wins;
-                        g_strategyStats[st].losses = dynamicStratStats[st].losses;
-                    }
-                });
-            }
-
-            renderStrategyStatsTable();
+            // Bảng chiến lược được tính trực tiếp từ closed_history để luôn chính xác.\n            renderStrategyStatsTable();
 
             const totalTrades = wins + losses;
             const winrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
