@@ -9,6 +9,7 @@
     <title>Gatekeeper Pro - Multi-Strategy & Auto-Fibo Trading</title>
     
     <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss5"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase Realtime SDK (v10.12.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -56,7 +57,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.25</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.27</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa Lãi/Lỗ Ngày ±20% | Volume ≤ Max Lot</p>
                 </div>
@@ -316,7 +317,7 @@
             </div>
         </div>
 
-        <!-- LỆNH CHỜ -->
+        <!-- LỆNH CHỜ (Đã thêm cột Chiến Lược đồng bộ) -->
         <div class="glass-card p-3 rounded-xl border border-sky-500/30">
             <h2 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
@@ -336,11 +337,12 @@
                             <th class="p-1.5">Giá Đặt</th>
                             <th class="p-1.5">Cắt Lỗ (SL)</th>
                             <th class="p-1.5">Chốt Lời (TP)</th>
+                            <th class="p-1.5">Chiến Lược</th>
                             <th class="p-1.5 text-right">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody id="live-pending-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>
+                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -351,7 +353,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
                 <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược
+                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược (Từ 07/10/2026)
                 </h2>
             </div>
 
@@ -1065,7 +1067,7 @@
             countEl.innerText = `${keys.length} lệnh chờ`;
 
             if(keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>`;
                 return;
             }
 
@@ -1075,6 +1077,8 @@
                 const badge = o.type.includes("BUY") 
                     ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">${o.type}</span>`
                     : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">${o.type}</span>`;
+                
+                const stratName = o.strategy || "Web Manual";
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-bold text-white">${o.symbol}</td>
@@ -1083,6 +1087,7 @@
                     <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(o.symbol, o.price)}</td>
                     <td class="p-1.5 font-mono text-rose-400">${o.sl ? fmtPrice(o.symbol, o.sl) : '--'}</td>
                     <td class="p-1.5 font-mono text-emerald-400">${o.tp ? fmtPrice(o.symbol, o.tp) : '--'}</td>
+                    <td class="p-1.5"><span class="px-1.5 py-0.5 bg-sky-500/20 text-sky-300 rounded border border-sky-500/30 font-bold text-[9px]">${stratName}</span></td>
                     <td class="p-1.5 text-right">
                         <button onclick="sendAction('CANCEL_PENDING', ${o.ticket})" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded text-[9px]">Hủy</button>
                     </td>
@@ -1113,8 +1118,12 @@
             if(u.includes("AMT") || u.includes("VWAP")) return "AMT/VWAP";
             if(u.includes("TURTLE") || u.includes("DONCHIAN")) return "Turtle";
             if(u.includes("FIBO") || u.includes("FIBONACCI")) return "Fibonacci";
-            if(u.includes("MANUAL") || u === "") return "Web Manual";
-            return "Other";
+            if(u.includes("WEB MANUAL") || u.includes("MANUAL") || u === "" || 
+               (!u.includes("SMC") && !u.includes("MOM") && !u.includes("BREAKOUT") && !u.includes("WYCKOFF") && !u.includes("AMT") && !u.includes("TURTLE") && !u.includes("FIBO")))
+            {
+                return "Web Manual";
+            }
+            return "Web Manual";
         }
 
         function renderStrategyStatsTable() {
@@ -1124,9 +1133,13 @@
             const stats = {};
             strategies.forEach(s => { stats[s] = { profit: 0, trades: 0, wins: 0, losses: 0 }; });
 
-            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History)
+            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History) từ ngày 07/10/2026
+            const oct7Timestamp = new Date("2026-10-07T00:00:00").getTime() / 1000;
             Object.keys(g_history || {}).forEach(k => {
                 const item = g_history[k] || {};
+                const closeTime = Number(item.close_time) || 0;
+                if(closeTime < oct7Timestamp) return; // Bỏ qua trước 07/10/2026
+
                 const p = Number(item.profit) || 0;
                 let strat = normalizeStrat(item.strategy || item.comment);
                 if(!stats[strat]) strat = "Other";
@@ -1137,7 +1150,7 @@
                 else if(p < 0) stats[strat].losses += 1;
             });
 
-            // 2. Tổng hợp từ Vị thế đang mở (Open Positions) để hiển thị ngay lợi nhuận & số lệnh theo chiến lược
+            // 2. Tổng hợp từ Vị thế đang mở (Open Positions) để phản ánh tức thì
             Object.keys(g_positions || {}).forEach(k => {
                 const item = g_positions[k] || {};
                 const p = Number(item.profit) || 0;
@@ -1173,7 +1186,15 @@
             const keys = Object.keys(g_history);
             let filtered = [];
 
-            keys.forEach(k => { filtered.push(g_history[k]); });
+            const oct7Timestamp = new Date("2026-10-07T00:00:00").getTime() / 1000;
+
+            keys.forEach(k => {
+                const item = g_history[k];
+                const closeTime = Number(item.close_time) || 0;
+                if(closeTime >= oct7Timestamp) {
+                    filtered.push(item);
+                }
+            });
             filtered.sort((a, b) => (a.close_time || 0) - (b.close_time || 0));
 
             let wins = 0, losses = 0, netProfit = 0, dailyProfit = 0;
