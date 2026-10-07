@@ -353,7 +353,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
                 <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược (Từ 07/10/2026)
+                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược (Từ 01/10/2026)
                 </h2>
             </div>
 
@@ -1133,12 +1133,12 @@
             const stats = {};
             strategies.forEach(s => { stats[s] = { profit: 0, trades: 0, wins: 0, losses: 0 }; });
 
-            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History) từ ngày 07/10/2026
-            const oct7Timestamp = new Date("2026-10-07T00:00:00").getTime() / 1000;
+            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History) từ ngày 01/10/2026
+            const oct1Timestamp = new Date("2026-10-01T00:00:00").getTime() / 1000;
             Object.keys(g_history || {}).forEach(k => {
                 const item = g_history[k] || {};
                 const closeTime = Number(item.close_time) || 0;
-                if(closeTime < oct7Timestamp) return; // Bỏ qua trước 07/10/2026
+                if(closeTime < oct1Timestamp) return; // Bỏ qua trước 01/10/2026
 
                 const p = Number(item.profit) || 0;
                 let strat = normalizeStrat(item.strategy || item.comment);
@@ -1186,12 +1186,12 @@
             const keys = Object.keys(g_history);
             let filtered = [];
 
-            const oct7Timestamp = new Date("2026-10-07T00:00:00").getTime() / 1000;
+            const oct1Timestamp = new Date("2026-10-01T00:00:00").getTime() / 1000;
 
             keys.forEach(k => {
                 const item = g_history[k];
                 const closeTime = Number(item.close_time) || 0;
-                if(closeTime >= oct7Timestamp) {
+                if(closeTime >= oct1Timestamp) {
                     filtered.push(item);
                 }
             });
