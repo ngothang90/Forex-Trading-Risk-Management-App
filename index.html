@@ -57,7 +57,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.27</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.29</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa Lãi/Lỗ Ngày ±20% | Volume ≤ Max Lot</p>
                 </div>
@@ -428,6 +428,8 @@
         let g_pendingOrders = {};
         let g_history = {};
         let g_strategyStats = {};
+        let g_bridgeStatus = {};
+        let g_firebaseConnected = false;
         let g_activeStratTab = 'smc';
         let g_selectedStrategyTag = "Web Manual";
 
@@ -443,6 +445,31 @@
         db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderHistoryAndStats(); });
         db.ref('strategy_stats').on('value', snap => { g_strategyStats = snap.val() || {}; renderStrategyStatsTable(); });
         db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
+        db.ref('bridge_status').on('value', snap => { g_bridgeStatus = snap.val() || {}; renderConnectionState(); });
+        db.ref('.info/connected').on('value', snap => { g_firebaseConnected = snap.val() === true; renderConnectionState(); });
+
+        function renderConnectionState() {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            if(!dot || !text) return;
+
+            const heartbeatMs = Number(g_bridgeStatus.timestamp || 0) * 1000;
+            const bridgeOnline = heartbeatMs > 0 && (Date.now() - heartbeatMs) < 25000;
+
+            if(g_firebaseConnected && bridgeOnline) {
+                dot.className = "w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse";
+                text.className = "text-[10px] font-bold text-emerald-300";
+                text.innerText = "MT5 Online";
+            } else if(g_firebaseConnected) {
+                dot.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
+                text.className = "text-[10px] font-bold text-amber-300";
+                text.innerText = "Firebase OK / Chờ MT5";
+            } else {
+                dot.className = "w-1.5 h-1.5 bg-rose-400 rounded-full";
+                text.className = "text-[10px] font-bold text-rose-300";
+                text.innerText = "Mất kết nối Firebase";
+            }
+        }
 
         function getSymbolDecimals(symbol) {
             if (!symbol) return 2;
@@ -480,6 +507,7 @@
         }
         setInterval(checkVietnamTradingHours, 10000);
         checkVietnamTradingHours();
+        renderConnectionState();
 
         function renderAccount() {
             document.getElementById('acc-balance').innerText = `$${(g_account.balance || 0).toFixed(2)}`;
@@ -979,7 +1007,7 @@
             }
         }
 
-        function submitOrder() {
+        async function submitOrder() {
             const symbol = document.getElementById('order-symbol').value;
             const type = document.getElementById('order-type').value;
             const term = document.getElementById('order-term').value;
@@ -987,6 +1015,17 @@
             const price = parseFloat(document.getElementById('order-price').value) || 0;
             let sl = parseFloat(document.getElementById('order-sl').value) || 0;
             let tp = parseFloat(document.getElementById('order-tp').value) || 0;
+
+            if(volume <= 0) {
+                alert("Khối lượng phải lớn hơn 0.");
+                return;
+            }
+
+            const isPending = ["BUY_LIMIT", "SELL_LIMIT"].includes(type);
+            if(isPending && price <= 0) {
+                alert("Lệnh LIMIT bắt buộc phải có Giá đặt.");
+                return;
+            }
 
             if(sl === 0 || tp === 0) {
                 let entryP = price;
@@ -999,25 +1038,28 @@
             }
 
             const reqData = {
-                symbol: symbol,
+                action: type,
                 type: type,
+                symbol: symbol,
                 term: term,
                 volume: volume,
                 price: price,
                 sl: sl,
                 tp: tp,
+                comment: g_selectedStrategyTag,
                 strategy: g_selectedStrategyTag,
                 timestamp: Date.now()
             };
 
-            db.ref('pending_requests').push(reqData, (err) => {
-                if(!err) {
-                    alert(`Đã gửi lệnh ${type} ${symbol} (${volume} Lot - ${g_selectedStrategyTag}) lên MT5!`);
-                    clearOrderForm();
-                } else {
-                    alert("Lỗi gửi lệnh: " + err.message);
-                }
-            });
+            try {
+                const ref = await db.ref('pending_requests').push(reqData);
+                alert(`Đã xếp lệnh ${type} ${symbol} vào hàng đợi MT5. EA sẽ báo kết quả trên banner.`);
+                console.log('[ORDER QUEUED]', ref.key, reqData);
+                clearOrderForm();
+            } catch(err) {
+                console.error('[ORDER QUEUE ERROR]', err);
+                alert("Lỗi gửi yêu cầu lên Firebase: " + (err?.message || err));
+            }
         }
 
         function renderLivePositions() {
@@ -1096,17 +1138,30 @@
             body.innerHTML = html;
         }
 
-        function sendAction(actionType, ticket) {
-            let msg = `Xác nhận thực hiện ${actionType} cho Ticket #${ticket}?`;
+        async function sendAction(actionType, ticket = 0) {
+            let msg = `Xác nhận thực hiện ${actionType}`;
+            if(ticket > 0) msg += ` cho Ticket #${ticket}`;
+            msg += "?";
             if(actionType === 'CLOSE_ALL') msg = "Xác nhận ĐÓNG TẤT CẢ các vị thế đang mở?";
             if(actionType === 'PARTIAL_CLOSE_50') msg = `Xác nhận CẮT 50% khối lượng cho lệnh #${ticket}?`;
-            
+
             if(!confirm(msg)) return;
-            db.ref('actions').push({
+
+            const payload = {
                 action: actionType,
-                ticket: ticket,
+                command: actionType,
+                ticket: Number(ticket) || 0,
                 timestamp: Date.now()
-            });
+            };
+
+            try {
+                const ref = await db.ref('actions').push(payload);
+                alert(`Đã gửi yêu cầu ${actionType}${ticket ? ` #${ticket}` : ''} cho MT5.`);
+                console.log('[ACTION QUEUED]', ref.key, payload);
+            } catch(err) {
+                console.error('[ACTION ERROR]', err);
+                alert("Lỗi gửi thao tác lên Firebase: " + (err?.message || err));
+            }
         }
 
         function normalizeStrat(strat) {
@@ -1309,6 +1364,7 @@
         }
 
         window.addEventListener('resize', () => { drawFiboCanvas(); });
+        setInterval(renderConnectionState, 5000);
     </script>
 </body>
 </html>
