@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro 8.20</title>
+    <title>Gatekeeper Pro 8.30</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,6 +56,24 @@
             .mobile-full { width: 100% !important; }
             .sticky-actions { position: sticky; bottom: 8px; z-index: 20; }
         }
+    
+        /* READABILITY V8.30 */
+        body { font-size: 16px !important; line-height: 1.45; }
+        h1 { font-size: 1.15rem !important; }
+        h2 { font-size: 1rem !important; }
+        p, td, th, label, button, select, input { line-height: 1.4; }
+        td { font-size: 0.88rem !important; }
+        .text-[8px] { font-size: 0.70rem !important; }
+        .text-[9px] { font-size: 0.76rem !important; }
+        .text-[10px] { font-size: 0.82rem !important; }
+        .text-[11px] { font-size: 0.86rem !important; }
+        .text-xs { font-size: 0.90rem !important; }
+        .text-sm { font-size: 1rem !important; }
+        .text-base { font-size: 1.08rem !important; }
+        button, select, input { min-height: 40px; }
+        @media (max-width: 640px) {
+            body { font-size: 15px !important; }
+        }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-12">
@@ -75,9 +93,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.20</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.30</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | Khóa ngày -20% / +20% | 8 lỗ/ngày</p>
+                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | Khóa -20% / +20% | 8 lỗ/ngày | TK < $500: EA 1:50</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -117,6 +135,7 @@
             <div class="glass-card p-2.5 rounded-xl">
                 <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy Web</span>
                 <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:2000</p>
+                <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA hiệu dụng theo Balance</span>
             </div>
         </div>
 
@@ -413,37 +432,6 @@
             </div>
         </div>
 
-        <!-- ECONOMIC CALENDAR -->
-        <div class="glass-card p-3 rounded-xl border border-rose-500/25">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-2.5">
-                <div>
-                    <h2 class="text-xs font-bold text-rose-300 uppercase tracking-wider">Lịch Kinh Tế · News Guard · Học tin</h2>
-                    <p class="text-[9px] text-slate-500 mt-0.5">Nguồn tự động từ Economic Calendar của MT5; có Forecast / Actual / Previous và phân tích trước-sau. Đối chiếu Investing.com.</p>
-                </div>
-                <a href="https://vn.investing.com/economic-calendar" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black text-center">MỞ INVESTING CALENDAR</a>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                <div class="overflow-x-auto no-scrollbar table-scroll">
-                    <table class="w-full text-left text-[10px] whitespace-nowrap">
-                        <thead class="bg-slate-900 text-slate-400 uppercase">
-                            <tr><th class="p-1.5">Giờ VN</th><th class="p-1.5">Tiền</th><th class="p-1.5">Mức</th><th class="p-1.5">Tin</th><th class="p-1.5">Actual</th><th class="p-1.5">Forecast</th><th class="p-1.5">Prev.</th><th class="p-1.5">Pha</th></tr>
-                        </thead>
-                        <tbody id="economic-calendar-body"><tr><td colspan="8" class="p-3 text-center text-slate-500">Đang tải lịch tin...</td></tr></tbody>
-                    </table>
-                    <div id="economic-calendar-study" class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-                </div>
-                <div class="bg-slate-950/80 rounded-xl border border-slate-800 p-2 min-h-[320px]">
-                    <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">TradingView Economic Calendar</div>
-                    <div class="tradingview-widget-container" style="height:420px;width:100%">
-                        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                        {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,gb,eu,jp","importanceFilter":"0,1","width":"100%","height":420}
-                        </script>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- PERFORMANCE OVERVIEW -->
         <div class="glass-card p-3 rounded-xl border border-purple-500/25">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
@@ -485,7 +473,6 @@
         let g_pendingOrders = {};
         let g_history = {};
         let g_performance = {};
-        let g_economicCalendar = {};
         let g_bridgeStatus = {};
         let g_riskState = {};
         let g_firebaseConnected = false;
@@ -505,7 +492,6 @@
         db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
         db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderPerformanceChartsFromHistory(); });
         db.ref('performance').on('value', snap => { g_performance = snap.val() || {}; renderPerformance(); renderPerformanceChartsFromHistory(); });
-        db.ref('economic_calendar').on('value', snap => { g_economicCalendar = snap.val() || {}; renderEconomicCalendar(); });
         db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
         db.ref('bridge_status').on('value', snap => { g_bridgeStatus = snap.val() || {}; renderConnectionState(); });
         db.ref('risk_state').on('value', snap => { g_riskState = snap.val() || {}; renderRiskState(); });
@@ -608,7 +594,12 @@
             document.getElementById('acc-balance').innerText = `$${(g_account.balance || 0).toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(g_account.equity || 0).toFixed(2)}`;
             document.getElementById('acc-margin-free').innerText = `$${(g_account.free_margin || 0).toFixed(2)}`;
-            document.getElementById('acc-leverage').innerText = `1:${g_account.leverage || 2000}`;
+            const effectiveLev = Number(g_account.effective_leverage || g_account.leverage || 2000);
+            const brokerLev = Number(g_account.broker_leverage || effectiveLev);
+            const leverageMode = g_account.leverage_mode || '';
+            document.getElementById('acc-leverage').innerText = leverageMode === 'SMALL_ACCOUNT_1_50' ? `1:${effectiveLev} (EA)` : `1:${effectiveLev}`;
+            const levNote = document.getElementById('acc-leverage-note');
+            if(levNote) levNote.innerText = leverageMode === 'SMALL_ACCOUNT_1_50' ? `Broker 1:${brokerLev} · EA dùng 1:${effectiveLev}` : `Broker 1:${brokerLev}`;
             
             const capNote = document.getElementById('balance-cap-note');
             capNote.innerText = `Risk ${Number(g_riskState.risk_per_trade_pct || 10).toFixed(2)}%/lệnh | Khóa ngày -${Number(g_riskState.daily_loss_limit_pct || 20).toFixed(1)}% / +${Number(g_riskState.daily_profit_lock_pct || 20).toFixed(1)}%`;
@@ -1339,37 +1330,6 @@
             }
         }
 
-        function renderEconomicCalendar() {
-            const body = document.getElementById('economic-calendar-body');
-            const studyEl = document.getElementById('economic-calendar-study');
-            if(!body) return;
-            const raw = Array.isArray(g_economicCalendar?.events) ? g_economicCalendar.events : [];
-            const events = raw.slice().sort((a,b)=>Number(a.time_vn||0)-Number(b.time_vn||0)).slice(0,40);
-            if(!events.length) {
-                body.innerHTML = `<tr><td colspan="8" class="p-3 text-center text-slate-500">Chưa có dữ liệu. EA lấy Economic Calendar trực tiếp từ MT5.</td></tr>`;
-                if(studyEl) studyEl.innerHTML = `<div class="sm:col-span-2 text-[9px] text-slate-500">Để học trước/sau tin, cần MT5 đang online và có Calendar data.</div>`;
-                return;
-            }
-            body.innerHTML = events.map(e => {
-                const dt = new Date(Number(e.time_vn||0)*1000);
-                const impactClass = e.importance==='CAO' ? 'text-rose-300' : 'text-amber-300';
-                const phaseClass = e.phase==='TRƯỚC' ? 'text-cyan-300' : 'text-emerald-300';
-                return `<tr class="border-b border-slate-800/70 align-top"><td class="p-1.5 font-mono text-slate-300">${dt.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="p-1.5 font-black">${escapeHtml(e.currency||'')}</td><td class="p-1.5 ${impactClass} font-black">${escapeHtml(e.importance||'')}</td><td class="p-1.5 whitespace-normal min-w-[220px]"><div class="font-bold text-white">${escapeHtml(e.event||'')}</div></td><td class="p-1.5 font-mono text-emerald-300">${escapeHtml(e.actual||'—')}</td><td class="p-1.5 font-mono text-cyan-300">${escapeHtml(e.forecast||'—')}</td><td class="p-1.5 font-mono text-slate-400">${escapeHtml(e.previous||'—')}</td><td class="p-1.5 ${phaseClass} font-black">${escapeHtml(e.phase||'')}</td></tr>`;
-            }).join('');
-            if(studyEl) {
-                studyEl.innerHTML = events.filter(e=>e.importance==='CAO').slice(0,4).map(e => {
-                    const actual=String(e.actual||''); const forecast=String(e.forecast||'');
-                    const phase=String(e.phase||''); const study=String(e.study||'');
-                    const action = phase==='TRƯỚC' ? 'Trước tin: giảm giao dịch mới quanh giờ công bố, ghi lại Forecast/Previous và chờ phản ứng.' : (actual && forecast ? 'Sau tin: so sánh Actual với Forecast, sau đó quan sát phản ứng giá thay vì đoán trước.' : 'Sau tin: quan sát phản ứng giá và spread; không kết luận chỉ từ một con số.');
-                    return `<div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2 text-[9px]"><div class="flex items-center justify-between gap-2"><b class="text-white">${escapeHtml(e.currency||'')} · ${escapeHtml(e.event||'')}</b><span class="${phase==='TRƯỚC'?'text-cyan-300':'text-emerald-300'} font-black">${escapeHtml(phase)}</span></div><div class="text-slate-500 mt-1">${escapeHtml(action)}</div><div class="text-slate-400 mt-1">${escapeHtml(study)}</div><div class="font-mono mt-1 text-[8px] text-slate-600">A ${escapeHtml(actual||'—')} · F ${escapeHtml(forecast||'—')} · P ${escapeHtml(e.previous||'—')}</div></div>`;
-                }).join('') || `<div class="sm:col-span-2 text-[9px] text-slate-500">Chưa có tin mức CAO trong cửa sổ đang theo dõi.</div>`;
-            }
-        }
-
-        function escapeHtml(v) {
-            return String(v??'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-        }
-
         function renderPerformance() {
             const p = g_performance || {};
             const wins = Number(p.wins)||0, losses=Number(p.losses)||0;
@@ -1405,7 +1365,7 @@
             symbolChartInstance = new Chart(ctxSymbol,{type:'bar',data:{labels:Object.keys(symbolProfits),datasets:[{label:'P/L theo cặp ($)',data:vals,backgroundColor:bg,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#94a3b8',font:{size:9}},grid:{display:false}},y:{grid:{color:'rgba(51,65,85,.3)'},ticks:{color:'#94a3b8',font:{size:9}}}},plugins:{legend:{display:false}}}});
         }
 
-        renderRiskState(); renderBestSignals(); renderEconomicCalendar(); renderPerformance(); renderSymbolCaps();
+        renderRiskState(); renderBestSignals(); renderPerformance(); renderSymbolCaps();
         window.addEventListener('resize', () => { drawFiboCanvas(); renderSymbolCaps(); });
         setInterval(renderConnectionState, 5000);
     </script>
