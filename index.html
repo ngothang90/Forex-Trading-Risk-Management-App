@@ -1,1 +1,1280 @@
-fdfd
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
+    <title>Gatekeeper Pro 8.40</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase Realtime SDK (v10.12.0) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { -webkit-tap-highlight-color: transparent; background-color: #080c14; color: #f1f5f9; font-size: 14px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card { 
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); 
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: #ffffff;
+        }
+        .glass-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+        .badge-buy { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .badge-sell { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; }
+        .tab-btn.active { background-color: #3b82f6; color: #ffffff; font-weight: bold; }
+
+        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; }
+        button, select, input { min-height: 32px; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll table { min-width: 700px; }
+        .signal-card { background: linear-gradient(145deg, rgba(15,23,42,.98), rgba(17,24,39,.94)); border: 1px solid rgba(71,85,105,.45); }
+        .score-ring { min-width: 46px; min-height: 46px; border-radius: 14px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+        .risk-ok { color:#6ee7b7; background:rgba(16,185,129,.12); border-color:rgba(16,185,129,.35); }
+        .risk-lock { color:#fda4af; background:rgba(244,63,94,.12); border-color:rgba(244,63,94,.35); }
+        .muted { color:#94a3b8; }
+        @media (max-width: 640px) {
+            body { font-size: 13px; }
+            .glass-card { border-radius: 14px; }
+            .table-scroll table { min-width: 760px; }
+            .mobile-stack { flex-direction: column !important; align-items: stretch !important; }
+            .mobile-full { width: 100% !important; }
+            .sticky-actions { position: sticky; bottom: 8px; z-index: 20; }
+        }
+    
+        /* READABILITY V8.30 */
+        body { font-size: 16px !important; line-height: 1.45; }
+        h1 { font-size: 1.15rem !important; }
+        h2 { font-size: 1rem !important; }
+        p, td, th, label, button, select, input { line-height: 1.4; }
+        td { font-size: 0.88rem !important; }
+        .text-[8px] { font-size: 0.70rem !important; }
+        .text-[9px] { font-size: 0.76rem !important; }
+        .text-[10px] { font-size: 0.82rem !important; }
+        .text-[11px] { font-size: 0.86rem !important; }
+        .text-xs { font-size: 0.90rem !important; }
+        .text-sm { font-size: 1rem !important; }
+        .text-base { font-size: 1.08rem !important; }
+        button, select, input { min-height: 40px; }
+        @media (max-width: 640px) {
+            body { font-size: 15px !important; }
+        }
+
+        /* READABILITY V8.40 */
+        body { font-size: 17px !important; line-height: 1.5; }
+        h1 { font-size: 1.35rem !important; }
+        h2 { font-size: 1.08rem !important; }
+        td, th, label, button, select, input { line-height: 1.45 !important; }
+        td, th { font-size: 0.95rem !important; }
+        button, select, input { min-height: 42px; }
+        table span { font-size: 0.88rem !important; }
+        .tab-btn { font-size: 0.90rem !important; }
+        .signal-card { min-height: 180px; }
+        @media (max-width: 640px) {
+            body { font-size: 16px !important; }
+            td, th { font-size: 0.92rem !important; }
+            .tab-btn { font-size: 0.84rem !important; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen pb-12">
+    <div class="container mx-auto px-2 py-2 sm:px-4 sm:py-4 max-w-7xl space-y-3">
+        
+        <!-- Header & Banner Cảnh Báo -->
+        <div class="flex items-center justify-between glass-card p-2.5 sm:p-4 rounded-xl">
+            <div class="flex items-center space-x-2.5">
+                <div class="relative flex items-center justify-center">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-xl blur-sm opacity-60 animate-pulse"></div>
+                    <div class="relative bg-slate-900 border border-emerald-500/50 p-2 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.40</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-end space-y-1">
+                <div class="flex items-center space-x-1 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span id="connection-dot" class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <span id="connection-text" class="text-[10px] font-bold text-emerald-300">MT5 Online</span>
+                </div>
+                <span id="time-window-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded border">Kiểm tra giờ...</span>
+            </div>
+        </div>
+
+        <!-- Banner Trạng Thái MT5 -->
+        <div id="status-banner" class="hidden glass-card p-2.5 rounded-xl border-l-4 transition-all">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span id="status-icon" class="text-base"></span>
+                    <p id="status-message" class="text-xs font-bold"></p>
+                </div>
+                <span id="status-time" class="text-[9px] text-slate-400 font-medium"></span>
+            </div>
+        </div>
+
+        <!-- Thẻ Tài Khoản -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Balance</span>
+                <p id="acc-balance" class="text-base sm:text-xl font-black text-emerald-400">$0.00</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Equity</span>
+                <p id="acc-equity" class="text-base sm:text-xl font-black text-sky-400">$0.00</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Margin Free</span>
+                <p id="acc-margin-free" class="text-base sm:text-xl font-black text-amber-400">$0.00</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy EA</span>
+                <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:8 (EA)</p>
+                <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA hiệu dụng theo Balance</span>
+            </div>
+        </div>
+
+        <!-- EMOTION / DISCIPLINE -->
+        <div class="glass-card p-2.5 rounded-xl border border-rose-500/20">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] sm:text-[10px] text-slate-400">
+                <span class="font-bold text-slate-200 uppercase">Tâm lý:</span>
+                <span>Không gỡ lỗ</span><span>Không bình quân giá thua</span><span>Không dời SL xa hơn</span>
+            </div>
+        </div>
+
+        <!-- MULTI-STRATEGY SIGNALS -->
+        <div class="glass-card p-3 rounded-xl border border-indigo-500/30">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2.5">
+                <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Tín Hiệu Tốt Nhất · TOP
+                </h2>
+                <div class="flex flex-wrap items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+                    <button onclick="switchStratTab('top')" id="tab-top" class="tab-btn active text-[10px] px-2 py-0.5 rounded transition">TOP</button>
+                    <button onclick="switchStratTab('smc')" id="tab-smc" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">SMC</button>
+                    <button onclick="switchStratTab('momentum')" id="tab-momentum" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Momentum</button>
+                    <button onclick="switchStratTab('breakout')" id="tab-breakout" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Breakout</button>
+                    <button onclick="switchStratTab('wyckoff')" id="tab-wyckoff" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Wyckoff</button>
+                    <button onclick="switchStratTab('amt')" id="tab-amt" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">AMT/VWAP</button>
+                    <button onclick="switchStratTab('turtle')" id="tab-turtle" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Turtle</button>
+                </div>
+            </div>
+
+            <div id="best-signal-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-2.5"></div>
+
+            <div id="multi-table-wrap" class="overflow-x-auto no-scrollbar table-scroll">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                        <tr id="multi-strat-table-head"></tr>
+                    </thead>
+                    <tbody id="multi-strat-table-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang quét tín hiệu từ VPS...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- WATCHLIST FIBONACCI & CHART CANVAS -->
+        <div class="glass-card p-3 rounded-xl border border-amber-500/30">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2.5">
+                <h2 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                    Watchlist & Chart Fibonacci + Hợp Lưu EMA
+                </h2>
+                <div class="flex items-center space-x-1.5">
+                    <label class="text-[10px] text-slate-300 font-bold">Xem Biểu Đồ:</label>
+                    <select id="fibo-chart-symbol" onchange="drawFiboCanvas()" class="glass-input rounded px-2 py-0.5 text-xs font-bold text-amber-400 outline-none">
+                        <option value="XAUUSD">XAUUSD</option>
+                        <option value="BTCUSD">BTCUSD</option>
+                        <option value="USOIL">USOIL</option>
+                        <option value="EURUSD">EURUSD</option>
+                        <option value="GBPUSD">GBPUSD</option>
+                        <option value="EURGBP">EURGBP</option>
+                        <option value="USDJPY">USDJPY</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto no-scrollbar mb-3">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-1.5">Cặp Tiền</th>
+                            <th class="p-1.5">Xu Hướng</th>
+                            <th class="p-1.5">Golden Zone (50-61.8%)</th>
+                            <th class="p-1.5">Nến Đảo Chiều</th>
+                            <th class="p-1.5">Hợp Lưu EMA</th>
+                            <th class="p-1.5">Score</th>
+                            <th class="p-1.5">Trạng Thái</th>
+                            <th class="p-1.5 text-right">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fibo-watchlist-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang tải tín hiệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mb-2 rounded-lg border border-amber-500/20 bg-amber-950/20 p-2 text-[9px] sm:text-[10px] text-slate-300">
+                <b class="text-amber-300">Fibo Score 0–100</b> = điểm chất lượng, <b>không phải % thắng</b>: Golden Zone 30 + Sweep 20 + nến đảo chiều 20 + EMA 15 + Trend 15. <b>≥71 (tức >70)</b> mới đủ ngưỡng kỹ thuật; vẫn phải có Entry + SL + Lot + không News Guard + còn Max Volume.
+            </div>
+            <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-xl border border-slate-800 p-2 overflow-hidden shadow-inner flex items-center justify-center">
+                <canvas id="fiboCanvas" class="w-full h-full block"></canvas>
+            </div>
+        </div>
+
+        <!-- ĐẶT LỆNH KỶ LUẬT -->
+        <div class="glass-card p-3 rounded-xl border border-blue-500/30">
+            <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span class="flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Đặt Lệnh Kỷ Luật <span id="current-strat-badge" class="ml-2 text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/30 font-mono">(Thực thi: Web Manual)</span>
+                </span>
+                <span id="live-symbol-price" class="text-[11px] font-mono font-bold text-cyan-400">ASK: -- | BID: --</span>
+            </h2>
+            <div class="text-[9px] sm:text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-lg px-2 py-1.5 mb-2">Risk 10%/lệnh • SL bắt buộc • 8 lỗ/ngày → nghỉ • ngày -20%/+20% → khóa • Max Volume theo EA Leverage.</div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2.5">
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cặp tiền</label>
+                    <select id="order-symbol" onchange="onOrderSymbolOrTermChange()" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                        <option value="XAUUSD">XAUUSD</option>
+                        <option value="BTCUSD">BTCUSD</option>
+                        <option value="USOIL">USOIL</option>
+                        <option value="EURUSD">EURUSD</option>
+                        <option value="GBPUSD">GBPUSD</option>
+                        <option value="EURGBP">EURGBP</option>
+                        <option value="USDJPY">USDJPY</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Loại lệnh</label>
+                    <select id="order-type" onchange="onOrderSymbolOrTermChange()" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                        <option value="BUY">BUY (Thị Trường)</option>
+                        <option value="SELL">SELL (Thị Trường)</option>
+                        <option value="BUY_LIMIT">BUY_LIMIT</option>
+                        <option value="SELL_LIMIT">SELL_LIMIT</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Chiến lược TP</label>
+                    <select id="order-term" onchange="onOrderSymbolOrTermChange()" class="w-full glass-input rounded-lg p-1.5 text-xs font-bold text-cyan-400 outline-none">
+                        <option value="SHORT">Ngắn</option>
+                        <option value="MEDIUM">Trung</option>
+                        <option value="LONG">Dài</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Khối lượng (Lot)</label>
+                    <input type="number" id="order-volume" value="0.01" step="0.01" min="0.01" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Giá đặt (Limit)</label>
+                    <input type="number" id="order-price" placeholder="Giá HT" step="0.00001" disabled class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold opacity-50 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cắt Lỗ (SL)</label>
+                    <input type="number" id="order-sl" placeholder="Tự động SL" step="0.00001" oninput="markManualInput('sl')" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Chốt Lời (TP)</label>
+                    <input type="number" id="order-tp" placeholder="Tự động TP" step="0.00001" oninput="markManualInput('tp')" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <span id="sl-tp-rule-hint" class="text-[10px] text-slate-400 font-mono">Gợi ý SL/TP: Tự động tính theo loại tài sản</span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearOrderForm()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 transition">Xóa Form</button>
+                    <button onclick="submitOrder()" class="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-500/20 transition">Gửi Lệnh MT5</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VỊ THẾ Đang MỞ -->
+        <div class="glass-card p-3 rounded-xl border border-emerald-500/30">
+            <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span class="flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Vị Thế Đang Mở
+                </span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
+                </div>
+            </h2>
+
+            <div class="overflow-x-auto no-scrollbar">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-1.5">Cặp / Lot</th>
+                            <th class="p-1.5">Loại</th>
+                            <th class="p-1.5">Giá Mở</th>
+                            <th class="p-1.5">Chiến Lược</th>
+                            <th class="p-1.5">Lợi Nhuận ($)</th>
+                            <th class="p-1.5 text-right">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="live-positions-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- LỆNH CHỜ (Đã thêm cột Chiến Lược đồng bộ) -->
+        <div class="glass-card p-3 rounded-xl border border-sky-500/30">
+            <h2 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span class="flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lệnh Chờ (Tự hủy sau 19:00 VN)
+                </span>
+                <span id="live-pending-count" class="text-xs font-bold text-slate-400">0 lệnh chờ</span>
+            </h2>
+
+            <div class="overflow-x-auto no-scrollbar">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-1.5">Cặp Tiền</th>
+                            <th class="p-1.5">Loại Lệnh</th>
+                            <th class="p-1.5">Khối Lượng</th>
+                            <th class="p-1.5">Giá Đặt</th>
+                            <th class="p-1.5">Cắt Lỗ (SL)</th>
+                            <th class="p-1.5">Chốt Lời (TP)</th>
+                            <th class="p-1.5">Chiến Lược</th>
+                            <th class="p-1.5 text-right">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="live-pending-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PERFORMANCE OVERVIEW -->
+        <div class="glass-card p-3 rounded-xl border border-purple-500/25">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
+                <div>
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Thống kê (từ 01/10/2026)</h2>
+                </div>
+                <span id="performance-updated" class="text-[9px] text-slate-500"></span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">Thắng / Thua</span><p id="stat-wins" class="text-base font-black"><span class="text-emerald-400">0</span> / <span class="text-rose-400">0</span></p></div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">LN Ròng</span><p id="stat-net-profit" class="text-base font-black text-white">+$0.00</p></div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">P/L Hôm Nay</span><p id="stat-daily-profit" class="text-base font-black text-white">+$0.00</p></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">LN tích lũy từ 01/10/2026</span><div class="w-full h-44"><canvas id="equityChart"></canvas></div></div>
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">P/L theo cặp</span><div class="w-full h-44"><canvas id="symbolProfitChart"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC JAVASCRIPT & FIREBASE -->
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://forex-discipline-app-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let g_account = {};
+        let g_prices = {};
+        let g_fiboSignals = {};
+        let g_multiSignals = {};
+        let g_positions = {};
+        let g_pendingOrders = {};
+        let g_history = {};
+        let g_performance = {};
+        let g_bridgeStatus = {};
+        let g_riskState = {};
+        let g_firebaseConnected = false;
+        let g_activeStratTab = 'top';
+        let g_selectedStrategyTag = "Web Manual";
+        let g_selectedSignalScore = 0;
+        let g_selectedSignalEntry = 0;
+
+        let equityChartInstance = null;
+        let symbolChartInstance = null;
+
+        db.ref('account').on('value', snap => { g_account = snap.val() || {}; renderAccount(); });
+        db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
+        db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; renderFiboWatchlist(); drawFiboCanvas(); });
+        db.ref('multi_strategy_signals').on('value', snap => { g_multiSignals = snap.val() || {}; renderMultiStrategy(); });
+        db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); renderSymbolCaps(); });
+        db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
+        db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderPerformanceChartsFromHistory(); });
+        db.ref('performance').on('value', snap => { g_performance = snap.val() || {}; renderPerformance(); renderPerformanceChartsFromHistory(); });
+        db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
+        db.ref('bridge_status').on('value', snap => { g_bridgeStatus = snap.val() || {}; renderConnectionState(); });
+        db.ref('risk_state').on('value', snap => { g_riskState = snap.val() || {}; renderRiskState(); });
+        db.ref('.info/connected').on('value', snap => { g_firebaseConnected = snap.val() === true; renderConnectionState(); });
+
+        function renderConnectionState() {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            if(!dot || !text) return;
+
+            const heartbeatMs = Number(g_bridgeStatus.timestamp || 0) * 1000;
+            const bridgeOnline = heartbeatMs > 0 && (Date.now() - heartbeatMs) < 25000;
+
+            if(g_firebaseConnected && bridgeOnline) {
+                dot.className = "w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse";
+                text.className = "text-[10px] font-bold text-emerald-300";
+                text.innerText = "MT5 Online";
+            } else if(g_firebaseConnected) {
+                dot.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
+                text.className = "text-[10px] font-bold text-amber-300";
+                text.innerText = "Firebase OK / Chờ MT5";
+            } else {
+                dot.className = "w-1.5 h-1.5 bg-rose-400 rounded-full";
+                text.className = "text-[10px] font-bold text-rose-300";
+                text.innerText = "Mất kết nối Firebase";
+            }
+        }
+
+        function renderRiskState() {
+            const p = Number(g_riskState.daily_pnl) || 0;
+            const pct = Number(g_riskState.daily_pnl_pct) || 0;
+            const streak = Number(g_riskState.daily_loss_count) || 0;
+            const open = Number(g_riskState.open_positions) || 0;
+                        const locked = !!g_riskState.trading_locked;
+            const pnlEl = document.getElementById('risk-daily-pnl');
+            const pctEl = document.getElementById('risk-daily-pct');
+            if(pnlEl) { pnlEl.innerText = `${p >= 0 ? '+' : ''}$${p.toFixed(2)}`; pnlEl.className = `text-sm sm:text-lg font-black ${p >= 0 ? 'text-emerald-300' : 'text-rose-300'}`; }
+            if(pctEl) { pctEl.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`; pctEl.className = `text-sm sm:text-lg font-black ${pct >= 0 ? 'text-emerald-300' : 'text-rose-300'}`; }
+            const riskTrade = document.getElementById('risk-per-trade');
+            if(riskTrade) riskTrade.innerText = `${Number(g_riskState.risk_per_trade_pct || 10).toFixed(2)}%`;
+            const loss = document.getElementById('risk-loss-streak');
+            if(loss) loss.innerText = `${streak} / ${Number(g_riskState.max_daily_losses || 8)}`;
+            const pos = document.getElementById('risk-open-pos');
+            if(pos) pos.innerText = `${open} / ${maxOpen}`;
+            const card = document.getElementById('risk-state-card');
+            const state = document.getElementById('risk-state');
+            const reason = document.getElementById('risk-reason');
+            if(card && state && reason) {
+                card.classList.toggle('risk-lock', locked); card.classList.toggle('risk-ok', !locked);
+                state.innerText = locked ? 'KHÓA' : 'SẴN SÀNG';
+                state.className = `text-sm sm:text-lg font-black ${locked ? 'text-rose-300' : 'text-emerald-300'}`;
+                reason.innerText = g_riskState.lock_reason || '';
+            }
+        }
+
+        function getSymbolDecimals(symbol) {
+            const d = Number(g_prices?.[symbol]?.digits);
+            if(Number.isFinite(d) && d > 0 && d <= 8) return Math.floor(d);
+            if (!symbol) return 2;
+            if (symbol.includes("JPY")) return 3;
+            if (symbol === "BTCUSD" || symbol === "XAUUSD" || symbol === "USOIL") return 2;
+            return 5;
+        }
+
+        function fmtPrice(symbol, price) {
+            if (price === undefined || price === null || isNaN(price)) return '--';
+            return price.toFixed(getSymbolDecimals(symbol));
+        }
+
+        function getSignalVolume(symbol, data = null, lotKey = "best_lot") {
+            const rem = Number(g_prices?.[symbol]?.remaining_vol);
+            if(!Number.isFinite(rem) || rem <= 0) return 0;
+            const strategyLot = data ? Number(data[lotKey]) : 0;
+            const riskLot = data ? Number(data.risk_lot) : 0;
+            const wanted = strategyLot > 0 ? strategyLot : (riskLot > 0 ? riskLot : rem);
+            return Math.max(0, Math.min(wanted, rem));
+        }
+
+        function checkVietnamTradingHours() {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const vnTime = new Date(utc + (3600000 * 7));
+            const hour = vnTime.getHours();
+
+            const badge = document.getElementById('time-window-badge');
+            if(hour >= 7 && hour < 19) {
+                badge.innerText = `Trong Giờ GD (${String(hour).padStart(2,'0')}:${String(vnTime.getMinutes()).padStart(2,'0')} VN)`;
+                badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded border bg-emerald-500/20 border-emerald-500/40 text-emerald-300";
+            } else {
+                badge.innerText = `Ngoại Giờ GD (${String(hour).padStart(2,'0')}:${String(vnTime.getMinutes()).padStart(2,'0')} VN)`;
+                badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded border bg-rose-500/20 border-rose-500/40 text-rose-300";
+            }
+        }
+        setInterval(checkVietnamTradingHours, 10000);
+        checkVietnamTradingHours();
+        renderConnectionState();
+
+        function renderAccount() {
+            document.getElementById('acc-balance').innerText = `$${(g_account.balance || 0).toFixed(2)}`;
+            document.getElementById('acc-equity').innerText = `$${(g_account.equity || 0).toFixed(2)}`;
+            document.getElementById('acc-margin-free').innerText = `$${(g_account.free_margin || 0).toFixed(2)}`;
+            const effectiveLev = Number(g_account.effective_leverage || g_account.leverage || 8);
+            const mode = g_account.leverage_mode || '';
+            document.getElementById('acc-leverage').innerText = `1:${effectiveLev} (EA)`;
+            const levNote = document.getElementById('acc-leverage-note');
+            if(levNote) {
+                levNote.innerText = mode === 'EA_1_50' ? 'Balance < $500' : (mode === 'EA_1_25' ? 'Balance < $2,500' : 'Balance ≥ $2,500');
+            }
+        }
+
+        function renderStatusBanner(statusData) {
+            if(!statusData) return;
+            const banner = document.getElementById('status-banner');
+            const icon = document.getElementById('status-icon');
+            const msg = document.getElementById('status-message');
+            const time = document.getElementById('status-time');
+
+            banner.classList.remove('hidden', 'border-emerald-500', 'border-rose-500');
+            if(statusData.status === "SUCCESS") {
+                banner.classList.add('border-emerald-500', 'bg-emerald-950/40');
+                icon.innerText = "✅";
+                msg.innerText = statusData.message;
+                msg.className = "text-xs font-bold text-emerald-300";
+            } else {
+                banner.classList.add('border-rose-500', 'bg-rose-950/40');
+                icon.innerText = "⚠";
+                msg.innerText = statusData.message;
+                msg.className = "text-xs font-bold text-rose-300";
+            }
+            if(statusData.timestamp) {
+                const dt = new Date(statusData.timestamp * 1000);
+                time.innerText = dt.toLocaleTimeString('vi-VN');
+            }
+        }
+
+        function renderMaxLots() {
+            // Max Volume chạy ngầm trong EA/Firebase; không hiển thị thành block riêng.
+        }
+
+        function renderSymbolCaps() {
+            // Giới hạn Max Volume vẫn được EA áp dụng; UI tổng hợp không cần hiển thị.
+        }
+
+        function switchStratTab(tab) {
+            g_activeStratTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-slate-400'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            renderMultiStrategy();
+        }
+
+        function renderMultiStrategy() {
+            const head = document.getElementById('multi-strat-table-head');
+            const body = document.getElementById('multi-strat-table-body');
+            const tableWrap = document.getElementById('multi-table-wrap');
+            const topGrid = document.getElementById('best-signal-grid');
+            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`tab-${g_activeStratTab}`);
+            if(activeBtn) { activeBtn.classList.add('active'); activeBtn.classList.remove('text-slate-400'); }
+
+            if(g_activeStratTab === 'top') {
+                if(tableWrap) tableWrap.classList.add('hidden');
+                if(topGrid) topGrid.classList.remove('hidden');
+                renderBestSignals();
+                return;
+            }
+            if(tableWrap) tableWrap.classList.remove('hidden');
+            if(topGrid) topGrid.classList.add('hidden');
+
+            if(g_activeStratTab === 'smc') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu SMC</th><th class="p-1.5">Entry Gợi Ý</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.smc_signal || "NONE";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Tín Hiệu</span>`;
+                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (SMC)</span>`;
+                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (SMC)</span>`;
+
+                    let autoVol = getSignalVolume(s, data, 'smc_lot');
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.smc_entry)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
+                        <td class="p-1.5 text-right">
+                            ${(Number(data.smc_score)||0) >= 71 && data.smc_entry > 0 && data.smc_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'momentum') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái Trend</th><th class="p-1.5">Score</th><th class="p-1.5">Entry Hồi Về</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.mom_signal || "WAITING";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Pullback</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY MOMENTUM</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL MOMENTUM</span>`;
+
+                    let score = data.mom_score || 0;
+                    let autoVol = getSignalVolume(s, data, 'mom_lot');
+
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/100</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
+                        <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
+                        <td class="p-1.5 text-right">
+                            ${score >= 71 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'breakout') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu Break/Retest</th><th class="p-1.5">Score</th><th class="p-1.5">Vùng Retest</th><th class="p-1.5">SL / TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.bo_signal || "WAITING";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Chờ Retest</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY RETEST</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL RETEST</span>`;
+
+                    let score = data.bo_score || 0;
+                    let autoVol = getSignalVolume(s, data, 'bo_lot');
+
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/100</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
+                        <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
+                        <td class="p-1.5 text-right">
+                            ${score >= 71 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'wyckoff') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Mô Hình Wyckoff</th><th class="p-1.5">Entry</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.wyckoff_signal || "NONE";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Tích Lũy / Phân Phối</span>`;
+                    if(sig.includes("SPRING")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">SPRING (Wyckoff)</span>`;
+                    else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (Wyckoff)</span>`;
+
+                    let autoVol = getSignalVolume(s, data, 'wyckoff_lot');
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.wyckoff_entry)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
+                        <td class="p-1.5 text-right">
+                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'amt') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Trạng Thái AMT</th><th class="p-1.5">VWAP M30</th><th class="p-1.5">Value Area (VAH-VAL)</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.amt_signal || "BALANCED";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-300 font-bold">BALANCED</span>`;
+                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Break VAH</span>`;
+                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Break VAL</span>`;
+
+                    let autoVol = getSignalVolume(s, data, 'amt_lot');
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 font-mono text-amber-400 font-bold">${fmtPrice(s, data.vwap)}</td>
+                        <td class="p-1.5 font-mono text-slate-300">${fmtPrice(s, data.vah)} - ${fmtPrice(s, data.val)}</td>
+                        <td class="p-1.5 text-right">
+                            ${(Number(data.amt_score||0) >= 71 && Number(data.amt_entry||0) > 0) ? `<button onclick="fillOrderForm('${s}', '${String(data.amt_signal||'').includes('SELL') || String(data.amt_signal||'').includes('BEARISH') ? 'SELL_LIMIT' : 'BUY_LIMIT'}', ${Number(data.amt_entry||data.vwap||0)}, ${Number(data.amt_sl||0)}, ${Number(data.amt_tp||0)}, ${autoVol}, 'AMT/VWAP')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">VWAP · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            } else if(g_activeStratTab === 'turtle') {
+                head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Turtle Donchian</th><th class="p-1.5">Đỉnh 20N</th><th class="p-1.5">Đáy 20N</th><th class="p-1.5 text-right">Thao Tác</th>`;
+                let html = "";
+                syms.forEach(s => {
+                    const data = g_multiSignals[s] || {};
+                    const sig = data.turtle_signal || "NONE";
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Kênh 20N</span>`;
+                    if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (Turtle)</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (Turtle)</span>`;
+
+                    let autoVol = Math.max(0.01, getSignalVolume(s, data, 'turtle_lot'));
+                    html += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-1.5 font-bold text-white">${s}</td>
+                        <td class="p-1.5">${badge}</td>
+                        <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.donchian_high)}</td>
+                        <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.donchian_low)}</td>
+                        <td class="p-1.5 text-right">
+                            ${Number(data.turtle_score||0) >= 71 && Number(data.turtle_entry||0) > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, ${Number(data.turtle_sl||0)}, ${Number(data.turtle_tp||0)}, ${autoVol}, 'Turtle')" class="px-2 py-1 bg-purple-600 hover:bg-purple-500 text-white font-black rounded text-[9px]">Turtle · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
+                        </td>
+                    </tr>`;
+                });
+                body.innerHTML = html;
+            }
+        }
+
+        function renderBestSignals() {
+            const grid = document.getElementById('best-signal-grid');
+            if(!grid) return;
+            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+            const candidates = syms.map(sym => ({sym, ...(g_multiSignals[sym] || {})}))
+                .filter(d => Number(d.best_score||0) >= 71 && d.best_signal !== 'WAIT' && Number(d.best_entry||0) > 0 && Number(d.best_sl||0) > 0 && Number(d.best_lot||0) > 0 && Number(g_prices?.[d.sym]?.remaining_vol||0) > 0 && d.spread_ok !== false && !d.news_blocked && !g_riskState.trading_locked)
+                .sort((a,b) => Number(b.best_score||0)-Number(a.best_score||0)).slice(0,5);
+            if(!candidates.length) {
+                grid.innerHTML = `<div class="sm:col-span-2 lg:col-span-3 text-center py-6 text-slate-500 text-xs">TOP chưa xuất hiện: cần Score ≥71 + Entry/SL/Lot hợp lệ + không News Guard + còn Max Volume.</div>`;
+                return;
+            }
+            grid.innerHTML = candidates.map(d => {
+                const sym=d.sym, score=Number(d.best_score)||0;
+                const dir=d.best_direction || (String(d.best_signal).includes('SELL')?'SELL':'BUY');
+                const lot=getSignalVolume(sym,d,'best_lot');
+                const rem=Number(g_prices?.[sym]?.remaining_vol)||0;
+                const locked=!!g_riskState.trading_locked || rem<=0;
+                const badge=dir==='SELL'?'badge-sell':'badge-buy';
+                return `<div class="signal-card rounded-xl p-3 shadow-lg">
+                    <div class="flex items-center justify-between gap-2"><div><div class="text-sm font-black text-white">${sym}</div><div class="text-[10px] text-slate-400">${d.best_strategy||'Best'}</div></div><div class="score-ring bg-slate-800 text-emerald-300 border border-slate-700">${score}</div></div>
+                    <div class="flex items-center justify-between mt-2"><span class="px-2 py-1 rounded text-[10px] font-black ${badge}">${dir}</span><span class="text-[10px] text-slate-400">RSI ${Number(d.rsi||0).toFixed(0)} · ADX ${Number(d.adx||0).toFixed(0)}</span></div>
+                    <div class="text-[9px] text-slate-500 mt-1">Raw ${Number(d.raw_best_score||score)} · News -${Number(d.news_penalty||0)} · Spread ${d.spread_ok===false?'cao':'OK'} · Còn ${rem.toFixed(2)}L</div>
+                    <div class="grid grid-cols-3 gap-1 mt-2 text-[10px] font-mono"><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">Entry</span><span class="text-cyan-300">${fmtPrice(sym,d.best_entry)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">SL</span><span class="text-rose-300">${fmtPrice(sym,d.best_sl)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">TP</span><span class="text-emerald-300">${fmtPrice(sym,d.best_tp)}</span></div></div>
+                    <button ${locked?'disabled':''} onclick="fillOrderForm('${sym}','${dir==='BUY'?'BUY_LIMIT':'SELL_LIMIT'}',${Number(d.best_entry||0)},${Number(d.best_sl||0)},${Number(d.best_tp||0)},${Number(lot||0)},'${d.best_strategy||'Best Signal'}')" class="w-full mt-2 px-3 py-2 ${locked?'bg-slate-700 cursor-not-allowed':'bg-indigo-600 hover:bg-indigo-500'} text-white text-[10px] font-black rounded-lg">${locked?'KHÓA / HẾT LOT':'VÀO LỆNH'} · ${lot.toFixed(2)}L</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderFiboWatchlist() {
+            const body = document.getElementById('fibo-watchlist-body');
+            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+
+            let html = "";
+            syms.forEach(s => {
+                const data = g_fiboSignals[s];
+                if(!data) {
+                    html += `<tr class="hover:bg-slate-800/40"><td class="p-1.5 font-bold text-white">${s}</td><td colspan="7" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu...</td></tr>`;
+                    return;
+                }
+
+                const trendBadge = data.trend === "UP" 
+                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">TĂNG</span>`
+                    : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">GIẢM</span>`;
+
+                const inGZBadge = data.in_golden_zone 
+                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold animate-pulse">Golden Zone</span>`
+                    : `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Ngoài Vùng</span>`;
+
+                let candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Chưa Có</span>`;
+                const revPattern = data.reversal_candle || "NONE";
+                if(revPattern.includes("BULL")) {
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">${revPattern}</span>`;
+                } else if(revPattern.includes("BEAR")) {
+                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">${revPattern}</span>`;
+                }
+
+                let emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Không</span>`;
+                if(data.ema_confluence && data.ema_confluence !== "NONE") {
+                    emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">${data.ema_confluence}</span>`;
+                }
+
+                const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
+                const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
+                const gzRange = (gzMin > 0 && gzMax > 0) ? `${fmtPrice(s, gzMin)} - ${fmtPrice(s, gzMax)}` : "Đang tính...";
+                const fiboScore = Number(data.fibo_score) || 0;
+                const scoreBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] ${fiboScore >= 71 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'} font-black">${fiboScore}</span>`;
+                let autoVol = getSignalVolume(s, data, 'fibo_lot');
+                const action = data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT";
+                const canEnter = fiboScore >= 71 && Number(data.fibo_entry || data.fib_618 || 0) > 0 && Number(data.fibo_sl || data.fib_786 || 0) > 0 && autoVol > 0 && !data.news_blocked;
+                const entry = Number(data.fibo_entry || data.fib_618 || 0);
+                const sl = Number(data.fibo_sl || data.fib_786 || 0);
+                const tp = Number(data.fibo_tp || data.fib_0 || 0);
+
+                html += `<tr class="hover:bg-slate-800/40">
+                    <td class="p-1.5 font-bold text-white">${s}</td>
+                    <td class="p-1.5">${trendBadge}</td>
+                    <td class="p-1.5 font-mono text-amber-400 font-bold">${gzRange}</td>
+                    <td class="p-1.5">${candleBadge}</td>
+                    <td class="p-1.5">${emaBadge}</td>
+                    <td class="p-1.5">${scoreBadge}</td>
+                    <td class="p-1.5"><div>${inGZBadge}</div><div class="text-[8px] text-slate-500 max-w-[220px] whitespace-normal">${data.wait_reason || data.news_note || ""}</div></td>
+                    <td class="p-1.5 text-right">
+                        ${canEnter ? `<button onclick="fillOrderForm('${s}', '${action}', ${entry}, ${sl}, ${tp}, ${autoVol}, 'Fibonacci')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">Fibo · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
+                    </td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        function drawFiboCanvas() {
+            const sym = document.getElementById('fibo-chart-symbol').value;
+            const canvas = document.getElementById('fiboCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth || 600;
+            canvas.height = parent.clientHeight || 320;
+
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const data = g_fiboSignals[sym];
+            if(!data || data.swing_high === undefined || data.swing_low === undefined || data.swing_high === data.swing_low) {
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "bold 13px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`Đang tải biểu đồ Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            ctx.textAlign = "left";
+            ctx.strokeStyle = "rgba(51, 65, 85, 0.25)";
+            ctx.lineWidth = 1;
+            for(let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+
+            const levels = [
+                { name: "0.0%", val: data.fib_0, color: "#94a3b8" },
+                { name: "38.2%", val: data.fib_382, color: "#818cf8" },
+                { name: "50.0%", val: data.fib_50, color: "#f59e0b" },
+                { name: "61.8% (Golden)", val: data.fib_618, color: "#f59e0b" },
+                { name: "78.6%", val: data.fib_786, color: "#f43f5e" },
+                { name: "100.0%", val: data.fib_100, color: "#94a3b8" }
+            ];
+
+            const maxVal = Math.max(data.swing_high, data.swing_low) * 1.002;
+            const minVal = Math.min(data.swing_high, data.swing_low) * 0.998;
+            const range = maxVal - minVal;
+
+            function getY(val) {
+                if(range <= 0) return canvas.height / 2;
+                return canvas.height - ((val - minVal) / range) * (canvas.height - 40) - 20;
+            }
+
+            const y50 = getY(data.fib_50);
+            const y618 = getY(data.fib_618);
+            const gzTop = Math.min(y50, y618);
+            const gzHeight = Math.abs(y618 - y50);
+
+            const grad = ctx.createLinearGradient(0, gzTop, 0, gzTop + gzHeight);
+            grad.addColorStop(0, "rgba(245, 158, 11, 0.35)");
+            grad.addColorStop(1, "rgba(245, 158, 11, 0.1)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, gzTop, canvas.width, gzHeight);
+
+            ctx.fillStyle = "#f59e0b";
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillText("GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 90, gzTop + gzHeight / 2 + 4);
+
+            levels.forEach(lvl => {
+                if(lvl.val !== undefined && lvl.val !== null && !isNaN(lvl.val)) {
+                    const y = getY(lvl.val);
+                    ctx.strokeStyle = lvl.color;
+                    ctx.lineWidth = (lvl.name.includes("50") || lvl.name.includes("61.8")) ? 2 : 1;
+                    ctx.setLineDash((lvl.name.includes("50") || lvl.name.includes("61.8")) ? [] : [4, 4]);
+
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+
+                    ctx.fillStyle = lvl.color;
+                    ctx.font = "bold 10px sans-serif";
+                    ctx.fillText(`${lvl.name}: ${fmtPrice(sym, lvl.val)}`, 10, y - 4);
+                }
+            });
+
+            if(g_prices[sym]) {
+                const currP = (data.trend === "UP") ? g_prices[sym].bid : g_prices[sym].ask;
+                const curY = getY(currP);
+
+                ctx.strokeStyle = "#10b981";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.moveTo(0, curY);
+                ctx.lineTo(canvas.width, curY);
+                ctx.stroke();
+
+                ctx.fillStyle = "#10b981";
+                ctx.fillRect(canvas.width - 130, curY - 10, 125, 20);
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 10px sans-serif";
+                ctx.fillText(`Price: ${fmtPrice(sym, currP)}`, canvas.width - 125, curY + 4);
+            }
+        }
+
+        function calculateDefaultSLTP(symbol, orderType, term, entryPrice) {
+            let slDist = 0, tpDist = 0;
+            const isBuy = orderType.includes("BUY");
+
+            if(symbol === "XAUUSD") {
+                slDist = 10.0;
+                tpDist = (term === "SHORT") ? 30.0 : (term === "MEDIUM" ? 45.0 : 60.0);
+            } else if(symbol === "BTCUSD") {
+                slDist = 300.0;
+                tpDist = (term === "SHORT") ? 600.0 : (term === "MEDIUM" ? 900.0 : 1200.0);
+            } else if(symbol === "USOIL" || symbol.includes("OIL")) {
+                slDist = 0.6;
+                tpDist = (term === "SHORT") ? 1.5 : (term === "MEDIUM" ? 2.25 : 3.0);
+            } else {
+                const isJPY = symbol.includes("JPY");
+                const pipUnit = isJPY ? 0.01 : 0.0001;
+                slDist = 30 * pipUnit;
+                const baseTpPips = 60;
+                const multiplier = (term === "SHORT") ? 1.0 : (term === "MEDIUM" ? 1.5 : 2.0);
+                tpDist = (baseTpPips * multiplier) * pipUnit;
+            }
+
+            let sl = 0, tp = 0;
+            if(entryPrice > 0) {
+                sl = isBuy ? (entryPrice - slDist) : (entryPrice + slDist);
+                tp = isBuy ? (entryPrice + tpDist) : (entryPrice - tpDist);
+            }
+
+            return { sl: sl, tp: tp, slDist: slDist, tpDist: tpDist };
+        }
+
+        function markManualInput(field) {
+            const inputEl = document.getElementById(`order-${field}`);
+            inputEl.dataset.manual = "true";
+        }
+
+        function onOrderSymbolOrTermChange() {
+            togglePriceInput();
+            document.getElementById('order-sl').dataset.manual = "false";
+            document.getElementById('order-tp').dataset.manual = "false";
+            autoFillManualSLTP();
+            updateLivePriceDisplay();
+        }
+
+        function autoFillManualSLTP() {
+            const symbol = document.getElementById('order-symbol').value;
+            const type = document.getElementById('order-type').value;
+            const term = document.getElementById('order-term').value;
+            
+            let entryP = 0;
+            if(type.includes("LIMIT")) {
+                entryP = parseFloat(document.getElementById('order-price').value) || 0;
+            } else if(g_prices[symbol]) {
+                entryP = type === "BUY" ? g_prices[symbol].ask : g_prices[symbol].bid;
+            }
+
+            const computed = calculateDefaultSLTP(symbol, type, term, entryP);
+            const hintEl = document.getElementById('sl-tp-rule-hint');
+            hintEl.innerText = `Quy tắc [${term}]: SL ~${computed.slDist.toFixed(getSymbolDecimals(symbol))} | TP ~${computed.tpDist.toFixed(getSymbolDecimals(symbol))}`;
+
+            const slInput = document.getElementById('order-sl');
+            const tpInput = document.getElementById('order-tp');
+
+            if(slInput.dataset.manual !== "true" && computed.sl > 0) {
+                slInput.value = computed.sl.toFixed(getSymbolDecimals(symbol));
+            }
+            if(tpInput.dataset.manual !== "true" && computed.tp > 0) {
+                tpInput.value = computed.tp.toFixed(getSymbolDecimals(symbol));
+            }
+        }
+
+        function getStrategyScore(symbol, strategyName) {
+            const d = g_multiSignals?.[symbol] || {};
+            const s = String(strategyName || "").toUpperCase();
+            if(s.includes("FIBO")) return Number(g_fiboSignals?.[symbol]?.fibo_score || d.fibo_score || 0);
+            if(s.includes("SMC")) return Number(d.smc_score || 0);
+            if(s.includes("MOM")) return Number(d.mom_score || 0);
+            if(s.includes("BREAKOUT") || s.includes("RETEST")) return Number(d.bo_score || 0);
+            if(s.includes("WYCKOFF")) return Number(d.wyckoff_score || 0);
+            if(s.includes("AMT") || s.includes("VWAP")) return Number(d.amt_score || 0);
+            if(s.includes("TURTLE")) return Number(d.turtle_score || 0);
+            if(s.includes("BEST")) return Number(d.best_score || 0);
+            return 0;
+        }
+
+        function fillOrderForm(symbol, type, price = 0, sl = 0, tp = 0, volume = 0, strategyName = "Web Manual") {
+            document.getElementById('order-symbol').value = symbol;
+            document.getElementById('order-type').value = type;
+            togglePriceInput();
+
+            g_selectedStrategyTag = strategyName;
+            g_selectedSignalScore = getStrategyScore(symbol, strategyName);
+            g_selectedSignalEntry = Number(price || 0);
+            const badgeEl = document.getElementById('current-strat-badge');
+            if(badgeEl) badgeEl.innerText = `(Thực thi: ${strategyName})`;
+
+            const slInput = document.getElementById('order-sl');
+            const tpInput = document.getElementById('order-tp');
+            let decimals = getSymbolDecimals(symbol);
+
+            if(price > 0) document.getElementById('order-price').value = price.toFixed(decimals);
+            
+            if(sl > 0) {
+                slInput.value = sl.toFixed(decimals); slInput.dataset.manual = "true";
+            } else { slInput.value = ""; slInput.dataset.manual = "false"; }
+
+            if(tp > 0) {
+                tpInput.value = tp.toFixed(decimals); tpInput.dataset.manual = "true";
+            } else { tpInput.value = ""; tpInput.dataset.manual = "false"; }
+
+            if(volume > 0) {
+                document.getElementById('order-volume').value = volume;
+            } else {
+                document.getElementById('order-volume').value = getSignalVolume(symbol);
+            }
+
+            autoFillManualSLTP();
+            updateLivePriceDisplay();
+            window.scrollTo({ top: document.getElementById('order-symbol').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        function togglePriceInput() {
+            const type = document.getElementById('order-type').value;
+            const priceInput = document.getElementById('order-price');
+            if(type.includes("LIMIT")) {
+                priceInput.disabled = false;
+                priceInput.classList.remove('opacity-50');
+            } else {
+                priceInput.disabled = true;
+                priceInput.classList.add('opacity-50');
+                priceInput.value = "";
+            }
+        }
+
+        function clearOrderForm() {
+            document.getElementById('order-price').value = "";
+            const slInput = document.getElementById('order-sl');
+            const tpInput = document.getElementById('order-tp');
+            slInput.value = ""; slInput.dataset.manual = "false";
+            tpInput.value = ""; tpInput.dataset.manual = "false";
+            document.getElementById('order-volume').value = "0.01";
+            g_selectedStrategyTag = "Web Manual";
+            g_selectedSignalScore = 0;
+            g_selectedSignalEntry = 0;
+            const badgeEl = document.getElementById('current-strat-badge');
+            if(badgeEl) badgeEl.innerText = `(Thực thi: Web Manual)`;
+            autoFillManualSLTP();
+        }
+
+        function updateLivePriceDisplay() {
+            const sym = document.getElementById('order-symbol').value;
+            const el = document.getElementById('live-symbol-price');
+            if(g_prices[sym]) {
+                el.innerText = `ASK: ${fmtPrice(sym, g_prices[sym].ask)} | BID: ${fmtPrice(sym, g_prices[sym].bid)}`;
+            } else {
+                el.innerText = "ASK: -- | BID: --";
+            }
+        }
+
+        async function submitOrder() {
+            const symbol = document.getElementById('order-symbol').value;
+            const type = document.getElementById('order-type').value;
+            const term = document.getElementById('order-term').value;
+            const volume = parseFloat(document.getElementById('order-volume').value) || 0;
+            const price = parseFloat(document.getElementById('order-price').value) || 0;
+            let sl = parseFloat(document.getElementById('order-sl').value) || 0;
+            let tp = parseFloat(document.getElementById('order-tp').value) || 0;
+            const pending = type.includes('LIMIT');
+            if(volume <= 0) return alert('Lot phải > 0 và còn Max Volume.');
+            if(pending && price <= 0) return alert('Lệnh LIMIT cần Giá đặt.');
+            if(g_riskState.trading_locked) return alert(`Đang khóa: ${g_riskState.lock_reason || 'Kỷ luật rủi ro'}`);
+
+            const px = g_prices?.[symbol] || {};
+            const entry = price > 0 ? price : (type === 'BUY' ? Number(px.ask)||0 : Number(px.bid)||0);
+            if(sl <= 0 || tp <= 0) {
+                const a = calculateDefaultSLTP(symbol,type,term,entry);
+                if(sl<=0) sl=a.sl; if(tp<=0) tp=a.tp;
+            }
+            if(!sl || sl<=0) return alert('Thiếu SL. Không được gửi lệnh không có SL.');
+
+            const maxVol=Number(px.max_vol)||0, openVol=Number(px.open_vol)||0, pendingVol=Number(px.pending_vol)||0, remain=Number(px.remaining_vol)||0;
+            if(maxVol<=0) return alert('Chưa có Max Volume từ MT5.');
+            if(openVol + pendingVol + volume > maxVol + 1e-9) return alert(`Vượt Max Volume ${symbol}. Mở ${openVol.toFixed(2)}L + Chờ ${pendingVol.toFixed(2)}L + Lệnh mới ${volume.toFixed(2)}L > Max ${maxVol.toFixed(2)}L.`);
+            if(volume > remain + 1e-9) return alert(`Lot còn lại ${remain.toFixed(2)}L cho ${symbol}.`);
+
+            const best=g_multiSignals?.[symbol]||{};
+            const fibo=g_fiboSignals?.[symbol]||{};
+            const strat=g_selectedStrategyTag||'Web Manual';
+            const sourceIsSignal = strat !== 'Web Manual';
+            const newsBlocked = !!best.news_blocked || !!fibo.news_blocked;
+            if(sourceIsSignal) {
+                if(g_selectedSignalScore < 71) return alert(`Tín hiệu ${strat} chưa đạt Score ≥71 (hiện ${g_selectedSignalScore}).`);
+                if(newsBlocked) return alert('News Guard đang chặn mã này.');
+                if(g_selectedSignalEntry>0 && Math.abs(g_selectedSignalEntry-entry) > Math.max(Math.abs(g_selectedSignalEntry)*0.003, Number(px.point||0)*20 || 0)) return alert('Entry đã lệch đáng kể so với tín hiệu. Quét lại trước khi vào.');
+            }
+            if(newsBlocked) return alert('News Guard đang chặn mã này.');
+
+            const reqData={action:type,type,symbol,term,volume,price,sl,tp,comment:strat,strategy:strat,timestamp:Date.now(),required_score:sourceIsSignal?71:0};
+            try {
+                const ref=await db.ref('pending_requests').push(reqData);
+                alert(`Đã xếp ${type} ${symbol} · ${volume.toFixed(2)}L. EA sẽ kiểm tra Risk/Max Volume/News lần cuối.`);
+                console.log('[ORDER QUEUED]',ref.key,reqData);
+                clearOrderForm();
+            } catch(err) { console.error('[ORDER QUEUE ERROR]',err); alert('Lỗi Firebase: '+(err?.message||err)); }
+        }
+
+        function renderLivePositions() {
+            const body = document.getElementById('live-positions-body');
+            const keys = Object.keys(g_positions);
+            if(keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[12px]">Không có vị thế đang mở.</td></tr>`;
+                return;
+            }
+
+            let html = "";
+            keys.forEach(k => {
+                const p = g_positions[k] || {};
+                const symbol = p.symbol || '--';
+                const volume = Number(p.volume) || 0;
+                const cap = Number(g_prices?.[symbol]?.max_vol) || 0;
+                const badge = p.type === "BUY"
+                    ? `<span class="px-2 py-1 rounded text-[11px] badge-buy font-bold">BUY</span>`
+                    : `<span class="px-2 py-1 rounded text-[11px] badge-sell font-bold">SELL</span>`;
+                const pColor = Number(p.profit) >= 0 ? "text-emerald-400" : "text-rose-400";
+                const pSign = Number(p.profit) >= 0 ? "+" : "";
+                const stratName = p.strategy || "Web Manual";
+                const lotLabel = `${symbol} ${volume.toFixed(2)}L/${cap > 0 ? cap.toFixed(2) : '--'}L`;
+
+                html += `<tr class="hover:bg-slate-800/40">
+                    <td class="p-2 font-black text-white">${lotLabel}</td>
+                    <td class="p-2">${badge}</td>
+                    <td class="p-2 font-mono text-cyan-300">${fmtPrice(symbol, p.price)}</td>
+                    <td class="p-2"><span class="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30 font-bold text-[11px]">${stratName}</span></td>
+                    <td class="p-2 font-mono font-bold ${pColor}">${pSign}$${Number(p.profit || 0).toFixed(2)}</td>
+                    <td class="p-2 text-right space-x-1">
+                        <button onclick="sendAction('PARTIAL_CLOSE_50', ${p.ticket})" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[11px]">Cắt 50%</button>
+                        <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[11px]">Đóng</button>
+                    </td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        function renderLivePendingOrders() {
+            const body = document.getElementById('live-pending-body');
+            const countEl = document.getElementById('live-pending-count');
+            const keys = Object.keys(g_pendingOrders);
+
+            countEl.innerText = `${keys.length} lệnh chờ`;
+
+            if(keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có lệnh chờ nào.</td></tr>`;
+                return;
+            }
+
+            let html = "";
+            keys.forEach(k => {
+                const o = g_pendingOrders[k];
+                const badge = o.type.includes("BUY") 
+                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">${o.type}</span>`
+                    : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">${o.type}</span>`;
+                
+                const stratName = o.strategy || "Web Manual";
+
+                html += `<tr class="hover:bg-slate-800/40">
+                    <td class="p-1.5 font-bold text-white">${o.symbol}</td>
+                    <td class="p-1.5">${badge}</td>
+                    <td class="p-1.5 font-mono text-slate-200">${o.volume.toFixed(2)} Lot</td>
+                    <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(o.symbol, o.price)}</td>
+                    <td class="p-1.5 font-mono text-rose-400">${o.sl ? fmtPrice(o.symbol, o.sl) : '--'}</td>
+                    <td class="p-1.5 font-mono text-emerald-400">${o.tp ? fmtPrice(o.symbol, o.tp) : '--'}</td>
+                    <td class="p-1.5"><span class="px-1.5 py-0.5 bg-sky-500/20 text-sky-300 rounded border border-sky-500/30 font-bold text-[9px]">${stratName}</span></td>
+                    <td class="p-1.5 text-right">
+                        <button onclick="sendAction('CANCEL_PENDING', ${o.ticket})" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded text-[9px]">Hủy</button>
+                    </td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        async function sendAction(actionType, ticket = 0) {
+            let msg = `Xác nhận thực hiện ${actionType}`;
+            if(ticket > 0) msg += ` cho Ticket #${ticket}`;
+            msg += "?";
+            if(actionType === 'CLOSE_ALL') msg = "Xác nhận ĐÓNG TẤT CẢ các vị thế đang mở?";
+            if(actionType === 'PARTIAL_CLOSE_50') msg = `Xác nhận CẮT 50% khối lượng cho lệnh #${ticket}?`;
+
+            if(!confirm(msg)) return;
+
+            const payload = {
+                action: actionType,
+                command: actionType,
+                ticket: Number(ticket) || 0,
+                timestamp: Date.now()
+            };
+
+            try {
+                const ref = await db.ref('actions').push(payload);
+                alert(`Đã gửi yêu cầu ${actionType}${ticket ? ` #${ticket}` : ''} cho MT5.`);
+                console.log('[ACTION QUEUED]', ref.key, payload);
+            } catch(err) {
+                console.error('[ACTION ERROR]', err);
+                alert("Lỗi gửi thao tác lên Firebase: " + (err?.message || err));
+            }
+        }
+
+        function renderPerformance() {
+            const p = g_performance || {};
+            const wins = Number(p.wins)||0, losses=Number(p.losses)||0;
+            const net=Number(p.net_profit)||0, today=Number(p.today_pnl)||0;
+            const winsEl = document.getElementById('stat-wins');
+            if(winsEl) winsEl.innerHTML = `<span class="text-emerald-400">${wins}</span> / <span class="text-rose-400">${losses}</span>`;
+            const netEl=document.getElementById('stat-net-profit');
+            if(netEl) { netEl.innerText=`${net>=0?'+':''}$${net.toFixed(2)}`; netEl.className=`text-base font-black ${net>=0?'text-emerald-300':'text-rose-300'}`; }
+            const dayEl=document.getElementById('stat-daily-profit');
+            if(dayEl) { dayEl.innerText=`${today>=0?'+':''}$${today.toFixed(2)}`; dayEl.className=`text-base font-black ${today>=0?'text-emerald-300':'text-rose-300'}`; }
+            const upd=document.getElementById('performance-updated');
+            if(upd) upd.innerText = p.updated_unix ? `Cập nhật ${new Date(Number(p.updated_unix)*1000).toLocaleTimeString('vi-VN')}` : '';
+        }
+
+        function renderPerformanceChartsFromHistory() {
+            const startTs = Number(g_performance?.stats_start_unix)||0;
+            const filtered = Object.values(g_history||{}).filter(x => Number(x.close_time||0) >= startTs).sort((a,b)=>Number(a.close_time||0)-Number(b.close_time||0));
+            let cum=0; const labels=[], curve=[]; const syms={"XAUUSD":0,"BTCUSD":0,"USOIL":0,"EURUSD":0,"GBPUSD":0,"EURGBP":0,"USDJPY":0};
+            filtered.forEach(x=>{ const p=Number(x.profit)||0; cum+=p; curve.push(cum); labels.push(new Date(Number(x.close_time||0)*1000).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})); if(syms[x.symbol]!==undefined) syms[x.symbol]+=p; });
+            renderPerformanceCharts(labels.length?labels:['01/10'], curve.length?curve:[0], syms);
+        }
+
+        function renderPerformanceCharts(labels, equityData, symbolProfits) {
+            const ctxEquity = document.getElementById('equityChart').getContext('2d');
+            if(equityChartInstance) equityChartInstance.destroy();
+            equityChartInstance = new Chart(ctxEquity,{type:'line',data:{labels,datasets:[{label:'LN tích lũy ($)',data:equityData,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,.1)',fill:true,tension:.3,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{display:false},y:{grid:{color:'rgba(51,65,85,.3)'},ticks:{color:'#94a3b8',font:{size:9}}}},plugins:{legend:{display:false}}}});
+            const ctxSymbol = document.getElementById('symbolProfitChart').getContext('2d');
+            if(symbolChartInstance) symbolChartInstance.destroy();
+            const vals=Object.values(symbolProfits); const bg=vals.map(v=>v>=0?'rgba(16,185,129,.7)':'rgba(244,63,94,.7)');
+            symbolChartInstance = new Chart(ctxSymbol,{type:'bar',data:{labels:Object.keys(symbolProfits),datasets:[{label:'P/L theo cặp ($)',data:vals,backgroundColor:bg,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#94a3b8',font:{size:9}},grid:{display:false}},y:{grid:{color:'rgba(51,65,85,.3)'},ticks:{color:'#94a3b8',font:{size:9}}}},plugins:{legend:{display:false}}}});
+        }
+
+        renderRiskState(); renderBestSignals(); renderPerformance(); renderSymbolCaps();
+        window.addEventListener('resize', () => { drawFiboCanvas(); renderSymbolCaps(); });
+        setInterval(renderConnectionState, 5000);
+    </script>
+</body>
+</html>
