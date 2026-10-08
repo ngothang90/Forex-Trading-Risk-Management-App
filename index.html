@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro 8.30</title>
+    <title>Gatekeeper Pro 8.40</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -74,6 +74,22 @@
         @media (max-width: 640px) {
             body { font-size: 15px !important; }
         }
+
+        /* READABILITY V8.40 */
+        body { font-size: 17px !important; line-height: 1.5; }
+        h1 { font-size: 1.35rem !important; }
+        h2 { font-size: 1.08rem !important; }
+        td, th, label, button, select, input { line-height: 1.45 !important; }
+        td, th { font-size: 0.95rem !important; }
+        button, select, input { min-height: 42px; }
+        table span { font-size: 0.88rem !important; }
+        .tab-btn { font-size: 0.90rem !important; }
+        .signal-card { min-height: 180px; }
+        @media (max-width: 640px) {
+            body { font-size: 16px !important; }
+            td, th { font-size: 0.92rem !important; }
+            .tab-btn { font-size: 0.84rem !important; }
+        }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-12">
@@ -93,9 +109,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.30</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.40</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | Khóa -20% / +20% | 8 lỗ/ngày | TK < $500: EA 1:50</p>
+                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -133,38 +149,9 @@
                 <p id="acc-margin-free" class="text-base sm:text-xl font-black text-amber-400">$0.00</p>
             </div>
             <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy Web</span>
-                <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:2000</p>
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy EA</span>
+                <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:8 (EA)</p>
                 <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA hiệu dụng theo Balance</span>
-            </div>
-        </div>
-
-        <!-- RISK / DISCIPLINE -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">Risk/lệnh</span>
-                <p id="risk-per-trade" class="text-sm sm:text-lg font-black text-cyan-300">10%</p>
-            </div>
-            <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">P/L ngày</span>
-                <p id="risk-daily-pnl" class="text-sm sm:text-lg font-black text-white">$0.00</p>
-            </div>
-            <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">P/L %</span>
-                <p id="risk-daily-pct" class="text-sm sm:text-lg font-black text-white">0.0%</p>
-            </div>
-            <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">Lỗ trong ngày</span>
-                <p id="risk-loss-streak" class="text-sm sm:text-lg font-black text-amber-300">0</p>
-            </div>
-            <div class="glass-card p-2.5 rounded-xl">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">Vị thế</span>
-                <p id="risk-open-pos" class="text-sm sm:text-lg font-black text-sky-300">0 / 4</p>
-            </div>
-            <div id="risk-state-card" class="glass-card p-2.5 rounded-xl border">
-                <span class="text-[10px] text-slate-400 block font-bold uppercase">Kỷ luật</span>
-                <p id="risk-state" class="text-sm sm:text-lg font-black text-emerald-300">SẴN SÀNG</p>
-                <span id="risk-reason" class="text-[9px] muted block mt-0.5 truncate"></span>
             </div>
         </div>
 
@@ -172,7 +159,7 @@
         <div class="glass-card p-2.5 rounded-xl border border-rose-500/20">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] sm:text-[10px] text-slate-400">
                 <span class="font-bold text-slate-200 uppercase">Tâm lý:</span>
-                <span>Không gỡ lỗ</span><span>Không bình quân giá thua</span><span>Không dời SL xa hơn</span><span>8 lỗ trong ngày → nghỉ</span>
+                <span>Không gỡ lỗ</span><span>Không bình quân giá thua</span><span>Không dời SL xa hơn</span>
             </div>
         </div>
 
@@ -257,48 +244,6 @@
             </div>
         </div>
 
-        <!-- MAX VOLUME -->
-        <div class="glass-card p-3 rounded-xl">
-            <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span class="flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Max Volume Giới Hạn Cặp Tiền
-                </span>
-                <span id="balance-cap-note" class="text-[9px] text-amber-400 font-normal"></span>
-            </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5">
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">XAUUSD</span>
-                    <p id="max-lot-XAUUSD" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">BTCUSD</span>
-                    <p id="max-lot-BTCUSD" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">USOIL</span>
-                    <p id="max-lot-USOIL" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">EURUSD</span>
-                    <p id="max-lot-EURUSD" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">GBPUSD</span>
-                    <p id="max-lot-GBPUSD" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">EURGBP</span>
-                    <p id="max-lot-EURGBP" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-                <div class="bg-slate-900/90 p-1.5 rounded-lg border border-slate-700/70 text-center">
-                    <span class="text-[9px] text-slate-400 font-bold uppercase block">USDJPY</span>
-                    <p id="max-lot-USDJPY" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
-                </div>
-            </div>
-            <div id="symbol-cap-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-2"></div>
-        </div>
-
         <!-- ĐẶT LỆNH KỶ LUẬT -->
         <div class="glass-card p-3 rounded-xl border border-blue-500/30">
             <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
@@ -308,7 +253,7 @@
                 </span>
                 <span id="live-symbol-price" class="text-[11px] font-mono font-bold text-cyan-400">ASK: -- | BID: --</span>
             </h2>
-            <div class="text-[9px] sm:text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-lg px-2 py-1.5 mb-2">Risk 10%/lệnh • SL bắt buộc • tối đa 4 vị thế Web • 1 mã/1 vị thế Web • 8 lỗ/ngày → nghỉ • ngày -20%/+20% → khóa.</div>
+            <div class="text-[9px] sm:text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-lg px-2 py-1.5 mb-2">Risk 10%/lệnh • SL bắt buộc • 8 lỗ/ngày → nghỉ • ngày -20%/+20% → khóa • Max Volume theo EA Leverage.</div>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2.5">
                 <div>
@@ -372,12 +317,10 @@
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Mở · Tổng lot/cặp ≤ Max Volume
+                    Vị Thế Đang Mở
                 </span>
                 <div class="flex items-center space-x-2">
                     <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
-                    <span id="live-pos-count" class="text-xs font-bold text-slate-400">0 vị thế</span>
-                    <span id="live-pos-cap-note" class="text-[9px] text-amber-300"></span>
                 </div>
             </h2>
 
@@ -385,9 +328,8 @@
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
                         <tr>
-                            <th class="p-1.5">Cặp Tiền</th>
+                            <th class="p-1.5">Cặp / Lot</th>
                             <th class="p-1.5">Loại</th>
-                            <th class="p-1.5">Khối Lượng</th>
                             <th class="p-1.5">Giá Mở</th>
                             <th class="p-1.5">Chiến Lược</th>
                             <th class="p-1.5">Lợi Nhuận ($)</th>
@@ -395,7 +337,7 @@
                         </tr>
                     </thead>
                     <tbody id="live-positions-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>
+                        <tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -436,19 +378,14 @@
         <div class="glass-card p-3 rounded-xl border border-purple-500/25">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
                 <div>
-                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hiệu Suất Tổng Quan & Thống Kê (từ 01/10/2026)</h2>
-                    <p id="performance-source" class="text-[9px] text-slate-500 mt-0.5">Đang chờ MT5 tổng hợp...</p>
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Thống kê (từ 01/10/2026)</h2>
                 </div>
                 <span id="performance-updated" class="text-[9px] text-slate-500"></span>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-3">
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Thắng / Thua</span><p id="stat-wins" class="text-sm font-black"><span class="text-emerald-400">0</span> / <span class="text-rose-400">0</span></p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Winrate</span><p id="stat-winrate" class="text-sm font-black text-amber-400">0.0%</p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">LN Ròng</span><p id="stat-net-profit" class="text-sm font-black text-white">+$0.00</p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">P/L Hôm Nay</span><p id="stat-daily-profit" class="text-sm font-black text-white">+$0.00</p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Profit Factor</span><p id="stat-profit-factor" class="text-sm font-black text-cyan-300">0.00</p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Max DD</span><p id="stat-max-dd" class="text-sm font-black text-rose-300">$0.00</p></div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Số lệnh đóng</span><p id="stat-trades" class="text-sm font-black text-slate-200">0</p></div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">Thắng / Thua</span><p id="stat-wins" class="text-base font-black"><span class="text-emerald-400">0</span> / <span class="text-rose-400">0</span></p></div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">LN Ròng</span><p id="stat-net-profit" class="text-base font-black text-white">+$0.00</p></div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50"><span class="text-[10px] text-slate-400 block font-bold uppercase">P/L Hôm Nay</span><p id="stat-daily-profit" class="text-base font-black text-white">+$0.00</p></div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">LN tích lũy từ 01/10/2026</span><div class="w-full h-44"><canvas id="equityChart"></canvas></div></div>
@@ -525,8 +462,7 @@
             const pct = Number(g_riskState.daily_pnl_pct) || 0;
             const streak = Number(g_riskState.daily_loss_count) || 0;
             const open = Number(g_riskState.open_positions) || 0;
-            const maxOpen = Number(g_riskState.max_open_positions) || 4;
-            const locked = !!g_riskState.trading_locked;
+                        const locked = !!g_riskState.trading_locked;
             const pnlEl = document.getElementById('risk-daily-pnl');
             const pctEl = document.getElementById('risk-daily-pct');
             if(pnlEl) { pnlEl.innerText = `${p >= 0 ? '+' : ''}$${p.toFixed(2)}`; pnlEl.className = `text-sm sm:text-lg font-black ${p >= 0 ? 'text-emerald-300' : 'text-rose-300'}`; }
@@ -594,15 +530,13 @@
             document.getElementById('acc-balance').innerText = `$${(g_account.balance || 0).toFixed(2)}`;
             document.getElementById('acc-equity').innerText = `$${(g_account.equity || 0).toFixed(2)}`;
             document.getElementById('acc-margin-free').innerText = `$${(g_account.free_margin || 0).toFixed(2)}`;
-            const effectiveLev = Number(g_account.effective_leverage || g_account.leverage || 2000);
-            const brokerLev = Number(g_account.broker_leverage || effectiveLev);
-            const leverageMode = g_account.leverage_mode || '';
-            document.getElementById('acc-leverage').innerText = leverageMode === 'SMALL_ACCOUNT_1_50' ? `1:${effectiveLev} (EA)` : `1:${effectiveLev}`;
+            const effectiveLev = Number(g_account.effective_leverage || g_account.leverage || 8);
+            const mode = g_account.leverage_mode || '';
+            document.getElementById('acc-leverage').innerText = `1:${effectiveLev} (EA)`;
             const levNote = document.getElementById('acc-leverage-note');
-            if(levNote) levNote.innerText = leverageMode === 'SMALL_ACCOUNT_1_50' ? `Broker 1:${brokerLev} · EA dùng 1:${effectiveLev}` : `Broker 1:${brokerLev}`;
-            
-            const capNote = document.getElementById('balance-cap-note');
-            capNote.innerText = `Risk ${Number(g_riskState.risk_per_trade_pct || 10).toFixed(2)}%/lệnh | Khóa ngày -${Number(g_riskState.daily_loss_limit_pct || 20).toFixed(1)}% / +${Number(g_riskState.daily_profit_lock_pct || 20).toFixed(1)}%`;
+            if(levNote) {
+                levNote.innerText = mode === 'EA_1_50' ? 'Balance < $500' : (mode === 'EA_1_25' ? 'Balance < $2,500' : 'Balance ≥ $2,500');
+            }
         }
 
         function renderStatusBanner(statusData) {
@@ -631,31 +565,11 @@
         }
 
         function renderMaxLots() {
-            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
-            syms.forEach(s => {
-                const d = g_prices[s] || {};
-                const el = document.getElementById(`max-lot-${s}`);
-                if(el) el.innerText = `${Number(d.max_vol || 0).toFixed(2)}L`;
-            });
-            renderSymbolCaps();
+            // Max Volume chạy ngầm trong EA/Firebase; không hiển thị thành block riêng.
         }
 
         function renderSymbolCaps() {
-            const grid = document.getElementById('symbol-cap-grid');
-            if(!grid) return;
-            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
-            grid.innerHTML = syms.map(s => {
-                const d = g_prices[s] || {};
-                const max = Number(d.max_vol)||0, open = Number(d.open_vol)||0, pending = Number(d.pending_vol)||0, rem = Math.max(0, Number(d.remaining_vol)||0);
-                const used = open + pending;
-                const pct = max > 0 ? Math.min(100, used/max*100) : 0;
-                const cls = rem > 0 ? 'text-emerald-300' : 'text-rose-300';
-                return `<div class="bg-slate-900/80 rounded-lg border border-slate-700/60 p-2">
-                    <div class="flex items-center justify-between"><span class="text-[10px] font-black text-white">${s}</span><span class="text-[9px] ${cls} font-black">Còn ${rem.toFixed(2)}L</span></div>
-                    <div class="mt-1 h-1.5 rounded bg-slate-800 overflow-hidden"><div class="h-full bg-sky-500" style="width:${pct}%"></div></div>
-                    <div class="grid grid-cols-3 gap-1 mt-1 text-[8px] font-mono text-slate-400"><span>Mở ${open.toFixed(2)}</span><span>Chờ ${pending.toFixed(2)}</span><span>Max ${max.toFixed(2)}</span></div>
-                </div>`;
-            }).join('');
+            // Giới hạn Max Volume vẫn được EA áp dụng; UI tổng hợp không cần hiển thị.
         }
 
         function switchStratTab(tab) {
@@ -1228,39 +1142,35 @@
 
         function renderLivePositions() {
             const body = document.getElementById('live-positions-body');
-            const countEl = document.getElementById('live-pos-count');
             const keys = Object.keys(g_positions);
-
-            countEl.innerText = `${keys.length} vị thế`;
-            const capNote=document.getElementById("live-pos-cap-note");
-            if(capNote){ const by={}; Object.values(g_positions||{}).forEach(p=>{ by[p.symbol]=(by[p.symbol]||0)+Number(p.volume||0); }); capNote.innerText=Object.entries(by).map(([s,v])=>`${s} ${v.toFixed(2)}L/${Number(g_prices?.[s]?.max_vol||0).toFixed(2)}L`).join(" · "); }
-
             if(keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-slate-500 font-medium text-[12px]">Không có vị thế đang mở.</td></tr>`;
                 return;
             }
 
             let html = "";
             keys.forEach(k => {
-                const p = g_positions[k];
-                const badge = p.type === "BUY" 
-                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY</span>`
-                    : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL</span>`;
-
-                const pColor = p.profit >= 0 ? "text-emerald-400" : "text-rose-400";
-                const pSign = p.profit >= 0 ? "+" : "";
+                const p = g_positions[k] || {};
+                const symbol = p.symbol || '--';
+                const volume = Number(p.volume) || 0;
+                const cap = Number(g_prices?.[symbol]?.max_vol) || 0;
+                const badge = p.type === "BUY"
+                    ? `<span class="px-2 py-1 rounded text-[11px] badge-buy font-bold">BUY</span>`
+                    : `<span class="px-2 py-1 rounded text-[11px] badge-sell font-bold">SELL</span>`;
+                const pColor = Number(p.profit) >= 0 ? "text-emerald-400" : "text-rose-400";
+                const pSign = Number(p.profit) >= 0 ? "+" : "";
                 const stratName = p.strategy || "Web Manual";
+                const lotLabel = `${symbol} ${volume.toFixed(2)}L/${cap > 0 ? cap.toFixed(2) : '--'}L`;
 
                 html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-bold text-white">${p.symbol}</td>
-                    <td class="p-1.5">${badge}</td>
-                    <td class="p-1.5 font-mono text-slate-200">${p.volume.toFixed(2)} Lot</td>
-                    <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(p.symbol, p.price)}</td>
-                    <td class="p-1.5"><span class="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30 font-bold text-[9px]">${stratName}</span></td>
-                    <td class="p-1.5 font-mono font-bold ${pColor}">${pSign}$${p.profit.toFixed(2)}</td>
-                    <td class="p-1.5 text-right space-x-1">
-                        <button onclick="sendAction('PARTIAL_CLOSE_50', ${p.ticket})" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Cắt 50%</button>
-                        <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px]">Đóng</button>
+                    <td class="p-2 font-black text-white">${lotLabel}</td>
+                    <td class="p-2">${badge}</td>
+                    <td class="p-2 font-mono text-cyan-300">${fmtPrice(symbol, p.price)}</td>
+                    <td class="p-2"><span class="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30 font-bold text-[11px]">${stratName}</span></td>
+                    <td class="p-2 font-mono font-bold ${pColor}">${pSign}$${Number(p.profit || 0).toFixed(2)}</td>
+                    <td class="p-2 text-right space-x-1">
+                        <button onclick="sendAction('PARTIAL_CLOSE_50', ${p.ticket})" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[11px]">Cắt 50%</button>
+                        <button onclick="sendAction('CLOSE_POSITION', ${p.ticket})" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[11px]">Đóng</button>
                     </td>
                 </tr>`;
             });
@@ -1334,17 +1244,14 @@
             const p = g_performance || {};
             const wins = Number(p.wins)||0, losses=Number(p.losses)||0;
             const net=Number(p.net_profit)||0, today=Number(p.today_pnl)||0;
-            const pf=Number(p.profit_factor)||0, dd=Number(p.max_drawdown)||0;
-            document.getElementById('stat-wins').innerHTML = `<span class="text-emerald-400">${wins}</span> / <span class="text-rose-400">${losses}</span>`;
-            document.getElementById('stat-winrate').innerText = `${(Number(p.win_rate)||0).toFixed(1)}%`;
-            const netEl=document.getElementById('stat-net-profit'); netEl.innerText=`${net>=0?'+':''}$${net.toFixed(2)}`; netEl.className=`text-sm font-black ${net>=0?'text-emerald-300':'text-rose-300'}`;
-            const dayEl=document.getElementById('stat-daily-profit'); dayEl.innerText=`${today>=0?'+':''}$${today.toFixed(2)}`; dayEl.className=`text-sm font-black ${today>=0?'text-emerald-300':'text-rose-300'}`;
-            document.getElementById('stat-profit-factor').innerText = pf>=999 ? '∞' : pf.toFixed(2);
-            document.getElementById('stat-max-dd').innerText = `-$${dd.toFixed(2)} (${(Number(p.max_drawdown_pct)||0).toFixed(2)}%)`;
-            document.getElementById('stat-trades').innerText = `${Number(p.trades)||0}`;
-            const start = p.stats_start || '01/10/2026';
-            document.getElementById('performance-source').innerText = `Nguồn MT5 · ${start} → hiện tại · Hôm nay ${today>=0?'+':''}$${today.toFixed(2)} (${(Number(p.today_pnl_pct)||0).toFixed(2)}%) · 8 lỗ/ngày`;
-            document.getElementById('performance-updated').innerText = p.updated_unix ? `Cập nhật ${new Date(Number(p.updated_unix)*1000).toLocaleTimeString('vi-VN')}` : '';
+            const winsEl = document.getElementById('stat-wins');
+            if(winsEl) winsEl.innerHTML = `<span class="text-emerald-400">${wins}</span> / <span class="text-rose-400">${losses}</span>`;
+            const netEl=document.getElementById('stat-net-profit');
+            if(netEl) { netEl.innerText=`${net>=0?'+':''}$${net.toFixed(2)}`; netEl.className=`text-base font-black ${net>=0?'text-emerald-300':'text-rose-300'}`; }
+            const dayEl=document.getElementById('stat-daily-profit');
+            if(dayEl) { dayEl.innerText=`${today>=0?'+':''}$${today.toFixed(2)}`; dayEl.className=`text-base font-black ${today>=0?'text-emerald-300':'text-rose-300'}`; }
+            const upd=document.getElementById('performance-updated');
+            if(upd) upd.innerText = p.updated_unix ? `Cập nhật ${new Date(Number(p.updated_unix)*1000).toLocaleTimeString('vi-VN')}` : '';
         }
 
         function renderPerformanceChartsFromHistory() {
