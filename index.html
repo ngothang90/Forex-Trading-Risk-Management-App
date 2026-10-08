@@ -6,10 +6,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro - Multi-Strategy & Auto-Fibo Trading</title>
+    <title>Gatekeeper Pro 8.20</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss5"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase Realtime SDK (v10.12.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -38,6 +37,25 @@
         .badge-buy { background: linear-gradient(135deg, #10b981, #059669); color: white; }
         .badge-sell { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; }
         .tab-btn.active { background-color: #3b82f6; color: #ffffff; font-weight: bold; }
+
+        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; }
+        button, select, input { min-height: 32px; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll table { min-width: 700px; }
+        .signal-card { background: linear-gradient(145deg, rgba(15,23,42,.98), rgba(17,24,39,.94)); border: 1px solid rgba(71,85,105,.45); }
+        .score-ring { min-width: 46px; min-height: 46px; border-radius: 14px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+        .risk-ok { color:#6ee7b7; background:rgba(16,185,129,.12); border-color:rgba(16,185,129,.35); }
+        .risk-lock { color:#fda4af; background:rgba(244,63,94,.12); border-color:rgba(244,63,94,.35); }
+        .muted { color:#94a3b8; }
+        @media (max-width: 640px) {
+            body { font-size: 13px; }
+            .glass-card { border-radius: 14px; }
+            .table-scroll table { min-width: 760px; }
+            .mobile-stack { flex-direction: column !important; align-items: stretch !important; }
+            .mobile-full { width: 100% !important; }
+            .sticky-actions { position: sticky; bottom: 8px; z-index: 20; }
+        }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-12">
@@ -57,9 +75,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v6.29</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.20</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Giờ GD: 07:00 - 19:00 (VN) | Khóa Lãi/Lỗ Ngày ±20% | Volume ≤ Max Lot</p>
+                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | Khóa ngày -20% / +20% | 8 lỗ/ngày</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -102,24 +120,64 @@
             </div>
         </div>
 
+        <!-- RISK / DISCIPLINE -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">Risk/lệnh</span>
+                <p id="risk-per-trade" class="text-sm sm:text-lg font-black text-cyan-300">10%</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">P/L ngày</span>
+                <p id="risk-daily-pnl" class="text-sm sm:text-lg font-black text-white">$0.00</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">P/L %</span>
+                <p id="risk-daily-pct" class="text-sm sm:text-lg font-black text-white">0.0%</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">Lỗ trong ngày</span>
+                <p id="risk-loss-streak" class="text-sm sm:text-lg font-black text-amber-300">0</p>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">Vị thế</span>
+                <p id="risk-open-pos" class="text-sm sm:text-lg font-black text-sky-300">0 / 4</p>
+            </div>
+            <div id="risk-state-card" class="glass-card p-2.5 rounded-xl border">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase">Kỷ luật</span>
+                <p id="risk-state" class="text-sm sm:text-lg font-black text-emerald-300">SẴN SÀNG</p>
+                <span id="risk-reason" class="text-[9px] muted block mt-0.5 truncate"></span>
+            </div>
+        </div>
+
+        <!-- EMOTION / DISCIPLINE -->
+        <div class="glass-card p-2.5 rounded-xl border border-rose-500/20">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] sm:text-[10px] text-slate-400">
+                <span class="font-bold text-slate-200 uppercase">Tâm lý:</span>
+                <span>Không gỡ lỗ</span><span>Không bình quân giá thua</span><span>Không dời SL xa hơn</span><span>8 lỗ trong ngày → nghỉ</span>
+            </div>
+        </div>
+
         <!-- MULTI-STRATEGY SIGNALS -->
         <div class="glass-card p-3 rounded-xl border border-indigo-500/30">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2.5">
                 <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Tín Hiệu Multi-Strategy
+                    Tín Hiệu Tốt Nhất · TOP
                 </h2>
                 <div class="flex flex-wrap items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
-                    <button onclick="switchStratTab('smc')" id="tab-smc" class="tab-btn active text-[10px] px-2 py-0.5 rounded transition">SMC</button>
-                    <button onclick="switchStratTab('momentum')" id="tab-momentum" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Mom. Pullback</button>
-                    <button onclick="switchStratTab('breakout')" id="tab-breakout" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Breakout Retest</button>
+                    <button onclick="switchStratTab('top')" id="tab-top" class="tab-btn active text-[10px] px-2 py-0.5 rounded transition">TOP</button>
+                    <button onclick="switchStratTab('smc')" id="tab-smc" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">SMC</button>
+                    <button onclick="switchStratTab('momentum')" id="tab-momentum" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Momentum</button>
+                    <button onclick="switchStratTab('breakout')" id="tab-breakout" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Breakout</button>
                     <button onclick="switchStratTab('wyckoff')" id="tab-wyckoff" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Wyckoff</button>
                     <button onclick="switchStratTab('amt')" id="tab-amt" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">AMT/VWAP</button>
                     <button onclick="switchStratTab('turtle')" id="tab-turtle" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Turtle</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto no-scrollbar">
+            <div id="best-signal-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-2.5"></div>
+
+            <div id="multi-table-wrap" class="overflow-x-auto no-scrollbar table-scroll">
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
                         <tr id="multi-strat-table-head"></tr>
@@ -161,16 +219,20 @@
                             <th class="p-1.5">Golden Zone (50-61.8%)</th>
                             <th class="p-1.5">Nến Đảo Chiều</th>
                             <th class="p-1.5">Hợp Lưu EMA</th>
+                            <th class="p-1.5">Score</th>
                             <th class="p-1.5">Trạng Thái</th>
                             <th class="p-1.5 text-right">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody id="fibo-watchlist-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang tải dữ liệu Fibonacci...</td></tr>
+                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang tải tín hiệu...</td></tr>
                     </tbody>
                 </table>
             </div>
 
+            <div class="mb-2 rounded-lg border border-amber-500/20 bg-amber-950/20 p-2 text-[9px] sm:text-[10px] text-slate-300">
+                <b class="text-amber-300">Fibo Score 0–100</b> = điểm chất lượng, <b>không phải % thắng</b>: Golden Zone 30 + Sweep 20 + nến đảo chiều 20 + EMA 15 + Trend 15. <b>≥71 (tức >70)</b> mới đủ ngưỡng kỹ thuật; vẫn phải có Entry + SL + Lot + không News Guard + còn Max Volume.
+            </div>
             <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-xl border border-slate-800 p-2 overflow-hidden shadow-inner flex items-center justify-center">
                 <canvas id="fiboCanvas" class="w-full h-full block"></canvas>
             </div>
@@ -215,6 +277,7 @@
                     <p id="max-lot-USDJPY" class="text-xs sm:text-sm font-black text-amber-400">0.00 Lot</p>
                 </div>
             </div>
+            <div id="symbol-cap-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-2"></div>
         </div>
 
         <!-- ĐẶT LỆNH KỶ LUẬT -->
@@ -226,6 +289,7 @@
                 </span>
                 <span id="live-symbol-price" class="text-[11px] font-mono font-bold text-cyan-400">ASK: -- | BID: --</span>
             </h2>
+            <div class="text-[9px] sm:text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-lg px-2 py-1.5 mb-2">Risk 10%/lệnh • SL bắt buộc • tối đa 4 vị thế Web • 1 mã/1 vị thế Web • 8 lỗ/ngày → nghỉ • ngày -20%/+20% → khóa.</div>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2.5">
                 <div>
@@ -289,11 +353,12 @@
             <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Vị Thế Đang Mở (Không quá Max Volume)
+                    Vị Thế Đang Mở · Tổng lot/cặp ≤ Max Volume
                 </span>
                 <div class="flex items-center space-x-2">
                     <button onclick="sendAction('CLOSE_ALL', 0)" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[9px] transition">Đóng Tất Cả</button>
                     <span id="live-pos-count" class="text-xs font-bold text-slate-400">0 vị thế</span>
+                    <span id="live-pos-cap-note" class="text-[9px] text-amber-300"></span>
                 </div>
             </h2>
 
@@ -348,68 +413,60 @@
             </div>
         </div>
 
-        <!-- THỐNG KÊ HIỆU SUẤT & CHIẾN LƯỢC -->
-        <div class="glass-card p-3 rounded-xl">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
-                <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Hiệu Suất Tổng Quan & Thống Kê Chiến Lược (Từ 01/10/2026)
-                </h2>
+        <!-- ECONOMIC CALENDAR -->
+        <div class="glass-card p-3 rounded-xl border border-rose-500/25">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-2.5">
+                <div>
+                    <h2 class="text-xs font-bold text-rose-300 uppercase tracking-wider">Lịch Kinh Tế · News Guard · Học tin</h2>
+                    <p class="text-[9px] text-slate-500 mt-0.5">Nguồn tự động từ Economic Calendar của MT5; có Forecast / Actual / Previous và phân tích trước-sau. Đối chiếu Investing.com.</p>
+                </div>
+                <a href="https://vn.investing.com/economic-calendar" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black text-center">MỞ INVESTING CALENDAR</a>
             </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
-                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Thắng / Thua</span>
-                    <p class="text-sm sm:text-base font-bold"><span id="stat-wins" class="text-emerald-400">0</span> <span class="text-slate-600">/</span> <span id="stat-losses" class="text-rose-400">0</span></p>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                <div class="overflow-x-auto no-scrollbar table-scroll">
+                    <table class="w-full text-left text-[10px] whitespace-nowrap">
+                        <thead class="bg-slate-900 text-slate-400 uppercase">
+                            <tr><th class="p-1.5">Giờ VN</th><th class="p-1.5">Tiền</th><th class="p-1.5">Mức</th><th class="p-1.5">Tin</th><th class="p-1.5">Actual</th><th class="p-1.5">Forecast</th><th class="p-1.5">Prev.</th><th class="p-1.5">Pha</th></tr>
+                        </thead>
+                        <tbody id="economic-calendar-body"><tr><td colspan="8" class="p-3 text-center text-slate-500">Đang tải lịch tin...</td></tr></tbody>
+                    </table>
+                    <div id="economic-calendar-study" class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
                 </div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
-                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Tỷ Lệ Thắng</span>
-                    <p id="stat-winrate" class="text-sm sm:text-base font-bold text-amber-400">0.0%</p>
-                </div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
-                    <span class="text-[10px] text-slate-400 block font-bold uppercase">LN Ròng Tổng</span>
-                    <p id="stat-net-profit" class="text-sm sm:text-base font-bold text-white">+$0.00</p>
-                </div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50">
-                    <span class="text-[10px] text-slate-400 block font-bold uppercase">LN Hôm Nay (±20% Khóa)</span>
-                    <p id="stat-daily-profit" class="text-sm sm:text-base font-bold text-white">+$0.00</p>
-                </div>
-            </div>
-
-            <!-- Bảng Thống Kê Chi Tiết Theo Chiến Lược -->
-            <div class="mb-3 overflow-x-auto no-scrollbar">
-                <table class="w-full text-left text-xs whitespace-nowrap bg-slate-900/90 rounded-xl overflow-hidden border border-slate-800">
-                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="p-2">Chiến Lược</th>
-                            <th class="p-2 text-center">Số Lệnh Thắng/Thua</th>
-                            <th class="p-2 text-center">Tổng Số Lệnh</th>
-                            <th class="p-2 text-right">Lợi Nhuận ($)</th>
-                            <th class="p-2 text-right">Hiệu Suất (Winrate)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="strategy-stats-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="text-center py-2 text-slate-500">Đang tổng hợp dữ liệu chiến lược...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">1. Tăng Trưởng Lợi Nhuận Tích Lũy Tổng ($)</span>
-                    <div class="w-full h-44">
-                        <canvas id="equityChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex flex-col justify-center">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">2. Lời Lỗ Của Từng Cặp Tiền ($)</span>
-                    <div class="w-full h-44">
-                        <canvas id="symbolProfitChart"></canvas>
+                <div class="bg-slate-950/80 rounded-xl border border-slate-800 p-2 min-h-[320px]">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">TradingView Economic Calendar</div>
+                    <div class="tradingview-widget-container" style="height:420px;width:100%">
+                        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                        {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,gb,eu,jp","importanceFilter":"0,1","width":"100%","height":420}
+                        </script>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- PERFORMANCE OVERVIEW -->
+        <div class="glass-card p-3 rounded-xl border border-purple-500/25">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2.5">
+                <div>
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hiệu Suất Tổng Quan & Thống Kê (từ 01/10/2026)</h2>
+                    <p id="performance-source" class="text-[9px] text-slate-500 mt-0.5">Đang chờ MT5 tổng hợp...</p>
+                </div>
+                <span id="performance-updated" class="text-[9px] text-slate-500"></span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-3">
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Thắng / Thua</span><p id="stat-wins" class="text-sm font-black"><span class="text-emerald-400">0</span> / <span class="text-rose-400">0</span></p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Winrate</span><p id="stat-winrate" class="text-sm font-black text-amber-400">0.0%</p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">LN Ròng</span><p id="stat-net-profit" class="text-sm font-black text-white">+$0.00</p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">P/L Hôm Nay</span><p id="stat-daily-profit" class="text-sm font-black text-white">+$0.00</p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Profit Factor</span><p id="stat-profit-factor" class="text-sm font-black text-cyan-300">0.00</p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Max DD</span><p id="stat-max-dd" class="text-sm font-black text-rose-300">$0.00</p></div>
+                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/50"><span class="text-[9px] text-slate-400 block font-bold uppercase">Số lệnh đóng</span><p id="stat-trades" class="text-sm font-black text-slate-200">0</p></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">LN tích lũy từ 01/10/2026</span><div class="w-full h-44"><canvas id="equityChart"></canvas></div></div>
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">P/L theo cặp</span><div class="w-full h-44"><canvas id="symbolProfitChart"></canvas></div></div>
+            </div>
+        </div>
     </div>
 
     <!-- SCRIPT LOGIC JAVASCRIPT & FIREBASE -->
@@ -427,11 +484,15 @@
         let g_positions = {};
         let g_pendingOrders = {};
         let g_history = {};
-        let g_strategyStats = {};
+        let g_performance = {};
+        let g_economicCalendar = {};
         let g_bridgeStatus = {};
+        let g_riskState = {};
         let g_firebaseConnected = false;
-        let g_activeStratTab = 'smc';
+        let g_activeStratTab = 'top';
         let g_selectedStrategyTag = "Web Manual";
+        let g_selectedSignalScore = 0;
+        let g_selectedSignalEntry = 0;
 
         let equityChartInstance = null;
         let symbolChartInstance = null;
@@ -440,12 +501,14 @@
         db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
         db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; renderFiboWatchlist(); drawFiboCanvas(); });
         db.ref('multi_strategy_signals').on('value', snap => { g_multiSignals = snap.val() || {}; renderMultiStrategy(); });
-        db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); renderStrategyStatsTable(); });
+        db.ref('live_positions').on('value', snap => { g_positions = snap.val() || {}; renderLivePositions(); renderSymbolCaps(); });
         db.ref('live_pending_orders').on('value', snap => { g_pendingOrders = snap.val() || {}; renderLivePendingOrders(); });
-        db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderHistoryAndStats(); });
-        db.ref('strategy_stats').on('value', snap => { g_strategyStats = snap.val() || {}; renderStrategyStatsTable(); });
+        db.ref('closed_history').on('value', snap => { g_history = snap.val() || {}; renderPerformanceChartsFromHistory(); });
+        db.ref('performance').on('value', snap => { g_performance = snap.val() || {}; renderPerformance(); renderPerformanceChartsFromHistory(); });
+        db.ref('economic_calendar').on('value', snap => { g_economicCalendar = snap.val() || {}; renderEconomicCalendar(); });
         db.ref('last_status').on('value', snap => { renderStatusBanner(snap.val()); });
         db.ref('bridge_status').on('value', snap => { g_bridgeStatus = snap.val() || {}; renderConnectionState(); });
+        db.ref('risk_state').on('value', snap => { g_riskState = snap.val() || {}; renderRiskState(); });
         db.ref('.info/connected').on('value', snap => { g_firebaseConnected = snap.val() === true; renderConnectionState(); });
 
         function renderConnectionState() {
@@ -471,11 +534,41 @@
             }
         }
 
+        function renderRiskState() {
+            const p = Number(g_riskState.daily_pnl) || 0;
+            const pct = Number(g_riskState.daily_pnl_pct) || 0;
+            const streak = Number(g_riskState.daily_loss_count) || 0;
+            const open = Number(g_riskState.open_positions) || 0;
+            const maxOpen = Number(g_riskState.max_open_positions) || 4;
+            const locked = !!g_riskState.trading_locked;
+            const pnlEl = document.getElementById('risk-daily-pnl');
+            const pctEl = document.getElementById('risk-daily-pct');
+            if(pnlEl) { pnlEl.innerText = `${p >= 0 ? '+' : ''}$${p.toFixed(2)}`; pnlEl.className = `text-sm sm:text-lg font-black ${p >= 0 ? 'text-emerald-300' : 'text-rose-300'}`; }
+            if(pctEl) { pctEl.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`; pctEl.className = `text-sm sm:text-lg font-black ${pct >= 0 ? 'text-emerald-300' : 'text-rose-300'}`; }
+            const riskTrade = document.getElementById('risk-per-trade');
+            if(riskTrade) riskTrade.innerText = `${Number(g_riskState.risk_per_trade_pct || 10).toFixed(2)}%`;
+            const loss = document.getElementById('risk-loss-streak');
+            if(loss) loss.innerText = `${streak} / ${Number(g_riskState.max_daily_losses || 8)}`;
+            const pos = document.getElementById('risk-open-pos');
+            if(pos) pos.innerText = `${open} / ${maxOpen}`;
+            const card = document.getElementById('risk-state-card');
+            const state = document.getElementById('risk-state');
+            const reason = document.getElementById('risk-reason');
+            if(card && state && reason) {
+                card.classList.toggle('risk-lock', locked); card.classList.toggle('risk-ok', !locked);
+                state.innerText = locked ? 'KHÓA' : 'SẴN SÀNG';
+                state.className = `text-sm sm:text-lg font-black ${locked ? 'text-rose-300' : 'text-emerald-300'}`;
+                reason.innerText = g_riskState.lock_reason || '';
+            }
+        }
+
         function getSymbolDecimals(symbol) {
+            const d = Number(g_prices?.[symbol]?.digits);
+            if(Number.isFinite(d) && d > 0 && d <= 8) return Math.floor(d);
             if (!symbol) return 2;
-            if (symbol.includes("JPY")) return 2;
+            if (symbol.includes("JPY")) return 3;
             if (symbol === "BTCUSD" || symbol === "XAUUSD" || symbol === "USOIL") return 2;
-            return 4;
+            return 5;
         }
 
         function fmtPrice(symbol, price) {
@@ -483,11 +576,13 @@
             return price.toFixed(getSymbolDecimals(symbol));
         }
 
-        function getSignalVolume(symbol) {
-            let maxVol = (g_prices[symbol] && g_prices[symbol].max_vol) ? g_prices[symbol].max_vol : 0.01;
-            let vol = maxVol / 2.0;
-            if (vol < 0.01) vol = 0.01;
-            return Math.floor(vol / 0.01) * 0.01;
+        function getSignalVolume(symbol, data = null, lotKey = "best_lot") {
+            const rem = Number(g_prices?.[symbol]?.remaining_vol);
+            if(!Number.isFinite(rem) || rem <= 0) return 0;
+            const strategyLot = data ? Number(data[lotKey]) : 0;
+            const riskLot = data ? Number(data.risk_lot) : 0;
+            const wanted = strategyLot > 0 ? strategyLot : (riskLot > 0 ? riskLot : rem);
+            return Math.max(0, Math.min(wanted, rem));
         }
 
         function checkVietnamTradingHours() {
@@ -516,11 +611,7 @@
             document.getElementById('acc-leverage').innerText = `1:${g_account.leverage || 2000}`;
             
             const capNote = document.getElementById('balance-cap-note');
-            if((g_account.balance || 0) < 500) {
-                capNote.innerText = "(TK < $500: Áp dụng Lot an toàn & Khóa lời/lỗ ±20%)";
-            } else {
-                capNote.innerText = "(Tổng lệnh chạy tối đa Max Lot & Cắt tự động ±20% ngày)";
-            }
+            capNote.innerText = `Risk ${Number(g_riskState.risk_per_trade_pct || 10).toFixed(2)}%/lệnh | Khóa ngày -${Number(g_riskState.daily_loss_limit_pct || 20).toFixed(1)}% / +${Number(g_riskState.daily_profit_lock_pct || 20).toFixed(1)}%`;
         }
 
         function renderStatusBanner(statusData) {
@@ -551,11 +642,29 @@
         function renderMaxLots() {
             const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
             syms.forEach(s => {
+                const d = g_prices[s] || {};
                 const el = document.getElementById(`max-lot-${s}`);
-                if(el && g_prices[s]) {
-                    el.innerText = `${(g_prices[s].max_vol || 0).toFixed(2)} Lot`;
-                }
+                if(el) el.innerText = `${Number(d.max_vol || 0).toFixed(2)}L`;
             });
+            renderSymbolCaps();
+        }
+
+        function renderSymbolCaps() {
+            const grid = document.getElementById('symbol-cap-grid');
+            if(!grid) return;
+            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+            grid.innerHTML = syms.map(s => {
+                const d = g_prices[s] || {};
+                const max = Number(d.max_vol)||0, open = Number(d.open_vol)||0, pending = Number(d.pending_vol)||0, rem = Math.max(0, Number(d.remaining_vol)||0);
+                const used = open + pending;
+                const pct = max > 0 ? Math.min(100, used/max*100) : 0;
+                const cls = rem > 0 ? 'text-emerald-300' : 'text-rose-300';
+                return `<div class="bg-slate-900/80 rounded-lg border border-slate-700/60 p-2">
+                    <div class="flex items-center justify-between"><span class="text-[10px] font-black text-white">${s}</span><span class="text-[9px] ${cls} font-black">Còn ${rem.toFixed(2)}L</span></div>
+                    <div class="mt-1 h-1.5 rounded bg-slate-800 overflow-hidden"><div class="h-full bg-sky-500" style="width:${pct}%"></div></div>
+                    <div class="grid grid-cols-3 gap-1 mt-1 text-[8px] font-mono text-slate-400"><span>Mở ${open.toFixed(2)}</span><span>Chờ ${pending.toFixed(2)}</span><span>Max ${max.toFixed(2)}</span></div>
+                </div>`;
+            }).join('');
         }
 
         function switchStratTab(tab) {
@@ -568,7 +677,25 @@
         function renderMultiStrategy() {
             const head = document.getElementById('multi-strat-table-head');
             const body = document.getElementById('multi-strat-table-body');
+            const tableWrap = document.getElementById('multi-table-wrap');
+            const topGrid = document.getElementById('best-signal-grid');
             const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`tab-${g_activeStratTab}`);
+            if(activeBtn) { activeBtn.classList.add('active'); activeBtn.classList.remove('text-slate-400'); }
+
+            if(g_activeStratTab === 'top') {
+                if(tableWrap) tableWrap.classList.add('hidden');
+                if(topGrid) topGrid.classList.remove('hidden');
+                renderBestSignals();
+                return;
+            }
+            if(tableWrap) tableWrap.classList.remove('hidden');
+            if(topGrid) topGrid.classList.add('hidden');
 
             if(g_activeStratTab === 'smc') {
                 head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu SMC</th><th class="p-1.5">Entry Gợi Ý</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
@@ -580,7 +707,7 @@
                     if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (SMC)</span>`;
                     else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (SMC)</span>`;
 
-                    let autoVol = getSignalVolume(s);
+                    let autoVol = getSignalVolume(s, data, 'smc_lot');
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
@@ -588,7 +715,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.smc_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.smc_score)||0) >= 71 && data.smc_entry > 0 && data.smc_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BULLISH")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -604,16 +731,16 @@
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL MOMENTUM</span>`;
 
                     let score = data.mom_score || 0;
-                    let autoVol = getSignalVolume(s);
+                    let autoVol = getSignalVolume(s, data, 'mom_lot');
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 text-emerald-400 font-bold">${score}/10</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/100</td>
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -629,16 +756,16 @@
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL RETEST</span>`;
 
                     let score = data.bo_score || 0;
-                    let autoVol = getSignalVolume(s);
+                    let autoVol = getSignalVolume(s, data, 'bo_lot');
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
-                        <td class="p-1.5 text-emerald-400 font-bold">${score}/10</td>
+                        <td class="p-1.5 text-emerald-400 font-bold">${score}/100</td>
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 7 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -653,7 +780,7 @@
                     if(sig.includes("SPRING")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">SPRING (Wyckoff)</span>`;
                     else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (Wyckoff)</span>`;
 
-                    let autoVol = getSignalVolume(s);
+                    let autoVol = getSignalVolume(s, data, 'wyckoff_lot');
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
@@ -661,7 +788,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.wyckoff_entry > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("SPRING")?"BUY_LIMIT":"SELL_LIMIT"}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -676,14 +803,14 @@
                     if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Break VAH</span>`;
                     else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Break VAL</span>`;
 
-                    let autoVol = getSignalVolume(s);
+                    let autoVol = getSignalVolume(s, data, 'amt_lot');
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
                         <td class="p-1.5 font-mono text-amber-400 font-bold">${fmtPrice(s, data.vwap)}</td>
                         <td class="p-1.5 font-mono text-slate-300">${fmtPrice(s, data.vah)} - ${fmtPrice(s, data.val)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.vwap > 0 ? `<button onclick="fillOrderForm('${s}', 'BUY_LIMIT', ${data.vwap}, 0, 0,${autoVol}, 'AMT/VWAP')" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Retest VWAP (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.amt_score||0) >= 71 && Number(data.amt_entry||0) > 0) ? `<button onclick="fillOrderForm('${s}', '${String(data.amt_signal||'').includes('SELL') || String(data.amt_signal||'').includes('BEARISH') ? 'SELL_LIMIT' : 'BUY_LIMIT'}', ${Number(data.amt_entry||data.vwap||0)}, ${Number(data.amt_sl||0)}, ${Number(data.amt_tp||0)}, ${autoVol}, 'AMT/VWAP')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">VWAP · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
                         </td>
                     </tr>`;
                 });
@@ -698,19 +825,47 @@
                     if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (Turtle)</span>`;
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (Turtle)</span>`;
 
-                    let autoVol = Math.max(0.01, getSignalVolume(s));
+                    let autoVol = Math.max(0.01, getSignalVolume(s, data, 'turtle_lot'));
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.donchian_high)}</td>
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.donchian_low)}</td>
                         <td class="p-1.5 text-right">
-                            ${data.donchian_high > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, 0, 0, ${autoVol}, 'Turtle')" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-[9px]">Set Unit (${autoVol} Lot)</button>` : '--'}
+                            ${Number(data.turtle_score||0) >= 71 && Number(data.turtle_entry||0) > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, ${Number(data.turtle_sl||0)}, ${Number(data.turtle_tp||0)}, ${autoVol}, 'Turtle')" class="px-2 py-1 bg-purple-600 hover:bg-purple-500 text-white font-black rounded text-[9px]">Turtle · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
                         </td>
                     </tr>`;
                 });
                 body.innerHTML = html;
             }
+        }
+
+        function renderBestSignals() {
+            const grid = document.getElementById('best-signal-grid');
+            if(!grid) return;
+            const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
+            const candidates = syms.map(sym => ({sym, ...(g_multiSignals[sym] || {})}))
+                .filter(d => Number(d.best_score||0) >= 71 && d.best_signal !== 'WAIT' && Number(d.best_entry||0) > 0 && Number(d.best_sl||0) > 0 && Number(d.best_lot||0) > 0 && Number(g_prices?.[d.sym]?.remaining_vol||0) > 0 && d.spread_ok !== false && !d.news_blocked && !g_riskState.trading_locked)
+                .sort((a,b) => Number(b.best_score||0)-Number(a.best_score||0)).slice(0,5);
+            if(!candidates.length) {
+                grid.innerHTML = `<div class="sm:col-span-2 lg:col-span-3 text-center py-6 text-slate-500 text-xs">TOP chưa xuất hiện: cần Score ≥71 + Entry/SL/Lot hợp lệ + không News Guard + còn Max Volume.</div>`;
+                return;
+            }
+            grid.innerHTML = candidates.map(d => {
+                const sym=d.sym, score=Number(d.best_score)||0;
+                const dir=d.best_direction || (String(d.best_signal).includes('SELL')?'SELL':'BUY');
+                const lot=getSignalVolume(sym,d,'best_lot');
+                const rem=Number(g_prices?.[sym]?.remaining_vol)||0;
+                const locked=!!g_riskState.trading_locked || rem<=0;
+                const badge=dir==='SELL'?'badge-sell':'badge-buy';
+                return `<div class="signal-card rounded-xl p-3 shadow-lg">
+                    <div class="flex items-center justify-between gap-2"><div><div class="text-sm font-black text-white">${sym}</div><div class="text-[10px] text-slate-400">${d.best_strategy||'Best'}</div></div><div class="score-ring bg-slate-800 text-emerald-300 border border-slate-700">${score}</div></div>
+                    <div class="flex items-center justify-between mt-2"><span class="px-2 py-1 rounded text-[10px] font-black ${badge}">${dir}</span><span class="text-[10px] text-slate-400">RSI ${Number(d.rsi||0).toFixed(0)} · ADX ${Number(d.adx||0).toFixed(0)}</span></div>
+                    <div class="text-[9px] text-slate-500 mt-1">Raw ${Number(d.raw_best_score||score)} · News -${Number(d.news_penalty||0)} · Spread ${d.spread_ok===false?'cao':'OK'} · Còn ${rem.toFixed(2)}L</div>
+                    <div class="grid grid-cols-3 gap-1 mt-2 text-[10px] font-mono"><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">Entry</span><span class="text-cyan-300">${fmtPrice(sym,d.best_entry)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">SL</span><span class="text-rose-300">${fmtPrice(sym,d.best_sl)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">TP</span><span class="text-emerald-300">${fmtPrice(sym,d.best_tp)}</span></div></div>
+                    <button ${locked?'disabled':''} onclick="fillOrderForm('${sym}','${dir==='BUY'?'BUY_LIMIT':'SELL_LIMIT'}',${Number(d.best_entry||0)},${Number(d.best_sl||0)},${Number(d.best_tp||0)},${Number(lot||0)},'${d.best_strategy||'Best Signal'}')" class="w-full mt-2 px-3 py-2 ${locked?'bg-slate-700 cursor-not-allowed':'bg-indigo-600 hover:bg-indigo-500'} text-white text-[10px] font-black rounded-lg">${locked?'KHÓA / HẾT LOT':'VÀO LỆNH'} · ${lot.toFixed(2)}L</button>
+                </div>`;
+            }).join('');
         }
 
         function renderFiboWatchlist() {
@@ -721,7 +876,7 @@
             syms.forEach(s => {
                 const data = g_fiboSignals[s];
                 if(!data) {
-                    html += `<tr class="hover:bg-slate-800/40"><td class="p-1.5 font-bold text-white">${s}</td><td colspan="6" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu từ VPS...</td></tr>`;
+                    html += `<tr class="hover:bg-slate-800/40"><td class="p-1.5 font-bold text-white">${s}</td><td colspan="7" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu...</td></tr>`;
                     return;
                 }
 
@@ -749,7 +904,14 @@
                 const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
                 const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
                 const gzRange = (gzMin > 0 && gzMax > 0) ? `${fmtPrice(s, gzMin)} - ${fmtPrice(s, gzMax)}` : "Đang tính...";
-                let autoVol = getSignalVolume(s);
+                const fiboScore = Number(data.fibo_score) || 0;
+                const scoreBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] ${fiboScore >= 71 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'} font-black">${fiboScore}</span>`;
+                let autoVol = getSignalVolume(s, data, 'fibo_lot');
+                const action = data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT";
+                const canEnter = fiboScore >= 71 && Number(data.fibo_entry || data.fib_618 || 0) > 0 && Number(data.fibo_sl || data.fib_786 || 0) > 0 && autoVol > 0 && !data.news_blocked;
+                const entry = Number(data.fibo_entry || data.fib_618 || 0);
+                const sl = Number(data.fibo_sl || data.fib_786 || 0);
+                const tp = Number(data.fibo_tp || data.fib_0 || 0);
 
                 html += `<tr class="hover:bg-slate-800/40">
                     <td class="p-1.5 font-bold text-white">${s}</td>
@@ -757,9 +919,10 @@
                     <td class="p-1.5 font-mono text-amber-400 font-bold">${gzRange}</td>
                     <td class="p-1.5">${candleBadge}</td>
                     <td class="p-1.5">${emaBadge}</td>
-                    <td class="p-1.5">${inGZBadge}</td>
+                    <td class="p-1.5">${scoreBadge}</td>
+                    <td class="p-1.5"><div>${inGZBadge}</div><div class="text-[8px] text-slate-500 max-w-[220px] whitespace-normal">${data.wait_reason || data.news_note || ""}</div></td>
                     <td class="p-1.5 text-right">
-                        <button onclick="fillOrderForm('${s}', '${data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT"}', ${data.fib_618 || 0}, ${data.fib_786 || 0}, ${data.fib_0 || 0}, ${autoVol}, 'Fibonacci')" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào Fibo (${autoVol} Lot)</button>
+                        ${canEnter ? `<button onclick="fillOrderForm('${s}', '${action}', ${entry}, ${sl}, ${tp}, ${autoVol}, 'Fibonacci')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">Fibo · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
                     </td>
                 </tr>`;
             });
@@ -937,12 +1100,28 @@
             }
         }
 
+        function getStrategyScore(symbol, strategyName) {
+            const d = g_multiSignals?.[symbol] || {};
+            const s = String(strategyName || "").toUpperCase();
+            if(s.includes("FIBO")) return Number(g_fiboSignals?.[symbol]?.fibo_score || d.fibo_score || 0);
+            if(s.includes("SMC")) return Number(d.smc_score || 0);
+            if(s.includes("MOM")) return Number(d.mom_score || 0);
+            if(s.includes("BREAKOUT") || s.includes("RETEST")) return Number(d.bo_score || 0);
+            if(s.includes("WYCKOFF")) return Number(d.wyckoff_score || 0);
+            if(s.includes("AMT") || s.includes("VWAP")) return Number(d.amt_score || 0);
+            if(s.includes("TURTLE")) return Number(d.turtle_score || 0);
+            if(s.includes("BEST")) return Number(d.best_score || 0);
+            return 0;
+        }
+
         function fillOrderForm(symbol, type, price = 0, sl = 0, tp = 0, volume = 0, strategyName = "Web Manual") {
             document.getElementById('order-symbol').value = symbol;
             document.getElementById('order-type').value = type;
             togglePriceInput();
 
             g_selectedStrategyTag = strategyName;
+            g_selectedSignalScore = getStrategyScore(symbol, strategyName);
+            g_selectedSignalEntry = Number(price || 0);
             const badgeEl = document.getElementById('current-strat-badge');
             if(badgeEl) badgeEl.innerText = `(Thực thi: ${strategyName})`;
 
@@ -992,6 +1171,8 @@
             tpInput.value = ""; tpInput.dataset.manual = "false";
             document.getElementById('order-volume').value = "0.01";
             g_selectedStrategyTag = "Web Manual";
+            g_selectedSignalScore = 0;
+            g_selectedSignalEntry = 0;
             const badgeEl = document.getElementById('current-strat-badge');
             if(badgeEl) badgeEl.innerText = `(Thực thi: Web Manual)`;
             autoFillManualSLTP();
@@ -1011,55 +1192,47 @@
             const symbol = document.getElementById('order-symbol').value;
             const type = document.getElementById('order-type').value;
             const term = document.getElementById('order-term').value;
-            const volume = parseFloat(document.getElementById('order-volume').value) || 0.01;
+            const volume = parseFloat(document.getElementById('order-volume').value) || 0;
             const price = parseFloat(document.getElementById('order-price').value) || 0;
             let sl = parseFloat(document.getElementById('order-sl').value) || 0;
             let tp = parseFloat(document.getElementById('order-tp').value) || 0;
+            const pending = type.includes('LIMIT');
+            if(volume <= 0) return alert('Lot phải > 0 và còn Max Volume.');
+            if(pending && price <= 0) return alert('Lệnh LIMIT cần Giá đặt.');
+            if(g_riskState.trading_locked) return alert(`Đang khóa: ${g_riskState.lock_reason || 'Kỷ luật rủi ro'}`);
 
-            if(volume <= 0) {
-                alert("Khối lượng phải lớn hơn 0.");
-                return;
+            const px = g_prices?.[symbol] || {};
+            const entry = price > 0 ? price : (type === 'BUY' ? Number(px.ask)||0 : Number(px.bid)||0);
+            if(sl <= 0 || tp <= 0) {
+                const a = calculateDefaultSLTP(symbol,type,term,entry);
+                if(sl<=0) sl=a.sl; if(tp<=0) tp=a.tp;
             }
+            if(!sl || sl<=0) return alert('Thiếu SL. Không được gửi lệnh không có SL.');
 
-            const isPending = ["BUY_LIMIT", "SELL_LIMIT"].includes(type);
-            if(isPending && price <= 0) {
-                alert("Lệnh LIMIT bắt buộc phải có Giá đặt.");
-                return;
+            const maxVol=Number(px.max_vol)||0, openVol=Number(px.open_vol)||0, pendingVol=Number(px.pending_vol)||0, remain=Number(px.remaining_vol)||0;
+            if(maxVol<=0) return alert('Chưa có Max Volume từ MT5.');
+            if(openVol + pendingVol + volume > maxVol + 1e-9) return alert(`Vượt Max Volume ${symbol}. Mở ${openVol.toFixed(2)}L + Chờ ${pendingVol.toFixed(2)}L + Lệnh mới ${volume.toFixed(2)}L > Max ${maxVol.toFixed(2)}L.`);
+            if(volume > remain + 1e-9) return alert(`Lot còn lại ${remain.toFixed(2)}L cho ${symbol}.`);
+
+            const best=g_multiSignals?.[symbol]||{};
+            const fibo=g_fiboSignals?.[symbol]||{};
+            const strat=g_selectedStrategyTag||'Web Manual';
+            const sourceIsSignal = strat !== 'Web Manual';
+            const newsBlocked = !!best.news_blocked || !!fibo.news_blocked;
+            if(sourceIsSignal) {
+                if(g_selectedSignalScore < 71) return alert(`Tín hiệu ${strat} chưa đạt Score ≥71 (hiện ${g_selectedSignalScore}).`);
+                if(newsBlocked) return alert('News Guard đang chặn mã này.');
+                if(g_selectedSignalEntry>0 && Math.abs(g_selectedSignalEntry-entry) > Math.max(Math.abs(g_selectedSignalEntry)*0.003, Number(px.point||0)*20 || 0)) return alert('Entry đã lệch đáng kể so với tín hiệu. Quét lại trước khi vào.');
             }
+            if(newsBlocked) return alert('News Guard đang chặn mã này.');
 
-            if(sl === 0 || tp === 0) {
-                let entryP = price;
-                if(entryP === 0 && g_prices[symbol]) {
-                    entryP = type === "BUY" ? g_prices[symbol].ask : g_prices[symbol].bid;
-                }
-                const autoCalculated = calculateDefaultSLTP(symbol, type, term, entryP);
-                if(sl === 0) sl = autoCalculated.sl;
-                if(tp === 0) tp = autoCalculated.tp;
-            }
-
-            const reqData = {
-                action: type,
-                type: type,
-                symbol: symbol,
-                term: term,
-                volume: volume,
-                price: price,
-                sl: sl,
-                tp: tp,
-                comment: g_selectedStrategyTag,
-                strategy: g_selectedStrategyTag,
-                timestamp: Date.now()
-            };
-
+            const reqData={action:type,type,symbol,term,volume,price,sl,tp,comment:strat,strategy:strat,timestamp:Date.now(),required_score:sourceIsSignal?71:0};
             try {
-                const ref = await db.ref('pending_requests').push(reqData);
-                alert(`Đã xếp lệnh ${type} ${symbol} vào hàng đợi MT5. EA sẽ báo kết quả trên banner.`);
-                console.log('[ORDER QUEUED]', ref.key, reqData);
+                const ref=await db.ref('pending_requests').push(reqData);
+                alert(`Đã xếp ${type} ${symbol} · ${volume.toFixed(2)}L. EA sẽ kiểm tra Risk/Max Volume/News lần cuối.`);
+                console.log('[ORDER QUEUED]',ref.key,reqData);
                 clearOrderForm();
-            } catch(err) {
-                console.error('[ORDER QUEUE ERROR]', err);
-                alert("Lỗi gửi yêu cầu lên Firebase: " + (err?.message || err));
-            }
+            } catch(err) { console.error('[ORDER QUEUE ERROR]',err); alert('Lỗi Firebase: '+(err?.message||err)); }
         }
 
         function renderLivePositions() {
@@ -1068,6 +1241,8 @@
             const keys = Object.keys(g_positions);
 
             countEl.innerText = `${keys.length} vị thế`;
+            const capNote=document.getElementById("live-pos-cap-note");
+            if(capNote){ const by={}; Object.values(g_positions||{}).forEach(p=>{ by[p.symbol]=(by[p.symbol]||0)+Number(p.volume||0); }); capNote.innerText=Object.entries(by).map(([s,v])=>`${s} ${v.toFixed(2)}L/${Number(g_prices?.[s]?.max_vol||0).toFixed(2)}L`).join(" · "); }
 
             if(keys.length === 0) {
                 body.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-slate-500 font-medium text-[11px]">Không có vị thế đang mở.</td></tr>`;
@@ -1164,206 +1339,74 @@
             }
         }
 
-        function normalizeStrat(strat) {
-            const u = String(strat || "").toUpperCase();
-            if(u.includes("SMC")) return "SMC";
-            if(u.includes("MOMENTUM") || u.includes("PULLBACK") || u.includes("MOM.")) return "Mom. Pullback";
-            if(u.includes("BREAKOUT") || u.includes("RETEST")) return "Breakout Retest";
-            if(u.includes("WYCKOFF")) return "Wyckoff";
-            if(u.includes("AMT") || u.includes("VWAP")) return "AMT/VWAP";
-            if(u.includes("TURTLE") || u.includes("DONCHIAN")) return "Turtle";
-            if(u.includes("FIBO") || u.includes("FIBONACCI")) return "Fibonacci";
-            if(u.includes("WEB MANUAL") || u.includes("MANUAL") || u === "" || 
-               (!u.includes("SMC") && !u.includes("MOM") && !u.includes("BREAKOUT") && !u.includes("WYCKOFF") && !u.includes("AMT") && !u.includes("TURTLE") && !u.includes("FIBO")))
-            {
-                return "Web Manual";
+        function renderEconomicCalendar() {
+            const body = document.getElementById('economic-calendar-body');
+            const studyEl = document.getElementById('economic-calendar-study');
+            if(!body) return;
+            const raw = Array.isArray(g_economicCalendar?.events) ? g_economicCalendar.events : [];
+            const events = raw.slice().sort((a,b)=>Number(a.time_vn||0)-Number(b.time_vn||0)).slice(0,40);
+            if(!events.length) {
+                body.innerHTML = `<tr><td colspan="8" class="p-3 text-center text-slate-500">Chưa có dữ liệu. EA lấy Economic Calendar trực tiếp từ MT5.</td></tr>`;
+                if(studyEl) studyEl.innerHTML = `<div class="sm:col-span-2 text-[9px] text-slate-500">Để học trước/sau tin, cần MT5 đang online và có Calendar data.</div>`;
+                return;
             }
-            return "Web Manual";
+            body.innerHTML = events.map(e => {
+                const dt = new Date(Number(e.time_vn||0)*1000);
+                const impactClass = e.importance==='CAO' ? 'text-rose-300' : 'text-amber-300';
+                const phaseClass = e.phase==='TRƯỚC' ? 'text-cyan-300' : 'text-emerald-300';
+                return `<tr class="border-b border-slate-800/70 align-top"><td class="p-1.5 font-mono text-slate-300">${dt.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="p-1.5 font-black">${escapeHtml(e.currency||'')}</td><td class="p-1.5 ${impactClass} font-black">${escapeHtml(e.importance||'')}</td><td class="p-1.5 whitespace-normal min-w-[220px]"><div class="font-bold text-white">${escapeHtml(e.event||'')}</div></td><td class="p-1.5 font-mono text-emerald-300">${escapeHtml(e.actual||'—')}</td><td class="p-1.5 font-mono text-cyan-300">${escapeHtml(e.forecast||'—')}</td><td class="p-1.5 font-mono text-slate-400">${escapeHtml(e.previous||'—')}</td><td class="p-1.5 ${phaseClass} font-black">${escapeHtml(e.phase||'')}</td></tr>`;
+            }).join('');
+            if(studyEl) {
+                studyEl.innerHTML = events.filter(e=>e.importance==='CAO').slice(0,4).map(e => {
+                    const actual=String(e.actual||''); const forecast=String(e.forecast||'');
+                    const phase=String(e.phase||''); const study=String(e.study||'');
+                    const action = phase==='TRƯỚC' ? 'Trước tin: giảm giao dịch mới quanh giờ công bố, ghi lại Forecast/Previous và chờ phản ứng.' : (actual && forecast ? 'Sau tin: so sánh Actual với Forecast, sau đó quan sát phản ứng giá thay vì đoán trước.' : 'Sau tin: quan sát phản ứng giá và spread; không kết luận chỉ từ một con số.');
+                    return `<div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2 text-[9px]"><div class="flex items-center justify-between gap-2"><b class="text-white">${escapeHtml(e.currency||'')} · ${escapeHtml(e.event||'')}</b><span class="${phase==='TRƯỚC'?'text-cyan-300':'text-emerald-300'} font-black">${escapeHtml(phase)}</span></div><div class="text-slate-500 mt-1">${escapeHtml(action)}</div><div class="text-slate-400 mt-1">${escapeHtml(study)}</div><div class="font-mono mt-1 text-[8px] text-slate-600">A ${escapeHtml(actual||'—')} · F ${escapeHtml(forecast||'—')} · P ${escapeHtml(e.previous||'—')}</div></div>`;
+                }).join('') || `<div class="sm:col-span-2 text-[9px] text-slate-500">Chưa có tin mức CAO trong cửa sổ đang theo dõi.</div>`;
+            }
         }
 
-        function renderStrategyStatsTable() {
-            const body = document.getElementById('strategy-stats-body');
-            const strategies = ["SMC", "Mom. Pullback", "Breakout Retest", "Wyckoff", "AMT/VWAP", "Turtle", "Fibonacci", "Web Manual", "Other"];
-
-            const stats = {};
-            strategies.forEach(s => { stats[s] = { profit: 0, trades: 0, wins: 0, losses: 0 }; });
-
-            // 1. Tổng hợp từ Lịch sử đóng lệnh (Closed History) từ ngày 01/10/2026
-            const oct1Timestamp = new Date("2026-10-01T00:00:00").getTime() / 1000;
-            Object.keys(g_history || {}).forEach(k => {
-                const item = g_history[k] || {};
-                const closeTime = Number(item.close_time) || 0;
-                if(closeTime < oct1Timestamp) return; // Bỏ qua trước 01/10/2026
-
-                const p = Number(item.profit) || 0;
-                let strat = normalizeStrat(item.strategy || item.comment);
-                if(!stats[strat]) strat = "Other";
-
-                stats[strat].profit += p;
-                stats[strat].trades += 1;
-                if(p > 0) stats[strat].wins += 1;
-                else if(p < 0) stats[strat].losses += 1;
-            });
-
-            // 2. Tổng hợp từ Vị thế đang mở (Open Positions) để phản ánh tức thì
-            Object.keys(g_positions || {}).forEach(k => {
-                const item = g_positions[k] || {};
-                const p = Number(item.profit) || 0;
-                let strat = normalizeStrat(item.strategy);
-                if(!stats[strat]) strat = "Other";
-
-                stats[strat].profit += p;
-                stats[strat].trades += 1;
-                if(p > 0) stats[strat].wins += 1;
-                else if(p < 0) stats[strat].losses += 1;
-            });
-
-            let html = "";
-            strategies.forEach(stratKey => {
-                const data = stats[stratKey];
-                const p = data.profit, t = data.trades, w = data.wins, l = data.losses;
-                const winrate = t > 0 ? ((w / t) * 100).toFixed(1) : "0.0";
-                const pColor = p >= 0 ? "text-emerald-400" : "text-rose-400";
-                const pSign = p >= 0 ? "+" : "";
-
-                html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-2 font-bold text-white flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>${stratKey}</td>
-                    <td class="p-2 text-center font-mono"><span class="text-emerald-400 font-bold">${w}W</span> / <span class="text-rose-400 font-bold">${l}L</span></td>
-                    <td class="p-2 text-center font-mono text-slate-300">${t} lệnh</td>
-                    <td class="p-2 text-right font-mono font-bold ${pColor}">${pSign}$${p.toFixed(2)}</td>
-                    <td class="p-2 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] ${parseFloat(winrate) >= 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'} font-bold">${winrate}%</span></td>
-                </tr>`;
-            });
-            body.innerHTML = html;
+        function escapeHtml(v) {
+            return String(v??'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
         }
 
-        function renderHistoryAndStats() {
-            const keys = Object.keys(g_history);
-            let filtered = [];
+        function renderPerformance() {
+            const p = g_performance || {};
+            const wins = Number(p.wins)||0, losses=Number(p.losses)||0;
+            const net=Number(p.net_profit)||0, today=Number(p.today_pnl)||0;
+            const pf=Number(p.profit_factor)||0, dd=Number(p.max_drawdown)||0;
+            document.getElementById('stat-wins').innerHTML = `<span class="text-emerald-400">${wins}</span> / <span class="text-rose-400">${losses}</span>`;
+            document.getElementById('stat-winrate').innerText = `${(Number(p.win_rate)||0).toFixed(1)}%`;
+            const netEl=document.getElementById('stat-net-profit'); netEl.innerText=`${net>=0?'+':''}$${net.toFixed(2)}`; netEl.className=`text-sm font-black ${net>=0?'text-emerald-300':'text-rose-300'}`;
+            const dayEl=document.getElementById('stat-daily-profit'); dayEl.innerText=`${today>=0?'+':''}$${today.toFixed(2)}`; dayEl.className=`text-sm font-black ${today>=0?'text-emerald-300':'text-rose-300'}`;
+            document.getElementById('stat-profit-factor').innerText = pf>=999 ? '∞' : pf.toFixed(2);
+            document.getElementById('stat-max-dd').innerText = `-$${dd.toFixed(2)} (${(Number(p.max_drawdown_pct)||0).toFixed(2)}%)`;
+            document.getElementById('stat-trades').innerText = `${Number(p.trades)||0}`;
+            const start = p.stats_start || '01/10/2026';
+            document.getElementById('performance-source').innerText = `Nguồn MT5 · ${start} → hiện tại · Hôm nay ${today>=0?'+':''}$${today.toFixed(2)} (${(Number(p.today_pnl_pct)||0).toFixed(2)}%) · 8 lỗ/ngày`;
+            document.getElementById('performance-updated').innerText = p.updated_unix ? `Cập nhật ${new Date(Number(p.updated_unix)*1000).toLocaleTimeString('vi-VN')}` : '';
+        }
 
-            const oct1Timestamp = new Date("2026-10-01T00:00:00").getTime() / 1000;
-
-            keys.forEach(k => {
-                const item = g_history[k];
-                const closeTime = Number(item.close_time) || 0;
-                if(closeTime >= oct1Timestamp) {
-                    filtered.push(item);
-                }
-            });
-            filtered.sort((a, b) => (a.close_time || 0) - (b.close_time || 0));
-
-            let wins = 0, losses = 0, netProfit = 0, dailyProfit = 0;
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            let equityCurve = [];
-            let cumulativeProfit = 0;
-            let timeLabels = [];
-            let symbolProfits = { "XAUUSD": 0, "BTCUSD": 0, "USOIL": 0, "EURUSD": 0, "GBPUSD": 0, "EURGBP": 0, "USDJPY": 0 };
-
-            filtered.forEach(item => {
-                const p = Number(item.profit) || 0;
-                netProfit += p;
-                cumulativeProfit += p;
-                equityCurve.push(cumulativeProfit);
-
-                const cTime = item.close_time ? new Date(item.close_time * 1000) : new Date();
-                const timeStr = cTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-                timeLabels.push(timeStr);
-
-                const dateStr = cTime.toISOString().split('T')[0];
-                if(dateStr === todayStr) {
-                    dailyProfit += p;
-                }
-
-                if(p > 0) wins++;
-                else if(p < 0) losses++;
-
-                const sym = item.symbol || "";
-                if(symbolProfits[sym] !== undefined) {
-                    symbolProfits[sym] += p;
-                }
-            });
-
-            renderStrategyStatsTable();
-
-            const totalTrades = wins + losses;
-            const winrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : "0.0";
-
-            document.getElementById('stat-wins').innerText = wins;
-            document.getElementById('stat-losses').innerText = losses;
-            document.getElementById('stat-winrate').innerText = `${winrate}%`;
-
-            const netEl = document.getElementById('stat-net-profit');
-            netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-            netEl.className = `text-sm sm:text-base font-bold ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-            const dailyEl = document.getElementById('stat-daily-profit');
-            dailyEl.innerText = `${dailyProfit >= 0 ? '+' : ''}$${dailyProfit.toFixed(2)}`;
-            dailyEl.className = `text-sm sm:text-base font-bold ${dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-            renderPerformanceCharts(timeLabels, equityCurve, symbolProfits);
+        function renderPerformanceChartsFromHistory() {
+            const startTs = Number(g_performance?.stats_start_unix)||0;
+            const filtered = Object.values(g_history||{}).filter(x => Number(x.close_time||0) >= startTs).sort((a,b)=>Number(a.close_time||0)-Number(b.close_time||0));
+            let cum=0; const labels=[], curve=[]; const syms={"XAUUSD":0,"BTCUSD":0,"USOIL":0,"EURUSD":0,"GBPUSD":0,"EURGBP":0,"USDJPY":0};
+            filtered.forEach(x=>{ const p=Number(x.profit)||0; cum+=p; curve.push(cum); labels.push(new Date(Number(x.close_time||0)*1000).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})); if(syms[x.symbol]!==undefined) syms[x.symbol]+=p; });
+            renderPerformanceCharts(labels.length?labels:['01/10'], curve.length?curve:[0], syms);
         }
 
         function renderPerformanceCharts(labels, equityData, symbolProfits) {
             const ctxEquity = document.getElementById('equityChart').getContext('2d');
             if(equityChartInstance) equityChartInstance.destroy();
-
-            equityChartInstance = new Chart(ctxEquity, {
-                type: 'line',
-                data: {
-                    labels: labels.length > 0 ? labels : ['00:00'],
-                    datasets: [{
-                        label: 'Lợi Nhuận Tích Lũy ($)',
-                        data: equityData.length > 0 ? equityData : [0],
-                        borderColor: '#38bdf8',
-                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { display: false },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
+            equityChartInstance = new Chart(ctxEquity,{type:'line',data:{labels,datasets:[{label:'LN tích lũy ($)',data:equityData,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,.1)',fill:true,tension:.3,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{display:false},y:{grid:{color:'rgba(51,65,85,.3)'},ticks:{color:'#94a3b8',font:{size:9}}}},plugins:{legend:{display:false}}}});
             const ctxSymbol = document.getElementById('symbolProfitChart').getContext('2d');
             if(symbolChartInstance) symbolChartInstance.destroy();
-
-            const symLabels = Object.keys(symbolProfits);
-            const symValues = Object.values(symbolProfits);
-            const bgColors = symValues.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)');
-
-            symbolChartInstance = new Chart(ctxSymbol, {
-                type: 'bar',
-                data: {
-                    labels: symLabels,
-                    datasets: [{
-                        label: 'Lợi Nhuận Theo Cặp ($)',
-                        data: symValues,
-                        backgroundColor: bgColors,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
+            const vals=Object.values(symbolProfits); const bg=vals.map(v=>v>=0?'rgba(16,185,129,.7)':'rgba(244,63,94,.7)');
+            symbolChartInstance = new Chart(ctxSymbol,{type:'bar',data:{labels:Object.keys(symbolProfits),datasets:[{label:'P/L theo cặp ($)',data:vals,backgroundColor:bg,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#94a3b8',font:{size:9}},grid:{display:false}},y:{grid:{color:'rgba(51,65,85,.3)'},ticks:{color:'#94a3b8',font:{size:9}}}},plugins:{legend:{display:false}}}});
         }
 
-        window.addEventListener('resize', () => { drawFiboCanvas(); });
+        renderRiskState(); renderBestSignals(); renderEconomicCalendar(); renderPerformance(); renderSymbolCaps();
+        window.addEventListener('resize', () => { drawFiboCanvas(); renderSymbolCaps(); });
         setInterval(renderConnectionState, 5000);
     </script>
 </body>
