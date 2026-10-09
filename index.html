@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro 8.40</title>
+    <title>Gatekeeper Pro 8.70</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,36 +57,40 @@
             .sticky-actions { position: sticky; bottom: 8px; z-index: 20; }
         }
     
-        /* READABILITY V8.50 */
-        body { font-size: 14px !important; line-height: 1.4; }
-        h1 { font-size: 1.08rem !important; }
-        h2 { font-size: 0.98rem !important; }
-        p, td, th, label, button, select, input { line-height: 1.35 !important; }
-        td, th { font-size: 0.82rem !important; }
-        table span { font-size: 0.78rem !important; }
-        .text-[8px] { font-size: 0.68rem !important; }
-        .text-[9px] { font-size: 0.72rem !important; }
-        .text-[10px] { font-size: 0.78rem !important; }
-        .text-[11px] { font-size: 0.82rem !important; }
-        .text-xs { font-size: 0.86rem !important; }
-        .text-sm { font-size: 0.94rem !important; }
-        .text-base { font-size: 1rem !important; }
-        button, select, input { min-height: 32px; }
-        .tab-btn { font-size: 0.76rem !important; min-height: 30px; }
+        /* Typography: compact desktop, comfortably readable on phones. */
+        body { font-size: 11.8px !important; line-height: 1.34; }
+        h1 { font-size: .88rem !important; }
+        h2 { font-size: .79rem !important; }
+        p, td, th, label, button, select, input { line-height: 1.3 !important; }
+        td, th { font-size: .68rem !important; }
+        table span { font-size: .66rem !important; }
+        .text-\[8px\] { font-size: .58rem !important; }
+        .text-\[9px\] { font-size: .60rem !important; }
+        .text-\[10px\] { font-size: .64rem !important; }
+        .text-\[11px\] { font-size: .70rem !important; }
+        .text-xs { font-size: .71rem !important; }
+        .text-sm { font-size: .79rem !important; }
+        .text-base { font-size: .85rem !important; }
+        .text-xl { font-size: .94rem !important; }
+        button, select, input { min-height: 28px; }
+        .tab-btn { font-size: .67rem !important; min-height: 27px; padding-left: .40rem !important; padding-right: .40rem !important; }
         .signal-card { min-height: 0; }
-        .score-ring { min-width: 42px; min-height: 42px; }
+        .score-ring { min-width: 35px; min-height: 35px; border-radius: 10px; }
         @media (max-width: 640px) {
-            body { font-size: 13.5px !important; }
-            td, th { font-size: 0.78rem !important; }
-            .tab-btn { font-size: 0.73rem !important; }
-            button, select, input { min-height: 32px; }
+            body { font-size: 11.3px !important; }
+            td, th { font-size: .65rem !important; }
+            .text-\[8px\] { font-size: .56rem !important; }
+            .text-\[9px\] { font-size: .58rem !important; }
+            .text-\[10px\] { font-size: .61rem !important; }
+            .tab-btn { font-size: .64rem !important; min-height: 27px; }
+            button, select, input { min-height: 29px; }
         }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-12">
     <div class="container mx-auto px-2 py-2 sm:px-4 sm:py-4 max-w-7xl space-y-3">
         
-        <!-- Header & Banner Cảnh Báo -->
+        <!-- Header -->
         <div class="flex items-center justify-between glass-card p-2.5 sm:p-4 rounded-xl">
             <div class="flex items-center space-x-2.5">
                 <div class="relative flex items-center justify-center">
@@ -100,7 +104,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.50</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.70</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8</p>
                 </div>
@@ -122,17 +126,6 @@
                     <p id="status-message" class="text-xs font-bold"></p>
                 </div>
                 <span id="status-time" class="text-[9px] text-slate-400 font-medium"></span>
-            </div>
-        </div>
-
-        <!-- CẢNH BÁO -->
-        <div class="glass-card p-2.5 rounded-xl border border-amber-500/25" id="alerts-panel">
-            <div class="flex items-center justify-between gap-2 mb-1.5">
-                <div><h2 class="text-sm font-bold text-amber-300 uppercase tracking-wide">Cảnh Báo</h2><div class="text-[9px] text-slate-500">Tín hiệu mới · News Guard · Max Volume · kết nối · lệnh bị chặn</div></div>
-                <button id="notify-permission-btn" onclick="enableBrowserNotifications()" class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300">Bật thông báo</button>
-            </div>
-            <div id="alert-list" class="space-y-1">
-                <div class="text-[11px] text-slate-500">Chưa có cảnh báo mới.</div>
             </div>
         </div>
 
@@ -180,6 +173,7 @@
                     <button onclick="switchStratTab('wyckoff')" id="tab-wyckoff" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Wyckoff</button>
                     <button onclick="switchStratTab('amt')" id="tab-amt" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">AMT/VWAP</button>
                     <button onclick="switchStratTab('turtle')" id="tab-turtle" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Turtle</button>
+                    <button onclick="switchStratTab('fibo')" id="tab-fibo" class="tab-btn text-[10px] px-2 py-0.5 rounded text-slate-400 transition">Fibonacci</button>
                 </div>
             </div>
 
@@ -197,55 +191,6 @@
             </div>
         </div>
 
-        <!-- WATCHLIST FIBONACCI & CHART CANVAS -->
-        <div class="glass-card p-3 rounded-xl border border-amber-500/30">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2.5">
-                <h2 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
-                    Watchlist & Chart Fibonacci + Hợp Lưu EMA
-                </h2>
-                <div class="flex items-center space-x-1.5">
-                    <label class="text-[10px] text-slate-300 font-bold">Xem Biểu Đồ:</label>
-                    <select id="fibo-chart-symbol" onchange="drawFiboCanvas()" class="glass-input rounded px-2 py-0.5 text-xs font-bold text-amber-400 outline-none">
-                        <option value="XAUUSD">XAUUSD</option>
-                        <option value="BTCUSD">BTCUSD</option>
-                        <option value="USOIL">USOIL</option>
-                        <option value="EURUSD">EURUSD</option>
-                        <option value="GBPUSD">GBPUSD</option>
-                        <option value="EURGBP">EURGBP</option>
-                        <option value="USDJPY">USDJPY</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto no-scrollbar mb-3">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="p-1.5">Cặp Tiền</th>
-                            <th class="p-1.5">Xu Hướng</th>
-                            <th class="p-1.5">Golden Zone (50-61.8%)</th>
-                            <th class="p-1.5">Nến Đảo Chiều</th>
-                            <th class="p-1.5">Hợp Lưu EMA</th>
-                            <th class="p-1.5">Score</th>
-                            <th class="p-1.5">Trạng Thái</th>
-                            <th class="p-1.5 text-right">Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fibo-watchlist-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="8" class="text-center py-3 text-slate-500 font-medium text-[11px]">Đang tải tín hiệu...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mb-2 rounded-lg border border-amber-500/20 bg-amber-950/20 p-2 text-[9px] sm:text-[10px] text-slate-300">
-                <b class="text-amber-300">Fibo Score 0–100</b> = điểm chất lượng, <b>không phải % thắng</b>: Golden Zone 30 + Sweep 20 + nến đảo chiều 20 + EMA 15 + Trend 15. <b>≥71 (tức >70)</b> mới đủ ngưỡng kỹ thuật; vẫn phải có Entry + SL + Lot + không News Guard + còn Max Volume.
-            </div>
-            <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-xl border border-slate-800 p-2 overflow-hidden shadow-inner flex items-center justify-center">
-                <canvas id="fiboCanvas" class="w-full h-full block"></canvas>
-            </div>
-        </div>
-
         <!-- ĐẶT LỆNH KỶ LUẬT -->
         <div class="glass-card p-3 rounded-xl border border-blue-500/30">
             <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center justify-between">
@@ -255,9 +200,7 @@
                 </span>
                 <span id="live-symbol-price" class="text-[11px] font-mono font-bold text-cyan-400">ASK: -- | BID: --</span>
             </h2>
-            <div class="text-[9px] sm:text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-lg px-2 py-1.5 mb-2">Risk 10%/lệnh • EA Leverage 50/25/8 • LIMIT phải đúng phía giá • 8 lỗ/ngày → nghỉ • -20%/+20% → khóa.</div>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2.5">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2.5">
                 <div>
                     <label class="block text-[10px] text-slate-300 mb-0.5 font-bold uppercase">Cặp tiền</label>
                     <select id="order-symbol" onchange="onOrderSymbolOrTermChange()" class="w-full glass-input rounded-lg p-1.5 text-xs font-semibold outline-none">
@@ -419,20 +362,15 @@
         let g_selectedStrategyTag = "Web Manual";
         let g_selectedSignalScore = 0;
         let g_selectedSignalEntry = 0;
-        let g_alertItems = [];
-        let g_alertKeys = new Set();
-        let g_seenSignalStates = {};
-        let g_seenNewsStates = {};
 
         let equityChartInstance = null;
         let symbolChartInstance = null;
 
         db.ref('account').on('value', snap => { g_account = snap.val() || {}; renderAccount(); });
         db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
-        db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; renderFiboWatchlist(); drawFiboCanvas(); });
+        db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; if(g_activeStratTab === 'fibo') renderFiboSignalTable(); renderBestSignals(); });
         db.ref('multi_strategy_signals').on('value', snap => {
             const nextSignals = snap.val() || {};
-            checkSignalAlerts(nextSignals);
             g_multiSignals = nextSignals;
             renderMultiStrategy();
         });
@@ -443,12 +381,10 @@
         db.ref('last_status').on('value', snap => {
             const data = snap.val();
             renderStatusBanner(data);
-            if(data && data.message) pushAlert(data.status === 'SUCCESS' ? 'success' : 'error', data.status === 'SUCCESS' ? 'MT5' : 'Cảnh báo MT5', data.message, false);
         });
         db.ref('bridge_status').on('value', snap => { g_bridgeStatus = snap.val() || {}; renderConnectionState(); });
         db.ref('risk_state').on('value', snap => {
             const nextRisk = snap.val() || {};
-            checkRiskAlerts(nextRisk);
             g_riskState = nextRisk;
             renderRiskState();
         });
@@ -478,95 +414,9 @@
         }
 
 
-        let g_lastConnAlert=0;
-        function checkVolumeAlerts() {
-            Object.keys(g_prices||{}).forEach(sym => {
-                const d=g_prices[sym]||{};
-                const max=Number(d.max_vol)||0, rem=Number(d.remaining_vol)||0;
-                if(max>0 && rem>0 && rem/max <= 0.10)
-                    pushAlert('warning','Gần đầy Max Volume',`${sym}: còn ${rem.toFixed(2)}L / ${max.toFixed(2)}L.` , false);
-                if(max>0 && rem<=0)
-                    pushAlert('error','Đã đầy Max Volume',`${sym}: tổng lot mở + chờ đã chạm giới hạn.` , false);
-            });
-        }
-
-        function checkConnectionAlert() {
-            const hb=Number(g_bridgeStatus.timestamp||0)*1000;
-            const offline=!g_firebaseConnected || !hb || (Date.now()-hb>25000);
-            if(offline && Date.now()-g_lastConnAlert>300000) {
-                g_lastConnAlert=Date.now();
-                pushAlert('error','Kết nối',g_firebaseConnected?'MT5 đang mất heartbeat.':'Mất kết nối Firebase.');
-            }
-        }
-
         function renderRiskState() {
-            // Risk details run in Firebase/EA; UI chỉ nhận cảnh báo cần thiết.
+            // Risk state is enforced by the EA; no separate alert panel is shown.
         }
-
-        function pushAlert(level, title, message, notify=true) {
-            const clean = String(message || '').trim();
-            if(!clean) return;
-            const key = `${level}|${title}|${clean}`;
-            const now = Date.now();
-            const bucket = `${key}|${Math.floor(now/60000)}`;
-            if(g_alertKeys.has(bucket)) return;
-            g_alertKeys.add(bucket);
-            g_alertItems.unshift({level, title, message:clean, time:now});
-            g_alertItems = g_alertItems.slice(0, 8);
-            renderAlertList();
-            if(notify && document.visibilityState === 'hidden') browserNotify(title, clean);
-        }
-
-        function renderAlertList() {
-            const el = document.getElementById('alert-list');
-            if(!el) return;
-            if(!g_alertItems.length) { el.innerHTML = '<div class="text-[11px] text-slate-500">Chưa có cảnh báo mới.</div>'; return; }
-            el.innerHTML = g_alertItems.map(a => {
-                const tone = a.level === 'error' ? 'border-rose-500/40 bg-rose-950/20 text-rose-200' : a.level === 'success' ? 'border-emerald-500/30 bg-emerald-950/15 text-emerald-200' : 'border-amber-500/30 bg-amber-950/15 text-amber-200';
-                return `<div class="rounded-lg border px-2 py-1.5 ${tone}"><div class="flex items-center justify-between gap-2"><b class="text-[11px]">${a.title}</b><span class="text-[9px] opacity-70">${new Date(a.time).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</span></div><div class="text-[11px] mt-0.5">${a.message}</div></div>`;
-            }).join('');
-        }
-
-        async function enableBrowserNotifications() {
-            if(!('Notification' in window)) { alert('Trình duyệt không hỗ trợ thông báo.'); return; }
-            try {
-                const permission = await Notification.requestPermission();
-                const btn=document.getElementById('notify-permission-btn');
-                if(btn) btn.innerText = permission === 'granted' ? 'Thông báo: Bật' : 'Thông báo: Chưa cấp';
-                if(permission === 'granted') browserNotify('Gatekeeper Pro','Đã bật thông báo cảnh báo.');
-            } catch(e) {}
-        }
-
-        function browserNotify(title, body) {
-            if('Notification' in window && Notification.permission === 'granted') new Notification(title,{body});
-        }
-
-        function checkSignalAlerts(next) {
-            Object.keys(next || {}).forEach(sym => {
-                const d=next[sym]||{};
-                const score=Number(d.best_score)||0;
-                const prev=g_seenSignalStates[sym];
-                const was=prev ? Number(prev.score)||0 : 0;
-                const dir=d.best_direction||'';
-                const strat=d.best_strategy||'';
-                if(score >= 71 && was < 71 && d.best_order_type)
-                    pushAlert('success','Tín hiệu mới',`${sym} ${dir} · ${strat} · Score ${score} · Entry ${fmtPrice(sym,Number(d.best_entry)||0)}`);
-                if(score >= 71 && d.news_blocked)
-                    pushAlert('warning','News Guard',`${sym}: đang chặn quanh tin quan trọng.`);
-                if(score >= 71 && !d.best_order_type && d.best_entry > 0)
-                    pushAlert('warning','Chờ giá',`${sym}: tín hiệu đủ điểm nhưng Entry chưa đúng phía giá để đặt LIMIT.`);
-                if(Number(d.best_score||0) > 0 && Number(d.best_score||0) < 71 && was >= 71)
-                    pushAlert('warning','Tín hiệu giảm điểm',`${sym}: Score giảm còn ${score}. Không vào theo tín hiệu cũ.`);
-                g_seenSignalStates[sym]={score,direction:dir,strategy:strat};
-            });
-        }
-
-        function checkRiskAlerts(next) {
-            const locked=!!next.trading_locked;
-            const prev=!!g_riskState.trading_locked;
-            if(locked && !prev) pushAlert('error','Kỷ luật',next.lock_reason||'EA đã khóa giao dịch.');
-        }
-
 
         function getSymbolDecimals(symbol) {
             const d = Number(g_prices?.[symbol]?.digits);
@@ -686,6 +536,11 @@
             if(tableWrap) tableWrap.classList.remove('hidden');
             if(topGrid) topGrid.classList.add('hidden');
 
+            if(g_activeStratTab === 'fibo') {
+                renderFiboSignalTable();
+                return;
+            }
+
             if(g_activeStratTab === 'smc') {
                 head.innerHTML = `<th class="p-1.5">Cặp Tiền</th><th class="p-1.5">Tín Hiệu SMC</th><th class="p-1.5">Entry Gợi Ý</th><th class="p-1.5">SL</th><th class="p-1.5">TP</th><th class="p-1.5 text-right">Thao Tác</th>`;
                 let html = "";
@@ -788,9 +643,11 @@
                 syms.forEach(s => {
                     const data = g_multiSignals[s] || {};
                     const sig = data.amt_signal || "BALANCED";
-                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-300 font-bold">BALANCED</span>`;
-                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">Break VAH</span>`;
-                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">Break VAL</span>`;
+                    let badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-300 font-bold">BALANCED / WAIT</span>`;
+                    if(sig.includes("BULLISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">BUY · VAH</span>`;
+                    else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 font-bold">SELL · VAL</span>`;
+                    else if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">${sig.replace(/_/g,' ')}</span>`;
+                    else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">${sig.replace(/_/g,' ')}</span>`;
 
                     let autoVol = getSignalVolume(s, data, 'amt_lot');
                     html += `<tr class="hover:bg-slate-800/40">
@@ -799,7 +656,7 @@
                         <td class="p-1.5 font-mono text-amber-400 font-bold">${fmtPrice(s, data.vwap)}</td>
                         <td class="p-1.5 font-mono text-slate-300">${fmtPrice(s, data.vah)} - ${fmtPrice(s, data.val)}</td>
                         <td class="p-1.5 text-right">
-                            ${(Number(data.amt_score||0) >= 71 && data.amt_order_type && Number(data.amt_entry||0) > 0) ? `<button onclick="fillOrderForm('${s}', '${String(data.amt_signal||'').includes('SELL') || String(data.amt_signal||'').includes('BEARISH') ? 'SELL_LIMIT' : 'BUY_LIMIT'}', ${Number(data.amt_entry||data.vwap||0)}, ${Number(data.amt_sl||0)}, ${Number(data.amt_tp||0)}, ${autoVol}, 'AMT/VWAP')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">VWAP · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
+                            ${(Number(data.amt_score||0) >= 71 && ['BUY_LIMIT','SELL_LIMIT'].includes(data.amt_order_type) && Number(data.amt_entry||0) > 0 && Number(data.amt_sl||0) > 0 && Number(autoVol||0) > 0) ? `<button onclick="fillOrderForm('${s}', '${data.amt_order_type}', ${Number(data.amt_entry||0)}, ${Number(data.amt_sl||0)}, ${Number(data.amt_tp||0)}, ${autoVol}, 'AMT/VWAP')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px]">Vào lệnh · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-500">Chờ giá hợp lệ</span>`}
                         </td>
                     </tr>`;
                 });
@@ -857,165 +714,49 @@
             }).join('');
         }
 
-        function renderFiboWatchlist() {
-            const body = document.getElementById('fibo-watchlist-body');
+        function renderFiboSignalTable() {
+            const head = document.getElementById('multi-strat-table-head');
+            const body = document.getElementById('multi-strat-table-body');
+            if(!head || !body) return;
             const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
-
-            let html = "";
-            syms.forEach(s => {
-                const data = g_fiboSignals[s];
-                if(!data) {
-                    html += `<tr class="hover:bg-slate-800/40"><td class="p-1.5 font-bold text-white">${s}</td><td colspan="7" class="p-1.5 text-slate-500 text-[11px]">Đang chờ dữ liệu...</td></tr>`;
-                    return;
-                }
-
-                const trendBadge = data.trend === "UP" 
-                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">TĂNG</span>`
-                    : `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">GIẢM</span>`;
-
-                const inGZBadge = data.in_golden_zone 
-                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold animate-pulse">Golden Zone</span>`
-                    : `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-400 font-bold">Ngoài Vùng</span>`;
-
-                let candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Chưa Có</span>`;
-                const revPattern = data.reversal_candle || "NONE";
-                if(revPattern.includes("BULL")) {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">${revPattern}</span>`;
-                } else if(revPattern.includes("BEAR")) {
-                    candleBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">${revPattern}</span>`;
-                }
-
-                let emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-800 text-slate-500 font-bold">Không</span>`;
-                if(data.ema_confluence && data.ema_confluence !== "NONE") {
-                    emaBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">${data.ema_confluence}</span>`;
-                }
-
-                const gzMin = Math.min(data.fib_50 || 0, data.fib_618 || 0);
-                const gzMax = Math.max(data.fib_50 || 0, data.fib_618 || 0);
-                const gzRange = (gzMin > 0 && gzMax > 0) ? `${fmtPrice(s, gzMin)} - ${fmtPrice(s, gzMax)}` : "Đang tính...";
-                const fiboScore = Number(data.fibo_score) || 0;
-                const scoreBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] ${fiboScore >= 71 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'} font-black">${fiboScore}</span>`;
-                let autoVol = getSignalVolume(s, data, 'fibo_lot');
-                const action = data.trend === "UP" ? "BUY_LIMIT" : "SELL_LIMIT";
-                const canEnter = fiboScore >= 71 && data.fibo_order_type && Number(data.fibo_entry || data.fib_618 || 0) > 0 && Number(data.fibo_sl || data.fib_786 || 0) > 0 && autoVol > 0 && !data.news_blocked;
-                const entry = Number(data.fibo_entry || data.fib_618 || 0);
-                const sl = Number(data.fibo_sl || data.fib_786 || 0);
-                const tp = Number(data.fibo_tp || data.fib_0 || 0);
-
-                html += `<tr class="hover:bg-slate-800/40">
-                    <td class="p-1.5 font-bold text-white">${s}</td>
-                    <td class="p-1.5">${trendBadge}</td>
-                    <td class="p-1.5 font-mono text-amber-400 font-bold">${gzRange}</td>
-                    <td class="p-1.5">${candleBadge}</td>
-                    <td class="p-1.5">${emaBadge}</td>
-                    <td class="p-1.5">${scoreBadge}</td>
-                    <td class="p-1.5"><div>${inGZBadge}</div><div class="text-[8px] text-slate-500 max-w-[220px] whitespace-normal">${data.wait_reason || data.news_note || ""}</div></td>
-                    <td class="p-1.5 text-right">
-                        ${canEnter ? `<button onclick="fillOrderForm('${s}', data.fibo_order_type || resolveSignalOrderType(s, data.trend === 'UP'?'BUY':'SELL', entry), ${entry}, ${sl}, ${tp}, ${autoVol}, 'Fibonacci')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded text-[9px]">Fibo · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
-                    </td>
+            head.innerHTML = `<th class="p-2">Mã</th><th class="p-2">Xu hướng</th><th class="p-2">Vùng Fibo</th><th class="p-2">Score</th><th class="p-2">Entry</th><th class="p-2">SL</th><th class="p-2">TP</th><th class="p-1.5 text-right">Thao tác</th>`;
+            body.innerHTML = syms.map(sym => {
+                const d = g_fiboSignals[sym] || {};
+                const multi = g_multiSignals[sym] || {};
+                const rawScore = Number(d.fibo_score ?? multi.fibo_score) || 0;
+                const penalty = Number(d.news_penalty ?? multi.news_penalty) || 0;
+                const score = Math.max(0, rawScore - penalty);
+                const orderType = d.fibo_order_type || multi.fibo_order_type || '';
+                const entry = Number(d.fibo_entry || multi.fibo_entry || 0);
+                const sl = Number(d.fibo_sl || multi.fibo_sl || 0);
+                const tp = Number(d.fibo_tp || multi.fibo_tp || 0);
+                const lot = getSignalVolume(sym, d, 'fibo_lot') || getSignalVolume(sym, multi, 'fibo_lot');
+                const blocked = !!d.news_blocked || !!multi.news_blocked;
+                const validType = ['BUY_LIMIT','SELL_LIMIT','BUY','SELL'].includes(orderType);
+                const canEnter = score >= 71 && validType && entry > 0 && sl > 0 && tp > 0 && lot > 0 && !blocked;
+                const trend = d.trend === 'UP' ? 'TĂNG' : d.trend === 'DOWN' ? 'GIẢM' : '—';
+                const trendBadge = d.trend === 'UP'
+                    ? `<span class="px-2 py-1 rounded badge-buy font-bold">TĂNG</span>`
+                    : d.trend === 'DOWN' ? `<span class="px-2 py-1 rounded badge-sell font-bold">GIẢM</span>`
+                    : `<span class="text-slate-500">—</span>`;
+                const inZone = !!d.in_golden_zone;
+                const zoneBadge = inZone
+                    ? `<span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Golden Zone</span>`
+                    : `<span class="text-slate-500">Chờ vùng</span>`;
+                let status = d.wait_reason || d.fibo_score_detail || '';
+                if(blocked) status = d.news_note || 'News Guard';
+                else if(!validType && score >= 71) status = 'Điểm đạt nhưng Entry/giá chưa hợp lệ';
+                return `<tr class="hover:bg-slate-800/40">
+                    <td class="p-1.5 font-bold text-white">${sym}</td>
+                    <td class="p-2">${trendBadge}</td>
+                    <td class="p-2">${zoneBadge}<div class="text-[9px] muted mt-1">${status}</div></td>
+                    <td class="p-2"><span class="px-2 py-1 rounded font-bold ${score >= 71 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${score}/100</span></td>
+                    <td class="p-2 font-mono text-cyan-300">${['BUY','SELL'].includes(orderType) ? `${orderType} · ${fmtPrice(sym,entry)}` : fmtPrice(sym,entry)}</td>
+                    <td class="p-2 font-mono text-rose-300">${fmtPrice(sym,sl)}</td>
+                    <td class="p-2 font-mono text-emerald-300">${fmtPrice(sym,tp)}</td>
+                    <td class="p-1.5 text-right">${canEnter ? `<button onclick="fillOrderForm('${sym}','${orderType}',${entry},${sl},${tp},${lot},'Fibonacci')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded">Vào lệnh · ${lot.toFixed(2)}L</button>` : `<span class="text-[10px] text-slate-500">Chờ điều kiện</span>`}</td>
                 </tr>`;
-            });
-            body.innerHTML = html;
-        }
-
-        function drawFiboCanvas() {
-            const sym = document.getElementById('fibo-chart-symbol').value;
-            const canvas = document.getElementById('fiboCanvas');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            const parent = canvas.parentElement;
-            canvas.width = parent.clientWidth || 600;
-            canvas.height = parent.clientHeight || 320;
-
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const data = g_fiboSignals[sym];
-            if(!data || data.swing_high === undefined || data.swing_low === undefined || data.swing_high === data.swing_low) {
-                ctx.fillStyle = "#94a3b8";
-                ctx.font = "bold 13px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(`Đang tải biểu đồ Fibonacci cho ${sym}...`, canvas.width / 2, canvas.height / 2);
-                return;
-            }
-
-            ctx.textAlign = "left";
-            ctx.strokeStyle = "rgba(51, 65, 85, 0.25)";
-            ctx.lineWidth = 1;
-            for(let x = 0; x < canvas.width; x += 50) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-
-            const levels = [
-                { name: "0.0%", val: data.fib_0, color: "#94a3b8" },
-                { name: "38.2%", val: data.fib_382, color: "#818cf8" },
-                { name: "50.0%", val: data.fib_50, color: "#f59e0b" },
-                { name: "61.8% (Golden)", val: data.fib_618, color: "#f59e0b" },
-                { name: "78.6%", val: data.fib_786, color: "#f43f5e" },
-                { name: "100.0%", val: data.fib_100, color: "#94a3b8" }
-            ];
-
-            const maxVal = Math.max(data.swing_high, data.swing_low) * 1.002;
-            const minVal = Math.min(data.swing_high, data.swing_low) * 0.998;
-            const range = maxVal - minVal;
-
-            function getY(val) {
-                if(range <= 0) return canvas.height / 2;
-                return canvas.height - ((val - minVal) / range) * (canvas.height - 40) - 20;
-            }
-
-            const y50 = getY(data.fib_50);
-            const y618 = getY(data.fib_618);
-            const gzTop = Math.min(y50, y618);
-            const gzHeight = Math.abs(y618 - y50);
-
-            const grad = ctx.createLinearGradient(0, gzTop, 0, gzTop + gzHeight);
-            grad.addColorStop(0, "rgba(245, 158, 11, 0.35)");
-            grad.addColorStop(1, "rgba(245, 158, 11, 0.1)");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, gzTop, canvas.width, gzHeight);
-
-            ctx.fillStyle = "#f59e0b";
-            ctx.font = "bold 11px sans-serif";
-            ctx.fillText("GOLDEN ZONE (50% - 61.8%)", canvas.width / 2 - 90, gzTop + gzHeight / 2 + 4);
-
-            levels.forEach(lvl => {
-                if(lvl.val !== undefined && lvl.val !== null && !isNaN(lvl.val)) {
-                    const y = getY(lvl.val);
-                    ctx.strokeStyle = lvl.color;
-                    ctx.lineWidth = (lvl.name.includes("50") || lvl.name.includes("61.8")) ? 2 : 1;
-                    ctx.setLineDash((lvl.name.includes("50") || lvl.name.includes("61.8")) ? [] : [4, 4]);
-
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(canvas.width, y);
-                    ctx.stroke();
-
-                    ctx.fillStyle = lvl.color;
-                    ctx.font = "bold 10px sans-serif";
-                    ctx.fillText(`${lvl.name}: ${fmtPrice(sym, lvl.val)}`, 10, y - 4);
-                }
-            });
-
-            if(g_prices[sym]) {
-                const currP = (data.trend === "UP") ? g_prices[sym].bid : g_prices[sym].ask;
-                const curY = getY(currP);
-
-                ctx.strokeStyle = "#10b981";
-                ctx.lineWidth = 2;
-                ctx.setLineDash([]);
-                ctx.beginPath();
-                ctx.moveTo(0, curY);
-                ctx.lineTo(canvas.width, curY);
-                ctx.stroke();
-
-                ctx.fillStyle = "#10b981";
-                ctx.fillRect(canvas.width - 130, curY - 10, 125, 20);
-                ctx.fillStyle = "#000000";
-                ctx.font = "bold 10px sans-serif";
-                ctx.fillText(`Price: ${fmtPrice(sym, currP)}`, canvas.width - 125, curY + 4);
-            }
+            }).join('');
         }
 
         function calculateDefaultSLTP(symbol, orderType, term, entryPrice) {
@@ -1092,7 +833,12 @@
         function getStrategyScore(symbol, strategyName) {
             const d = g_multiSignals?.[symbol] || {};
             const s = String(strategyName || "").toUpperCase();
-            if(s.includes("FIBO")) return Number(g_fiboSignals?.[symbol]?.fibo_score || d.fibo_score || 0);
+            if(s.includes("FIBO")) {
+                const f = g_fiboSignals?.[symbol] || {};
+                const raw = Number(f.fibo_score ?? d.fibo_score) || 0;
+                const penalty = Number(f.news_penalty ?? d.news_penalty) || 0;
+                return Math.max(0, raw - penalty);
+            }
             if(s.includes("SMC")) return Number(d.smc_score || 0);
             if(s.includes("MOM")) return Number(d.mom_score || 0);
             if(s.includes("BREAKOUT") || s.includes("RETEST")) return Number(d.bo_score || 0);
@@ -1128,7 +874,9 @@
             const tpInput = document.getElementById('order-tp');
             let decimals = getSymbolDecimals(symbol);
 
-            if(price > 0) document.getElementById('order-price').value = price.toFixed(decimals);
+            const priceInput = document.getElementById('order-price');
+            if(type.includes('LIMIT') && price > 0) priceInput.value = price.toFixed(decimals);
+            else priceInput.value = '';
             
             if(sl > 0) {
                 slInput.value = sl.toFixed(decimals); slInput.dataset.manual = "true";
@@ -1376,10 +1124,8 @@
         }
 
         renderRiskState(); renderBestSignals(); renderPerformance(); renderSymbolCaps();
-        window.addEventListener('resize', () => { drawFiboCanvas(); renderSymbolCaps(); });
+        window.addEventListener('resize', () => { renderSymbolCaps(); });
         setInterval(renderConnectionState, 5000);
-        setInterval(checkConnectionAlert, 15000);
-        setInterval(checkVolumeAlerts, 20000);
     </script>
 </body>
 </html>
