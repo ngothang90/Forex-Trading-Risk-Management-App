@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro 8.72</title>
+    <title>Gatekeeper Pro 8.73</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -104,9 +104,9 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.72</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.73</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8</p>
+                    <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8 · giới hạn margin toàn tài khoản</p>
                 </div>
             </div>
             <div class="flex flex-col items-end space-y-1">
@@ -146,7 +146,7 @@
             <div class="glass-card p-2.5 rounded-xl">
                 <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy EA</span>
                 <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:8 (EA)</p>
-                <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA hiệu dụng theo Balance</span>
+                <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA leverage theo Balance; lot có trần theo giá tài sản</span>
             </div>
         </div>
 
@@ -631,7 +631,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${(Number(data.smc_score)||0) >= 71 && data.smc_order_type && data.smc_entry > 0 && data.smc_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${smcType}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.smc_score)||0) >= 71 && data.smc_order_type && data.smc_entry > 0 && data.smc_sl > 0 && autoVol > 0 ? `<button onclick="fillOrderForm('${s}', '${smcType}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -657,7 +657,7 @@
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 71 && data.mom_order_type ? `<button onclick="fillOrderForm('${s}', '${momType}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 && data.mom_order_type && autoVol > 0 ? `<button onclick="fillOrderForm('${s}', '${momType}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -683,7 +683,7 @@
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 71 && data.bo_order_type ? `<button onclick="fillOrderForm('${s}', '${boType}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 && data.bo_order_type && autoVol > 0 ? `<button onclick="fillOrderForm('${s}', '${boType}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -707,7 +707,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_order_type && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${wyckoffType}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_order_type && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 && autoVol > 0 ? `<button onclick="fillOrderForm('${s}', '${wyckoffType}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -746,14 +746,14 @@
                     if(sig.includes("BUY")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-buy font-bold">BUY (Turtle)</span>`;
                     else if(sig.includes("SELL")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (Turtle)</span>`;
 
-                    let autoVol = Math.max(0.01, getSignalVolume(s, data, 'turtle_lot'));
+                    let autoVol = getSignalVolume(s, data, 'turtle_lot');
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.donchian_high)}</td>
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.donchian_low)}</td>
                         <td class="p-1.5 text-right">
-                            ${Number(data.turtle_score||0) >= 71 && Number(data.turtle_entry||0) > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, ${Number(data.turtle_sl||0)}, ${Number(data.turtle_tp||0)}, ${autoVol}, 'Turtle')" class="px-2 py-1 bg-purple-600 hover:bg-purple-500 text-white font-black rounded text-[9px]">Turtle · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
+                            ${Number(data.turtle_score||0) >= 71 && Number(data.turtle_entry||0) > 0 && autoVol > 0 ? `<button onclick="fillOrderForm('${s}', '${sig.includes("BUY")?"BUY":"SELL"}', 0, ${Number(data.turtle_sl||0)}, ${Number(data.turtle_tp||0)}, ${autoVol}, 'Turtle')" class="px-2 py-1 bg-purple-600 hover:bg-purple-500 text-white font-black rounded text-[9px]">Turtle · ${Number(autoVol||0).toFixed(2)}L</button>` : `<span class="text-[9px] text-slate-600">Chờ ≥71</span>`}
                         </td>
                     </tr>`;
                 });
@@ -1038,7 +1038,8 @@
             if(volume > 0) {
                 document.getElementById('order-volume').value = volume;
             } else {
-                document.getElementById('order-volume').value = getSignalVolume(symbol);
+                // Never default to all remaining capacity; use a conservative 0.01 lot.
+                document.getElementById('order-volume').value = '0.01';
             }
 
             autoFillManualSLTP();
