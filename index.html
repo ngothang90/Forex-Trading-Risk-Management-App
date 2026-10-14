@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gatekeeper Pro">
-    <title>Gatekeeper Pro 8.71</title>
+    <title>Gatekeeper Pro 8.72</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -104,7 +104,7 @@
                 <div>
                     <div class="flex items-center space-x-1.5">
                         <h1 class="text-sm sm:text-lg font-black tracking-wide text-white uppercase">GATEKEEPER PRO</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.71</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">v8.72</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium">GD 07:00–19:00 VN | Risk 10%/lệnh | EA: <500=1:50 · <2500=1:25 · ≥2500=1:8</p>
                 </div>
@@ -147,6 +147,36 @@
                 <span class="text-[10px] text-slate-400 block uppercase font-bold">Đòn Bẩy EA</span>
                 <p id="acc-leverage" class="text-base sm:text-xl font-black text-purple-400">1:8 (EA)</p>
                 <span id="acc-leverage-note" class="text-[10px] text-slate-500 block mt-0.5">EA hiệu dụng theo Balance</span>
+            </div>
+        </div>
+
+        <!-- DAILY RISK MONITOR -->
+        <div class="glass-card p-3 rounded-xl border border-amber-500/30">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div>
+                    <h2 class="text-sm font-black text-amber-300 uppercase tracking-wide">Bộ khóa kỷ luật ngày · ±20%</h2>
+                    <p id="risk-summary" class="text-xs text-slate-300 mt-1">Đang đồng bộ trạng thái quản lý rủi ro từ MT5...</p>
+                </div>
+                <span id="risk-status-pill" class="px-2 py-1 rounded-full text-xs font-black border border-slate-600 bg-slate-800 text-slate-300">ĐANG ĐỒNG BỘ</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-700/60">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Vốn tính giới hạn</span>
+                    <p id="risk-day-base" class="text-base font-black text-white">$0.00</p>
+                </div>
+                <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-700/60">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">P/L trong ngày</span>
+                    <p id="risk-day-pnl" class="text-base font-black text-white">$0.00</p>
+                    <span id="risk-day-pct" class="text-[10px] text-slate-400">0.00%</span>
+                </div>
+                <div class="bg-slate-950/70 p-2.5 rounded-lg border border-rose-500/20">
+                    <span id="risk-loss-title" class="text-[10px] text-slate-400 block font-bold uppercase">Ngưỡng khóa lỗ</span>
+                    <p id="risk-loss-limit" class="text-base font-black text-rose-300">-$0.00</p>
+                </div>
+                <div class="bg-slate-950/70 p-2.5 rounded-lg border border-emerald-500/20">
+                    <span id="risk-profit-title" class="text-[10px] text-slate-400 block font-bold uppercase">Ngưỡng khóa lời</span>
+                    <p id="risk-profit-limit" class="text-base font-black text-emerald-300">+$0.00</p>
+                </div>
             </div>
         </div>
 
@@ -367,7 +397,7 @@
         let symbolChartInstance = null;
 
         db.ref('account').on('value', snap => { g_account = snap.val() || {}; renderAccount(); });
-        db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); });
+        db.ref('prices').on('value', snap => { g_prices = snap.val() || {}; renderMaxLots(); updateLivePriceDisplay(); autoFillManualSLTP(); renderBestSignals(); });
         db.ref('fibo_signals').on('value', snap => { g_fiboSignals = snap.val() || {}; if(g_activeStratTab === 'fibo') renderFiboSignalTable(); renderBestSignals(); });
         db.ref('multi_strategy_signals').on('value', snap => {
             const nextSignals = snap.val() || {};
@@ -387,6 +417,7 @@
             const nextRisk = snap.val() || {};
             g_riskState = nextRisk;
             renderRiskState();
+            renderBestSignals();
         });
         db.ref('.info/connected').on('value', snap => { g_firebaseConnected = snap.val() === true; renderConnectionState(); });
 
@@ -415,7 +446,47 @@
 
 
         function renderRiskState() {
-            // Risk state is enforced by the EA; no separate alert panel is shown.
+            const r = g_riskState || {};
+            const base = Math.max(0, Number(r.daily_start_balance) || 0);
+            const pnl = Number(r.daily_pnl) || 0;
+            const pct = base > 0 ? (pnl / base) * 100 : (Number(r.daily_pnl_pct) || 0);
+            const lossPct = Math.abs(Number(r.daily_loss_limit_pct) || 20);
+            const profitPct = Math.abs(Number(r.daily_profit_lock_pct) || 20);
+            const locked = !!r.trading_locked;
+            const money = n => `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            const baseEl = document.getElementById('risk-day-base');
+            const pnlEl = document.getElementById('risk-day-pnl');
+            const pctEl = document.getElementById('risk-day-pct');
+            const lossEl = document.getElementById('risk-loss-limit');
+            const profitEl = document.getElementById('risk-profit-limit');
+            const summaryEl = document.getElementById('risk-summary');
+            const pillEl = document.getElementById('risk-status-pill');
+            if(baseEl) baseEl.innerText = money(base);
+            if(pnlEl) {
+                pnlEl.innerText = `${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                pnlEl.className = `text-base font-black ${pnl >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+            }
+            if(pctEl) {
+                pctEl.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+                pctEl.className = `text-[10px] ${pct >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+            }
+            if(lossEl) lossEl.innerText = `-${money(base * lossPct / 100).replace('-', '')}`;
+            if(profitEl) profitEl.innerText = `+${money(base * profitPct / 100).replace('-', '')}`;
+            const lossTitle = document.getElementById('risk-loss-title');
+            const profitTitle = document.getElementById('risk-profit-title');
+            if(lossTitle) lossTitle.innerText = `Ngưỡng khóa lỗ · ${lossPct.toFixed(0)}%`;
+            if(profitTitle) profitTitle.innerText = `Ngưỡng khóa lời · ${profitPct.toFixed(0)}%`;
+            if(pillEl) {
+                pillEl.innerText = locked ? 'ĐÃ KHÓA TRONG NGÀY' : 'ĐANG THEO DÕI';
+                pillEl.className = locked
+                    ? 'px-2 py-1 rounded-full text-xs font-black border border-rose-500/40 bg-rose-500/15 text-rose-300'
+                    : 'px-2 py-1 rounded-full text-xs font-black border border-emerald-500/40 bg-emerald-500/15 text-emerald-300';
+            }
+            if(summaryEl) {
+                summaryEl.innerText = locked
+                    ? `${r.lock_reason || 'EA da khoa giao dich trong ngay.'} · Hệ thống sẽ không mở lệnh mới cho đến ngày giao dịch tiếp theo.`
+                    : `Giới hạn tính trên vốn đầu ngày đã cộng/trừ nạp-rút trong ngày. P/L hiện tại: ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%.`;
+            }
         }
 
         function getSymbolDecimals(symbol) {
@@ -552,6 +623,7 @@
                     else if(sig.includes("BEARISH")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">SELL (SMC)</span>`;
 
                     let autoVol = getSignalVolume(s, data, 'smc_lot');
+                    const smcType = data.smc_order_type || resolveSignalOrderType(s, sig.includes('BULLISH') ? 'BUY' : 'SELL', Number(data.smc_entry || 0));
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
@@ -559,7 +631,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.smc_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.smc_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${(Number(data.smc_score)||0) >= 71 && data.smc_order_type && data.smc_entry > 0 && data.smc_sl > 0 ? `<button onclick="fillOrderForm('${s}', data.smc_order_type || resolveSignalOrderType(s, sig.includes('BULLISH')?'BUY':'SELL', data.smc_entry), ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.smc_score)||0) >= 71 && data.smc_order_type && data.smc_entry > 0 && data.smc_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${smcType}', ${data.smc_entry},${data.smc_sl}, ${data.smc_tp},${autoVol}, 'SMC')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh SMC (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -576,6 +648,7 @@
 
                     let score = data.mom_score || 0;
                     let autoVol = getSignalVolume(s, data, 'mom_lot');
+                    const momType = data.mom_order_type || resolveSignalOrderType(s, sig.includes('BUY') ? 'BUY' : 'SELL', Number(data.mom_entry || 0));
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
@@ -584,7 +657,7 @@
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.mom_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.mom_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.mom_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 71 && data.mom_order_type ? `<button onclick="fillOrderForm('${s}', data.mom_order_type || resolveSignalOrderType(s, sig.includes('BUY')?'BUY':'SELL', data.mom_entry), ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 && data.mom_order_type ? `<button onclick="fillOrderForm('${s}', '${momType}', ${data.mom_entry},${data.mom_sl}, ${data.mom_tp},${autoVol}, 'Mom. Pullback')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -601,6 +674,7 @@
 
                     let score = data.bo_score || 0;
                     let autoVol = getSignalVolume(s, data, 'bo_lot');
+                    const boType = data.bo_order_type || resolveSignalOrderType(s, sig.includes('BUY') ? 'BUY' : 'SELL', Number(data.bo_entry || 0));
 
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
@@ -609,7 +683,7 @@
                         <td class="p-1.5 font-mono text-cyan-300">${fmtPrice(s, data.bo_entry)}</td>
                         <td class="p-1.5 font-mono text-xs"><span class="text-rose-400">${fmtPrice(s, data.bo_sl)}</span> / <span class="text-emerald-400">${fmtPrice(s, data.bo_tp)}</span></td>
                         <td class="p-1.5 text-right">
-                            ${score >= 71 && data.bo_order_type ? `<button onclick="fillOrderForm('${s}', data.bo_order_type || resolveSignalOrderType(s, sig.includes('BUY')?'BUY':'SELL', data.bo_entry), ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
+                            ${score >= 71 && data.bo_order_type ? `<button onclick="fillOrderForm('${s}', '${boType}', ${data.bo_entry},${data.bo_sl}, ${data.bo_tp},${autoVol}, 'Breakout Retest')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -625,6 +699,7 @@
                     else if(sig.includes("UTAD")) badge = `<span class="px-1.5 py-0.5 rounded text-[9px] badge-sell font-bold">UTAD (Wyckoff)</span>`;
 
                     let autoVol = getSignalVolume(s, data, 'wyckoff_lot');
+                    const wyckoffType = data.wyckoff_order_type || resolveSignalOrderType(s, sig.includes('SPRING') ? 'BUY' : 'SELL', Number(data.wyckoff_entry || 0));
                     html += `<tr class="hover:bg-slate-800/40">
                         <td class="p-1.5 font-bold text-white">${s}</td>
                         <td class="p-1.5">${badge}</td>
@@ -632,7 +707,7 @@
                         <td class="p-1.5 font-mono text-rose-400">${fmtPrice(s, data.wyckoff_sl)}</td>
                         <td class="p-1.5 font-mono text-emerald-400">${fmtPrice(s, data.wyckoff_tp)}</td>
                         <td class="p-1.5 text-right">
-                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_order_type && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 ? `<button onclick="fillOrderForm('${s}', data.wyckoff_order_type || resolveSignalOrderType(s, sig.includes('SPRING')?'BUY':'SELL', data.wyckoff_entry), ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
+                            ${(Number(data.wyckoff_score)||0) >= 71 && data.wyckoff_order_type && data.wyckoff_entry > 0 && data.wyckoff_sl > 0 ? `<button onclick="fillOrderForm('${s}', '${wyckoffType}', ${data.wyckoff_entry},${data.wyckoff_sl}, ${data.wyckoff_tp},${autoVol}, 'Wyckoff')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[9px]">Vào Lệnh Wyckoff (${autoVol} Lot)</button>` : '--'}
                         </td>
                     </tr>`;
                 });
@@ -690,26 +765,100 @@
             const grid = document.getElementById('best-signal-grid');
             if(!grid) return;
             const syms = ["XAUUSD", "BTCUSD", "USOIL", "EURUSD", "GBPUSD", "EURGBP", "USDJPY"];
-            const candidates = syms.map(sym => ({sym, ...(g_multiSignals[sym] || {})}))
-                .filter(d => Number(d.best_score||0) >= 71 && d.best_signal !== 'WAIT' && Number(d.best_entry||0) > 0 && Number(d.best_sl||0) > 0 && Number(d.best_lot||0) > 0 && Number(g_prices?.[d.sym]?.remaining_vol||0) > 0 && d.spread_ok !== false && !d.news_blocked && !g_riskState.trading_locked)
-                .sort((a,b) => Number(b.best_score||0)-Number(a.best_score||0)).slice(0,5);
-            if(!candidates.length) {
-                grid.innerHTML = `<div class="sm:col-span-2 lg:col-span-3 text-center py-6 text-slate-500 text-xs">TOP chưa xuất hiện: cần Score ≥71 + Entry/SL/Lot hợp lệ + không News Guard + còn Max Volume.</div>`;
+            const nowSec = Math.floor(Date.now() / 1000);
+            const candidates = [];
+
+            syms.forEach(sym => {
+                const source = g_multiSignals[sym] || {};
+                const liveValid = Number(source.best_score || 0) >= 71 &&
+                    source.best_signal && source.best_signal !== 'WAIT' &&
+                    Number(source.best_entry || 0) > 0 && Number(source.best_sl || 0) > 0 &&
+                    Number(source.best_lot || 0) > 0 &&
+                    ['BUY','SELL','BUY_LIMIT','SELL_LIMIT'].includes(source.best_order_type);
+                if(liveValid) {
+                    candidates.push({sym, ...source, _signalState: 'LIVE'});
+                    return;
+                }
+
+                const recentTs = Number(source.recent_best_timestamp || 0);
+                const recentAge = recentTs > 0 ? nowSec - recentTs : -1;
+                const keepMinutes = Math.min(60, Math.max(1, Number(source.recent_best_keep_minutes) || 10));
+                const recentAvailable = source.recent_best_available === true && recentAge >= 0 && recentAge <= keepMinutes * 60;
+                const recentValid = recentAvailable && Number(source.recent_best_score || 0) >= 71 &&
+                    Number(source.recent_best_entry || 0) > 0 && Number(source.recent_best_sl || 0) > 0 &&
+                    Number(source.recent_best_lot || 0) > 0 &&
+                    ['BUY','SELL','BUY_LIMIT','SELL_LIMIT'].includes(source.recent_best_order_type);
+                if(recentValid) {
+                    candidates.push({
+                        ...source,
+                        sym,
+                        best_signal: source.recent_best_signal,
+                        best_strategy: source.recent_best_strategy,
+                        best_direction: source.recent_best_direction,
+                        best_order_type: source.recent_best_order_type,
+                        best_score: Number(source.recent_best_score) || 0,
+                        best_entry: Number(source.recent_best_entry) || 0,
+                        best_sl: Number(source.recent_best_sl) || 0,
+                        best_tp: Number(source.recent_best_tp) || 0,
+                        best_lot: Number(source.recent_best_lot) || 0,
+                        _signalState: 'RECENT',
+                        _recentAgeSec: recentAge
+                    });
+                }
+            });
+
+            candidates.sort((a,b) => {
+                const liveFirst = (a._signalState === 'LIVE' ? 1 : 0) - (b._signalState === 'LIVE' ? 1 : 0);
+                return liveFirst ? -liveFirst : Number(b.best_score || 0) - Number(a.best_score || 0);
+            });
+            const top = candidates.slice(0,5);
+            if(!top.length) {
+                grid.innerHTML = `<div class="sm:col-span-2 lg:col-span-3 text-center py-6 text-slate-400 text-sm">Chưa có tín hiệu TOP đạt điều kiện. Tín hiệu vừa hợp lệ được giữ tối đa 10 phút để tham khảo; tín hiệu đã cũ không thể dùng để vào lệnh.</div>`;
                 return;
             }
-            grid.innerHTML = candidates.map(d => {
-                const sym=d.sym, score=Number(d.best_score)||0;
-                const dir=d.best_direction || (String(d.best_signal).includes('SELL')?'SELL':'BUY');
-                const lot=getSignalVolume(sym,d,'best_lot');
-                const rem=Number(g_prices?.[sym]?.remaining_vol)||0;
-                const locked=!!g_riskState.trading_locked || rem<=0;
-                const badge=dir==='SELL'?'badge-sell':'badge-buy';
+
+            grid.innerHTML = top.map(d => {
+                const sym = d.sym;
+                const isRecent = d._signalState === 'RECENT';
+                const score = Number(d.best_score) || 0;
+                const dir = d.best_direction || (String(d.best_signal).includes('SELL') ? 'SELL' : 'BUY');
+                const rem = Number(g_prices?.[sym]?.remaining_vol) || 0;
+                const lot = isRecent ? (Number(d.best_lot) || 0) : getSignalVolume(sym, d, 'best_lot');
+                const riskLocked = !!g_riskState.trading_locked;
+                const newsBlocked = !!d.news_blocked;
+                const spreadBad = d.spread_ok === false;
+                const canEnter = !isRecent && !riskLocked && rem > 0 && lot > 0 && !newsBlocked && !spreadBad;
+                const badge = dir === 'SELL' ? 'badge-sell' : 'badge-buy';
+                const recentAgeMin = Math.max(0, Math.floor((Number(d._recentAgeSec) || 0) / 60));
+                const recentText = recentAgeMin < 1 ? 'vừa cập nhật' : `${recentAgeMin} phút trước`;
+                let statusText = 'ĐỦ ĐIỀU KIỆN HIỆN TẠI';
+                if(isRecent) statusText = `TÍN HIỆU GẦN NHẤT · ${recentText} · CHỜ XÁC NHẬN LẠI`;
+                else if(riskLocked) statusText = 'ĐANG KHÓA KỶ LUẬT NGÀY';
+                else if(newsBlocked) statusText = 'NEWS GUARD · TẠM CHẶN';
+                else if(spreadBad) statusText = 'SPREAD CAO · TẠM CHẶN';
+                else if(rem <= 0 || lot <= 0) statusText = 'HẾT MAX VOLUME';
+                const reasonColor = isRecent || riskLocked || newsBlocked || spreadBad || rem <= 0 ? 'text-amber-300' : 'text-emerald-300';
+                const type = d.best_order_type || resolveSignalOrderType(sym, dir, Number(d.best_entry || 0));
+                const entry = Number(d.best_entry) || 0;
+                const sl = Number(d.best_sl) || 0;
+                const tp = Number(d.best_tp) || 0;
+                const strategy = String(d.best_strategy || 'Best Signal').replace(/'/g, '');
+                const buttonLabel = isRecent ? 'CHỜ XÁC NHẬN LẠI' : riskLocked ? 'KHÓA KỶ LUẬT NGÀY' : newsBlocked ? 'NEWS GUARD' : spreadBad ? 'SPREAD CAO' : rem <= 0 || lot <= 0 ? 'HẾT LOT' : `VÀO LỆNH · ${lot.toFixed(2)}L`;
+                const buttonClass = canEnter ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-slate-700 cursor-not-allowed opacity-80';
+                const infoLine = isRecent
+                    ? `Lưu gần nhất: ${recentText} · Không gửi lệnh từ dữ liệu cũ.`
+                    : `Raw ${Number(d.raw_best_score || score)} · News -${Number(d.news_penalty || 0)} · Spread ${spreadBad ? 'cao' : 'OK'} · Còn ${rem.toFixed(2)}L`;
+                const buttonHtml = canEnter
+                    ? `<button onclick="fillOrderForm('${sym}','${type}',${entry},${sl},${tp},${lot},'${strategy}')" class="w-full mt-2 px-3 py-2 ${buttonClass} text-white text-xs font-black rounded-lg">${buttonLabel}</button>`
+                    : `<button disabled aria-disabled="true" title="Tín hiệu cần được EA xác nhận lại trước khi vào lệnh" class="w-full mt-2 px-3 py-2 ${buttonClass} text-white text-xs font-black rounded-lg">${buttonLabel}</button>`;
+
                 return `<div class="signal-card rounded-xl p-3 shadow-lg">
-                    <div class="flex items-center justify-between gap-2"><div><div class="text-sm font-black text-white">${sym}</div><div class="text-[10px] text-slate-400">${d.best_strategy||'Best'}</div></div><div class="score-ring bg-slate-800 text-emerald-300 border border-slate-700">${score}</div></div>
-                    <div class="flex items-center justify-between mt-2"><span class="px-2 py-1 rounded text-[10px] font-black ${badge}">${dir}</span><span class="text-[10px] text-slate-400">${d.best_order_type||''} · RSI ${Number(d.rsi||0).toFixed(0)} · ADX ${Number(d.adx||0).toFixed(0)}</span></div>
-                    <div class="text-[9px] text-slate-500 mt-1">Raw ${Number(d.raw_best_score||score)} · News -${Number(d.news_penalty||0)} · Spread ${d.spread_ok===false?'cao':'OK'} · Còn ${rem.toFixed(2)}L</div>
-                    <div class="grid grid-cols-3 gap-1 mt-2 text-[10px] font-mono"><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">Entry</span><span class="text-cyan-300">${fmtPrice(sym,d.best_entry)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">SL</span><span class="text-rose-300">${fmtPrice(sym,d.best_sl)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">TP</span><span class="text-emerald-300">${fmtPrice(sym,d.best_tp)}</span></div></div>
-                    <button ${locked?'disabled':''} onclick="fillOrderForm('${sym}',d.best_order_type || resolveSignalOrderType(sym,dir,Number(d.best_entry||0)),${Number(d.best_entry||0)},${Number(d.best_sl||0)},${Number(d.best_tp||0)},${Number(lot||0)},'${d.best_strategy||'Best Signal'}')" class="w-full mt-2 px-3 py-2 ${locked?'bg-slate-700 cursor-not-allowed':'bg-indigo-600 hover:bg-indigo-500'} text-white text-[10px] font-black rounded-lg">${locked?'KHÓA / HẾT LOT':'VÀO LỆNH'} · ${lot.toFixed(2)}L</button>
+                    <div class="flex items-center justify-between gap-2"><div><div class="text-base font-black text-white">${sym}</div><div class="text-xs text-slate-400">${d.best_strategy || 'Best'}</div></div><div class="score-ring bg-slate-800 text-emerald-300 border border-slate-700">${score}</div></div>
+                    <div class="flex items-center justify-between mt-2 gap-2"><span class="px-2 py-1 rounded text-xs font-black ${badge}">${dir}</span><span class="text-xs text-slate-400">${d.best_order_type || ''}</span></div>
+                    <div class="text-[10px] ${reasonColor} font-bold mt-2">${statusText}</div>
+                    <div class="text-[10px] text-slate-500 mt-1">${infoLine}</div>
+                    <div class="grid grid-cols-3 gap-1 mt-2 text-xs font-mono"><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">Entry</span><span class="text-cyan-300">${fmtPrice(sym,d.best_entry)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">SL</span><span class="text-rose-300">${fmtPrice(sym,d.best_sl)}</span></div><div class="bg-slate-950/70 rounded p-1.5"><span class="text-slate-500 block">TP</span><span class="text-emerald-300">${fmtPrice(sym,d.best_tp)}</span></div></div>
+                    ${buttonHtml}
                 </div>`;
             }).join('');
         }
